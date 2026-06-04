@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test — Forgia dell'Avventuriero</title>
+  <style>
+    :root {
+      --ink: #0b0a10; --panel: #1b1726; --panel2: #241f33; --edge: #352c4a;
+      --gold: #d9b65f; --green: #34d399; --red: #f87171; --parch: #ece5d3; --muted: #9b94ac;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--parch);
+      font-family: 'Inter', system-ui, sans-serif;
+      background:
+        radial-gradient(900px 500px at 0% 0%, rgba(217,182,95,.10), transparent 55%),
+        linear-gradient(180deg, #0b0a10, #0e0c15);
+    }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+    h1 { font-family: 'Cinzel', Georgia, serif; font-size: 1.6rem; margin: 0 0 4px; color: var(--gold); }
+    .sub { color: var(--muted); font-size: .85rem; margin: 0 0 20px; }
+    .summary {
+      display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+      background: var(--panel); border: 1px solid var(--edge); border-radius: 14px;
+      padding: 16px 18px; margin-bottom: 22px;
+    }
+    .summary .big { font-size: 1.5rem; font-weight: 700; }
+    .pill { padding: 4px 12px; border-radius: 999px; font-size: .8rem; font-weight: 600; }
+    .pill.ok { background: rgba(52,211,153,.15); color: var(--green); border: 1px solid rgba(52,211,153,.4); }
+    .pill.ko { background: rgba(248,113,113,.15); color: var(--red); border: 1px solid rgba(248,113,113,.4); }
+    .pill.tot { background: var(--panel2); color: var(--muted); border: 1px solid var(--edge); }
+    .verdict { margin-left: auto; font-family: 'Cinzel', Georgia, serif; font-size: 1.1rem; font-weight: 700; }
+    .verdict.ok { color: var(--green); }
+    .verdict.ko { color: var(--red); }
+    .suite { margin-bottom: 18px; }
+    .suite > h2 {
+      font-family: 'Cinzel', Georgia, serif; font-size: 1rem; color: var(--gold);
+      border-bottom: 1px solid var(--edge); padding-bottom: 6px; margin: 0 0 8px;
+    }
+    .case { display: flex; gap: 10px; padding: 6px 8px; border-radius: 8px; align-items: flex-start; }
+    .case + .case { margin-top: 2px; }
+    .case .mark { flex: 0 0 auto; font-weight: 700; width: 18px; text-align: center; }
+    .case.pass .mark { color: var(--green); }
+    .case.fail { background: rgba(248,113,113,.08); }
+    .case.fail .mark { color: var(--red); }
+    .case .name { flex: 1; }
+    .case .err { display: block; color: var(--red); font-size: .8rem; margin-top: 3px; font-family: ui-monospace, monospace; }
+    .empty { color: var(--red); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Suite di test automatici</h1>
+    <p class="sub">Database oggetti · Grimorio incantesimi · Ricerca · Filtri · Assistente Build</p>
+    <div id="summary" class="summary"><span class="big">Esecuzione in corso…</span></div>
+    <div id="results"></div>
+  </div>
+
+  <!-- Moduli sotto test (stesso ordine di index.html, i18n escluso: non serve ai test) -->
+  <script src="src/core/constants.js"></script>
+  <script src="src/core/util.js"></script>
+  <script src="src/data/items.js"></script>
+  <script src="src/data/spells.js"></script>
+  <script src="src/core/search.js"></script>
+  <script src="src/core/filter.js"></script>
+  <script src="src/core/recommend.js"></script>
+  <script src="src/core/encounter.js"></script>
+  <script src="src/data/dm.js"></script>
+
+  <!-- Framework di test + bootstrap moduli -->
+  <script src="tests/framework.js"></script>
+  <script src="tests/env.js"></script>
+
+  <!-- File di test -->
+  <script src="tests/data.test.js"></script>
+  <script src="tests/search.test.js"></script>
+  <script src="tests/filter.test.js"></script>
+  <script src="tests/recommend.test.js"></script>
+  <script src="tests/encounter.test.js"></script>
+
+  <!-- Esecuzione e rendering -->
+  <script>
+    (function () {
+      'use strict';
+      var summaryEl = document.getElementById('summary');
+      var resultsEl = document.getElementById('results');
+
+      function esc(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+
+      if (typeof TestRunner === 'undefined' || !window.T) {
+        summaryEl.innerHTML = '<span class="big empty">Errore: framework o moduli non caricati.</span>';
+        return;
+      }
+
+      var report = TestRunner.run();
+      var ok = report.failed === 0;
+
+      summaryEl.innerHTML =
+        '<span class="pill tot">Totale ' + report.total + '</span>' +
+        '<span class="pill ok">Superati ' + report.passed + '</span>' +
+        '<span class="pill ko">Falliti ' + report.failed + '</span>' +
+        '<span class="verdict ' + (ok ? 'ok' : 'ko') + '">' +
+        (ok ? 'TUTTO VERDE' : 'CI SONO ERRORI') + '</span>';
+
+      // Raggruppa per suite mantenendo l'ordine di apparizione.
+      var order = [];
+      var bySuite = {};
+      report.results.forEach(function (r) {
+        if (!bySuite[r.suite]) { bySuite[r.suite] = []; order.push(r.suite); }
+        bySuite[r.suite].push(r);
+      });
+
+      var html = '';
+      order.forEach(function (suite) {
+        html += '<section class="suite"><h2>' + esc(suite) + '</h2>';
+        bySuite[suite].forEach(function (r) {
+          html += '<div class="case ' + (r.pass ? 'pass' : 'fail') + '">' +
+            '<span class="mark">' + (r.pass ? '✓' : '✗') + '</span>' +
+            '<span class="name">' + esc(r.name) +
+            (r.pass ? '' : '<span class="err">' + esc(r.error) + '</span>') +
+            '</span></div>';
+        });
+        html += '</section>';
+      });
+      resultsEl.innerHTML = html;
+
+      document.title = (ok ? '✓ ' : '✗ ') + report.passed + '/' + report.total + ' — Test';
+    })();
+  </script>
+</body>
+</html>

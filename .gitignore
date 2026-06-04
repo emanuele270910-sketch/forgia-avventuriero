@@ -1,0 +1,9 @@
+# Configurazione locale dell'editor / strumenti (contiene percorsi temporanei)
+.claude/
+
+# Immagine non usata dall'app
+dsa.jpeg
+
+# File di sistema
+Thumbs.db
+.DS_Store
