@@ -1609,6 +1609,231 @@
       tags: ["arma", "spada", "fortuna"],
       descrizione: "Spada +1 che concede anche +1 a tutti i tiri salvezza mentre la impugni. Una volta al giorno puoi ripetere un tiro per colpire, una prova di caratteristica o un tiro salvezza fallito; può inoltre racchiudere un raro incantesimo Desiderio.",
       source: "SRD"
+    },
+
+    // ================= ARSENALE DA MISCHIA (update 1.4.0) =================
+    // Almeno 5 armi da mischia per ogni rarità. Le voci "Forgia" sono originali.
+
+    // --- Comuni ---
+    {
+      id: "silvered-shortsword", name: "Silvered Shortsword", type: "weapon", rarity: "common",
+      attunement: false, bonus: { extra: "Conta come arma d'argento e come magica" },
+      tags: ["arma", "spada", "argento"],
+      descrizione: "Lama placcata d'argento: conta come arma d'argento (efficace contro licantropi e certi immondi) e come magica per superare resistenze e immunità.",
+      source: "SRD"
+    },
+    {
+      id: "ember-dagger", name: "Ember Dagger", type: "weapon", rarity: "common",
+      attunement: false, bonus: { extra: "Una volta per turno +1 danno da fuoco; di notte emana un tenue bagliore" },
+      tags: ["arma", "pugnale", "fuoco"],
+      descrizione: "Un pugnale dalle braci sopite. Una volta per turno infliggi +1 danno da fuoco con un colpo; nell'oscurità la lama emana un fioco bagliore rossastro.",
+      source: "Forgia"
+    },
+    {
+      id: "ironwood-club", name: "Ironwood Club", type: "weapon", rarity: "common",
+      attunement: false, bonus: { extra: "Indistruttibile; conta come magica; vantaggio a spezzare oggetti e legature" },
+      tags: ["arma", "mazza", "legno"],
+      descrizione: "Una clava di legnoferro stagionato: praticamente indistruttibile e considerata magica. Concede vantaggio alle prove di Forza per spezzare oggetti o liberarsi da legature.",
+      source: "Forgia"
+    },
+    {
+      id: "hunters-handaxe", name: "Hunter's Handaxe", type: "weapon", rarity: "common",
+      attunement: false, bonus: { extra: "Se lanciata, alla fine del turno torna ai tuoi piedi; conta come magica" },
+      tags: ["arma", "ascia", "lancio"],
+      descrizione: "L'ascia del cacciatore è bilanciata per il lancio: dopo averla scagliata, alla fine del tuo turno rotola magicamente di nuovo ai tuoi piedi. Conta come magica.",
+      source: "Forgia"
+    },
+    {
+      id: "brineworn-spear", name: "Brineworn Spear", type: "weapon", rarity: "common",
+      attunement: false, bonus: { extra: "Sott'acqua niente penalità agli attacchi; non arrugginisce mai" },
+      tags: ["arma", "lancia", "acqua"],
+      descrizione: "Una lancia consumata dalla salsedine ma sempre affilata: sott'acqua non subisci penalità ai tiri per colpire e l'arma non si arrugginisce né si corrode.",
+      source: "Forgia"
+    },
+
+    // --- Non comuni ---
+    {
+      id: "trident-of-fish-command", name: "Trident of Fish Command", type: "weapon", rarity: "uncommon",
+      attunement: true, bonus: { extra: "Spendi una carica per ammaliare una bestia acquatica (TS Saggezza)" },
+      tags: ["arma", "tridente", "acqua"],
+      descrizione: "Spendendo una delle sue cariche puoi tentare di soggiogare una bestia acquatica entro 18 metri, che deve riuscire in un tiro salvezza su Saggezza o restare ammaliata. Le cariche si recuperano all'alba.",
+      source: "SRD"
+    },
+    {
+      id: "weapon-of-warning", name: "Weapon of Warning", type: "weapon", rarity: "uncommon",
+      attunement: true, bonus: { extra: "Tu e i compagni vicini non potete essere colti di sorpresa; vantaggio all'iniziativa" },
+      tags: ["arma", "iniziativa", "guardia"],
+      descrizione: "Mentre sei sintonizzato, tu e i tuoi compagni entro 9 metri non potete essere colti di sorpresa (a meno di essere incapacitati) e hai vantaggio ai tiri per l'iniziativa.",
+      source: "SRD"
+    },
+    {
+      id: "smoldering-scimitar", name: "Smoldering Scimitar", type: "weapon", rarity: "uncommon",
+      attunement: false, bonus: { extra: "Una volta al giorno avvolgi la lama di fuoco: +2d6 danni da fuoco al colpo successivo" },
+      tags: ["arma", "scimitarra", "fuoco"],
+      descrizione: "Una volta al giorno, con un'azione bonus, puoi far ardere la lama: il tuo prossimo colpo a segno entro 1 minuto infligge 2d6 danni da fuoco aggiuntivi.",
+      source: "Forgia"
+    },
+    {
+      id: "thornvine-whip", name: "Thornvine Whip", type: "weapon", rarity: "uncommon",
+      attunement: false, bonus: { extra: "Gittata +1,5 m; con un colpo puoi tentare di far cadere prono il bersaglio" },
+      tags: ["arma", "frusta", "controllo"],
+      descrizione: "Una frusta di rovi vivi: la sua gittata in mischia aumenta di 1,5 metri e, quando colpisci, puoi tentare di trascinare a terra il bersaglio (prova di Forza contrastata).",
+      source: "Forgia"
+    },
+    {
+      id: "duelists-rapier", name: "Duelist's Rapier", type: "weapon", rarity: "uncommon",
+      attunement: true, bonus: { acBonus: 1, extra: "+1 alla CA mentre impugni solo questo stocco (in mischia, senza scudo)" },
+      tags: ["arma", "stocco", "difesa"],
+      descrizione: "Uno stocco da duellante perfettamente bilanciato: finché lo impugni in una sola mano, senza scudo né altre armi, ottieni un bonus di +1 alla Classe Armatura.",
+      source: "Forgia"
+    },
+
+    // --- Rari ---
+    {
+      id: "mace-of-terror", name: "Mace of Terror", type: "weapon", rarity: "rare",
+      attunement: true, bonus: { extra: "Spendi una carica per terrorizzare i nemici entro 9 m (TS Saggezza)" },
+      tags: ["arma", "mazza", "paura"],
+      descrizione: "Spendendo una carica e usando un'azione, emani un'ondata di terrore: ogni creatura a tua scelta entro 9 metri deve superare un tiro salvezza su Saggezza o restare spaventata da te per 1 minuto.",
+      source: "SRD"
+    },
+    {
+      id: "thunderclap-warhammer", name: "Thunderclap Warhammer", type: "weapon", rarity: "rare",
+      attunement: true, bonus: { weaponBonus: 1, extra: "Una volta al giorno il colpo emette un tuono: +2d8 danni da tuono e il bersaglio può essere spinto via" },
+      tags: ["arma", "martello", "tuono"],
+      descrizione: "Martello da guerra +1. Una volta al giorno, quando colpisci, scateni un fragore di tuono: 2d8 danni da tuono aggiuntivi e il bersaglio, se più piccolo, può essere sospinto indietro di 3 metri.",
+      source: "Forgia"
+    },
+    {
+      id: "serpents-fang", name: "Serpent's Fang", type: "weapon", rarity: "rare",
+      attunement: true, bonus: { weaponBonus: 1, extra: "Ignori la resistenza al veleno; una volta al giorno +3d6 danni da veleno" },
+      tags: ["arma", "pugnale", "veleno"],
+      descrizione: "Pugnale +1 a forma di zanna. I tuoi colpi ignorano la resistenza al veleno e, una volta al giorno, puoi iniettare un potente tossico per infliggere 3d6 danni da veleno aggiuntivi (TS Costituzione dimezza).",
+      source: "Forgia"
+    },
+    {
+      id: "reapers-glaive", name: "Reaper's Glaive", type: "weapon", rarity: "rare",
+      attunement: true, bonus: { extra: "Gittata +1,5 m; +1d8 danni necrotici contro bersagli sotto metà PF" },
+      tags: ["arma", "falce", "necrotico"],
+      descrizione: "La falce del mietitore ha una gittata in mischia maggiore di 1,5 metri. Contro una creatura ridotta a metà dei suoi punti ferita o meno, infligge 1d8 danni necrotici aggiuntivi.",
+      source: "Forgia"
+    },
+    {
+      id: "bearclaw-greataxe", name: "Bearclaw Greataxe", type: "weapon", rarity: "rare",
+      attunement: true, bonus: { weaponBonus: 1, extra: "Con un colpo critico ottieni PF temporanei pari al tuo livello" },
+      tags: ["arma", "ascia", "furia"],
+      descrizione: "Un'ascia bipenne +1 intagliata come una zampa d'orso. Quando metti a segno un colpo critico, ottieni un numero di punti ferita temporanei pari al tuo livello e ruggisci con furia primordiale.",
+      source: "Forgia"
+    },
+
+    // --- Molto rari ---
+    {
+      id: "scimitar-of-speed", name: "Scimitar of Speed", type: "weapon", rarity: "very-rare",
+      attunement: true, bonus: { weaponBonus: 2, extra: "Puoi attaccare con quest'arma usando un'azione bonus" },
+      tags: ["arma", "scimitarra", "velocità"],
+      descrizione: "Scimitarra +2 dalla leggerezza innaturale. A ogni tuo turno puoi effettuare un attacco aggiuntivo con essa usando un'azione bonus.",
+      source: "SRD"
+    },
+    {
+      id: "dawnbringer", name: "Dawnbringer", type: "weapon", rarity: "very-rare",
+      attunement: true, bonus: { weaponBonus: 1, extra: "Emana luce solare; +2d6 danni radiosi a non morti e immondi, che hanno svantaggio contro di te" },
+      tags: ["arma", "spada", "radioso"],
+      descrizione: "Una spada lunga che, evocata, si riveste di luce solare entro 9 metri. Infligge 2d6 danni radiosi aggiuntivi a non morti e immondi, che hanno svantaggio ai tiri per colpire contro chi la impugna.",
+      source: "Forgia"
+    },
+    {
+      id: "stormcaller-halberd", name: "Stormcaller Halberd", type: "weapon", rarity: "very-rare",
+      attunement: true, bonus: { weaponBonus: 1, extra: "+1d8 danni da fulmine; una volta al giorno scateni una saetta in linea (TS Destrezza, 4d8)" },
+      tags: ["arma", "alabarda", "fulmine"],
+      descrizione: "Alabarda +1 percorsa da scariche elettriche: ogni colpo infligge 1d8 danni da fulmine aggiuntivi. Una volta al giorno puoi scatenare una saetta in linea retta di 9 metri (TS Destrezza per dimezzare 4d8 danni da fulmine).",
+      source: "Forgia"
+    },
+    {
+      id: "quicksilver-rapier", name: "Quicksilver Rapier", type: "weapon", rarity: "very-rare",
+      attunement: true, bonus: { weaponBonus: 2, extra: "Quando un nemico ti manca in mischia, puoi reagire con un attacco" },
+      tags: ["arma", "stocco", "riposta"],
+      descrizione: "Stocco +2 d'argentovivo, rapidissimo. Quando una creatura ti attacca in mischia e manca, puoi usare la reazione per effettuare un attacco contro di essa.",
+      source: "Forgia"
+    },
+    {
+      id: "earthshaker-maul", name: "Earthshaker Maul", type: "weapon", rarity: "very-rare",
+      attunement: true, bonus: { weaponBonus: 1, extra: "Una volta al giorno colpisci il suolo: onda d'urto in 4,5 m (TS Forza, proni + 3d10 contundenti)" },
+      tags: ["arma", "maglio", "terremoto"],
+      descrizione: "Un enorme maglio +1. Una volta al giorno puoi abbatterlo al suolo con un'azione: tutte le creature entro 4,5 metri subiscono 3d10 danni contundenti e cadono proni se non superano un tiro salvezza su Forza.",
+      source: "Forgia"
+    },
+
+    // --- Leggendari ---
+    {
+      id: "hammer-of-thunderbolts", name: "Hammer of Thunderbolts", type: "weapon", rarity: "legendary",
+      attunement: true, bonus: { weaponBonus: 1, extra: "Colpi tonanti; con un 20 naturale contro un gigante può ucciderlo all'istante" },
+      tags: ["arma", "maglio", "giganti", "tuono"],
+      descrizione: "Maglio +1 dei tuoni: ogni colpo rimbomba come una saetta. Con un 20 naturale contro un gigante, questi deve riuscire in un tiro salvezza su Costituzione o morire all'istante. Sfruttato appieno, può essere scagliato per liberare tuoni devastanti.",
+      source: "SRD"
+    },
+    {
+      id: "worldcleaver-greataxe", name: "Worldcleaver Greataxe", type: "weapon", rarity: "legendary",
+      attunement: true, bonus: { weaponBonus: 3, extra: "Critico con 19-20 a danni massimi; una volta al giorno fendi il terreno in una voragine" },
+      tags: ["arma", "ascia", "critico"],
+      descrizione: "Ascia bipenne +3 dalla potenza titanica. Metti a segno un colpo critico con un tiro di 19 o 20 e i tuoi critici infliggono danni massimi. Una volta al giorno puoi spaccare il terreno, creando una voragine che intrappola i nemici.",
+      source: "Forgia"
+    },
+    {
+      id: "kingsbane", name: "Kingsbane", type: "weapon", rarity: "legendary",
+      attunement: true, bonus: { weaponBonus: 3, extra: "Ignori l'immunità ai critici; una volta al giorno il colpo impedisce al bersaglio di curarsi per 1 minuto" },
+      tags: ["arma", "stocco", "esecuzione"],
+      descrizione: "Stocco +3 forgiato per abbattere i potenti. Ignori la resistenza e l'immunità ai colpi critici; una volta al giorno, quando colpisci, il bersaglio non può recuperare punti ferita per 1 minuto (TS Costituzione nega).",
+      source: "Forgia"
+    },
+    {
+      id: "phoenixfire-blade", name: "Phoenixfire Blade", type: "weapon", rarity: "legendary",
+      attunement: true, bonus: { weaponBonus: 3, extra: "+2d6 danni da fuoco e resistenza al fuoco; una volta al giorno, se cadi a 0 PF, rinasci con metà PF in un'esplosione di fiamme" },
+      tags: ["arma", "spada", "fuoco", "rinascita"],
+      descrizione: "Spada lunga +3 avvolta da fiamme eterne: infligge 2d6 danni da fuoco aggiuntivi e ti dona resistenza al fuoco. Una volta al giorno, quando scendi a 0 punti ferita, rinasci come una fenice con metà dei tuoi punti ferita ed esplodi in fiamme attorno a te.",
+      source: "Forgia"
+    },
+    {
+      id: "stormlords-trident", name: "Stormlord's Trident", type: "weapon", rarity: "legendary",
+      attunement: true, bonus: { weaponBonus: 3, extra: "Comandi vento e fulmini; una volta al giorno richiami una saetta dal cielo (8d6 da fulmine)" },
+      tags: ["arma", "tridente", "tempesta"],
+      descrizione: "Tridente +3 del signore delle tempeste. Una volta al giorno puoi richiamare una saetta dal cielo su un bersaglio entro 36 metri: 8d6 danni da fulmine (TS Destrezza dimezza). Quando lo impugni, vento e pioggia ti obbediscono.",
+      source: "Forgia"
+    },
+
+    // --- Artefatti ---
+    {
+      id: "worldforge-maul", name: "Maul of the Worldforge", type: "weapon", rarity: "artifact",
+      attunement: true, bonus: { weaponBonus: 3, extra: "Plasma pietra e metallo; ogni colpo infligge danni da forza che ignorano ogni resistenza" },
+      tags: ["arma", "maglio", "forgia", "artefatto"],
+      descrizione: "Il maglio con cui, narra la leggenda, furono forgiate le montagne. Arma +3 i cui colpi infliggono danni da forza che ignorano ogni resistenza e immunità; impugnandolo puoi rimodellare pietra e metallo a tuo piacimento.",
+      source: "Forgia"
+    },
+    {
+      id: "firstdawn-greatsword", name: "Blade of the First Dawn", type: "weapon", rarity: "artifact",
+      attunement: true, bonus: { weaponBonus: 3, saveBonus: 2, extra: "Luce solare accecante; i non morti colpiti possono essere disintegrati; sei immune alla paura" },
+      tags: ["arma", "spadone", "radioso", "artefatto"],
+      descrizione: "Uno spadone +3 che racchiude la prima alba del mondo. Sprigiona luce solare accecante e i non morti che colpisce devono superare un tiro salvezza o essere disintegrati. Mentre lo impugni sei immune alla condizione spaventato e concedi +2 ai tiri salvezza.",
+      source: "Forgia"
+    },
+    {
+      id: "the-devourer-scythe", name: "The Devourer", type: "weapon", rarity: "artifact",
+      attunement: true, bonus: { weaponBonus: 3, extra: "Le creature uccise non possono essere resuscitate facilmente; recuperi PF e talvolta uno slot incantesimo" },
+      tags: ["arma", "falce", "anime", "artefatto"],
+      descrizione: "Una falce +3 che divora le anime. Le creature uccise con essa non possono essere riportate in vita con magie inferiori al 9° livello; ogni anima mietuta ti ristora punti ferita e, di tanto in tanto, uno slot incantesimo speso.",
+      source: "Forgia"
+    },
+    {
+      id: "crownward-blade", name: "Crownward, the Oathblade", type: "weapon", rarity: "artifact",
+      attunement: true, bonus: { weaponBonus: 3, saveBonus: 2, extra: "Aura protettiva per gli alleati; una volta al giorno riporti in vita un compagno caduto" },
+      tags: ["arma", "spada", "giuramento", "artefatto"],
+      descrizione: "La lama del giuramento dei re leggendari. Spada +3 che irradia un'aura entro 9 metri: gli alleati ottengono +2 ai tiri salvezza. Una volta al giorno puoi toccare un compagno caduto e riportarlo in vita con metà dei suoi punti ferita.",
+      source: "Forgia"
+    },
+    {
+      id: "stormheart-greataxe", name: "Stormheart", type: "weapon", rarity: "artifact",
+      attunement: true, bonus: { weaponBonus: 3, extra: "Fulmini e tuoni a ogni colpo (+1d8 fulmine, +1d8 tuono) e resistenza al fulmine; una volta al giorno scateni un uragano" },
+      tags: ["arma", "ascia", "tempesta", "artefatto"],
+      descrizione: "Un'ascia bipenne +3 che racchiude il cuore di una tempesta. Ogni colpo libera fulmini e tuoni (1d8 da fulmine e 1d8 da tuono aggiuntivi) e ti dona resistenza al fulmine. Una volta al giorno puoi scatenare un uragano che flagella il campo di battaglia.",
+      source: "Forgia"
     }
   ];
 });
@@ -2684,6 +2909,19 @@
 
   // Voci in ordine cronologico inverso (la più recente per prima).
   return [
+    {
+      version: '1.4.0',
+      date: '2026-06-06',
+      title: 'Arsenale da mischia',
+      added: [
+        'Trenta nuove armi da corpo a corpo, almeno cinque per ogni rarità: dal Comune all’Artefatto, c’è sempre qualcosa da impugnare.',
+        'Tanti tipi diversi: spade, pugnali, asce, mazze, magli, lance, tridenti, alabarde, fruste, falci, scimitarre e stocchi.',
+        'Tra le chicche: Scimitarra della velocità, Maglio dei fulmini, Lama della fenice e cinque Artefatti leggendari come il Maglio della Forgia del Mondo e Stormheart.',
+        'Tutte le armi sono cercabili nel Database Oggetti (filtro « Tipo: Arma » e per rarità) e si possono aggiungere alle tue build.'
+      ],
+      improved: [],
+      fixed: []
+    },
     {
       version: '1.3.0',
       date: '2026-06-06',

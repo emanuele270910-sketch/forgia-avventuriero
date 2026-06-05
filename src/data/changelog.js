@@ -15,6 +15,19 @@
   // Voci in ordine cronologico inverso (la più recente per prima).
   return [
     {
+      version: '1.4.0',
+      date: '2026-06-06',
+      title: 'Arsenale da mischia',
+      added: [
+        'Trenta nuove armi da corpo a corpo, almeno cinque per ogni rarità: dal Comune all’Artefatto, c’è sempre qualcosa da impugnare.',
+        'Tanti tipi diversi: spade, pugnali, asce, mazze, magli, lance, tridenti, alabarde, fruste, falci, scimitarre e stocchi.',
+        'Tra le chicche: Scimitarra della velocità, Maglio dei fulmini, Lama della fenice e cinque Artefatti leggendari come il Maglio della Forgia del Mondo e Stormheart.',
+        'Tutte le armi sono cercabili nel Database Oggetti (filtro « Tipo: Arma » e per rarità) e si possono aggiungere alle tue build.'
+      ],
+      improved: [],
+      fixed: []
+    },
+    {
       version: '1.3.0',
       date: '2026-06-06',
       title: 'Armi corpo a corpo',
