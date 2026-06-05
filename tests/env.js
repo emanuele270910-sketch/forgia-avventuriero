@@ -20,6 +20,7 @@
     T.dm = require('../src/data/dm.js');
     T.names = require('../src/core/names.js');
     T.changelog = require('../src/data/changelog.js');
+    T.builds = require('../src/core/builds.js');
   }
   root.T = T;
   if (typeof module !== 'undefined' && module.exports) { module.exports = T; }

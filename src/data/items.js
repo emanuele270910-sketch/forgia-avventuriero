@@ -735,6 +735,51 @@
       bonus: { resist: ["fire"], spellSaveDcBonus: 2, spellAttackBonus: 2, extra: "Domini il fuoco: immunità alle fiamme e poteri vulcanici da artefatto" },
       tags: ["artefatto", "esempio", "fuoco", "potere assoluto"],
       descrizione: "Esempio illustrativo di artefatto: gemma incandescente che racchiude un vulcano dormiente. Concede immunità al fuoco e magie devastanti, ma rischia di consumare chi non ne domina la sete di distruzione.",
-      source: "Esempio" }
+      source: "Esempio" },
+
+    // ---------------- AGGIUNTE (update 1.2.0) ----------------
+    {
+      id: "adamantine-armor", name: "Adamantine Armor", type: "armor", rarity: "uncommon",
+      attunement: false, bonus: { extra: "Ogni colpo critico contro di te diventa un colpo normale" },
+      tags: ["armatura", "difesa"],
+      descrizione: "Quest'armatura è rinforzata con adamantio. Mentre la indossi, ogni colpo critico messo a segno contro di te diventa un colpo normale.",
+      source: "SRD"
+    },
+    {
+      id: "boots-of-elvenkind", name: "Boots of Elvenkind", type: "wondrous", rarity: "uncommon",
+      attunement: false, bonus: { extra: "Passi silenziosi: vantaggio alla Furtività per muoverti senza far rumore" },
+      tags: ["furtività", "movimento"],
+      descrizione: "Mentre indossi questi stivali i tuoi passi non fanno alcun rumore: hai vantaggio alle prove di Destrezza (Furtività) basate sul muoverti in silenzio.",
+      source: "SRD"
+    },
+    {
+      id: "brooch-of-shielding", name: "Brooch of Shielding", type: "wondrous", rarity: "uncommon",
+      attunement: true, bonus: { resist: ["force"], extra: "Immune ai danni di dardo incantato (magic missile)" },
+      tags: ["difesa", "protezione"],
+      descrizione: "Mentre indossi questa spilla hai resistenza ai danni da forza e sei immune ai danni inflitti dall'incantesimo dardo incantato.",
+      source: "SRD"
+    },
+    {
+      id: "mace-of-smiting", name: "Mace of Smiting", type: "weapon", rarity: "rare",
+      attunement: false, bonus: { weaponBonus: 1, extra: "+3 a colpire e danni contro i costrutti; con un 20 naturale può distruggere un costrutto" },
+      tags: ["arma", "costrutti"],
+      descrizione: "Questa mazza concede +1 ai tiri per colpire e ai danni, che diventano +3 contro i costrutti. Con un 20 naturale infligge danni extra e può distruggere un costrutto.",
+      source: "SRD"
+    },
+    {
+      id: "periapt-of-wound-closure", name: "Periapt of Wound Closure", type: "wondrous", rarity: "rare",
+      attunement: true, bonus: { extra: "Ti stabilizzi automaticamente e raddoppi i PF recuperati con i dadi vita" },
+      tags: ["cura", "sopravvivenza"],
+      descrizione: "Mentre indossi questo ciondolo ti stabilizzi automaticamente quando sei morente e raddoppi i punti ferita recuperati spendendo i dadi vita.",
+      source: "SRD"
+    },
+    {
+      id: "dwarven-thrower", name: "Dwarven Thrower", type: "weapon", rarity: "very-rare",
+      attunement: true, attunementNote: "da un nano",
+      bonus: { weaponBonus: 3, extra: "Se lanciato torna subito in mano; danni extra, ancora maggiori contro i giganti" },
+      tags: ["arma", "lancio", "nani"],
+      descrizione: "Questo martello da guerra concede +3 ai tiri per colpire e ai danni. Puoi lanciarlo: dopo l'attacco torna immediatamente nella tua mano e infligge danni extra, devastanti contro i giganti.",
+      source: "SRD"
+    }
   ];
 });

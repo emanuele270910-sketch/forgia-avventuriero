@@ -190,6 +190,47 @@
       </div>
     </section>
 
+    <!-- PANEL: BUILD -->
+    <section id="panel-build" data-panel="build" class="hidden">
+      <h2 id="build-title" class="font-display text-lg text-gold mb-2"></h2>
+      <p id="build-intro" class="text-sm text-muted mb-5 max-w-2xl"></p>
+
+      <div class="grid gap-6 lg:grid-cols-5 items-start">
+        <!-- Colonna sinistra: crea + elenco build salvate -->
+        <div class="lg:col-span-2 flex flex-col gap-4">
+          <form id="build-form" class="rounded-xl bg-panel border border-edge p-4 flex flex-col gap-3">
+            <h3 id="build-new-title" class="font-display text-base text-parchment"></h3>
+            <div>
+              <label class="block text-[11px] uppercase tracking-wider text-muted mb-1" id="lbl-build-name"></label>
+              <input id="build-name" type="text" autocomplete="off"
+                class="w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment placeholder-muted focus:outline-none focus:border-gold/70" />
+            </div>
+            <div>
+              <label class="block text-[11px] uppercase tracking-wider text-muted mb-1" id="lbl-build-class"></label>
+              <select id="build-class" class="w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment focus:outline-none focus:border-gold/70"></select>
+            </div>
+            <button id="build-create" type="submit"
+              class="rounded-lg bg-gradient-to-b from-gold to-goldsoft text-ink font-semibold py-2 hover:brightness-105 active:brightness-95 transition"></button>
+          </form>
+
+          <div class="rounded-xl bg-panel border border-edge p-4">
+            <div class="flex items-center justify-between gap-3 mb-3">
+              <h3 id="build-saved-title" class="font-display text-base text-parchment"></h3>
+              <span id="build-count" class="text-xs text-muted"></span>
+            </div>
+            <div id="build-list" class="flex flex-col gap-2"></div>
+            <p id="build-saved-empty" class="text-center text-muted py-6 text-sm"></p>
+          </div>
+        </div>
+
+        <!-- Colonna destra: editor della build attiva + assistente -->
+        <div class="lg:col-span-3">
+          <p id="build-editor-empty" class="text-center text-muted py-16 rounded-xl border border-dashed border-edge"></p>
+          <div id="build-editor" class="hidden flex-col gap-4"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- PANEL: DM -->
     <section id="panel-dm" data-panel="dm" class="hidden">
       <h2 id="dm-title" class="font-display text-lg text-gold mb-2"></h2>
@@ -450,6 +491,7 @@
       items: 'Oggetti',
       spells: 'Incantesimi',
       assistant: 'Assistente',
+      build: 'Build',
       dm: 'DM',
       patch: 'Novità'
     },
@@ -524,6 +566,67 @@
       scoreLabel: 'Affinità',
       level1to4: 'Livelli 1–4',
       summaryFor: 'Build per'
+    },
+    build: {
+      title: 'Le mie Build',
+      intro: 'Crea le tue build: scegli un nome e una classe, poi aggiungi oggetti e incantesimi presenti nel sito. Un assistente integrato ti dice se la build è equilibrata e cosa conviene aggiungere o togliere. Tutto resta salvato su questo dispositivo.',
+      // Creazione
+      newTitle: 'Nuova build',
+      name: 'Nome della build',
+      namePlaceholder: 'es. Paladino della Vendetta…',
+      class: 'Classe',
+      noClass: 'Nessuna classe',
+      create: 'Crea build',
+      // Elenco build salvate
+      savedTitle: 'Build salvate',
+      savedEmpty: 'Nessuna build salvata. Creane una qui sopra per cominciare.',
+      count: 'build salvate',
+      countOne: 'build salvata',
+      active: 'In modifica',
+      duplicate: 'Duplica',
+      delete: 'Elimina',
+      confirmDelete: 'Eliminare definitivamente questa build?',
+      // Editor
+      editorEmpty: 'Seleziona una build dall’elenco oppure creane una nuova per modificarla.',
+      itemsTitle: 'Oggetti della build',
+      itemsEmpty: 'Nessun oggetto. Cerca qui sotto e tocca un risultato per aggiungerlo.',
+      itemSearch: 'Cerca un oggetto da aggiungere…',
+      spellsTitle: 'Incantesimi della build',
+      spellsEmpty: 'Nessun incantesimo. Cerca qui sotto e tocca un risultato per aggiungerlo.',
+      spellSearch: 'Cerca un incantesimo da aggiungere…',
+      spellsNonCaster: 'Questa classe non lancia incantesimi: la build si concentra su oggetti ed equipaggiamento.',
+      add: 'Aggiungi',
+      remove: 'Rimuovi',
+      searchEmpty: 'Nessun risultato.',
+      inBuild: 'Già nella build',
+      // Assistente
+      assistantTitle: 'Assistente della build',
+      score: 'Equilibrio',
+      itemsCount: 'oggetti',
+      spellsCount: 'incantesimi',
+      attunement: 'Sintonia',
+      problemsTitle: 'Da rivedere',
+      suggestionsTitle: 'Consigli',
+      positivesTitle: 'Punti di forza',
+      verdictGreat: 'Build equilibrata',
+      verdictGood: 'Build solida',
+      verdictReview: 'Da rivedere',
+      verdictEmpty: 'Build vuota',
+      // Messaggi dell'assistente: codici di evaluateBuild → testo. Segnaposto {used} {max} {type} {clazz} {count}.
+      msg: {
+        empty: 'Aggiungi qualche oggetto o incantesimo: poi l’assistente valuterà la tua build.',
+        'attune-over': 'Troppi oggetti che richiedono sintonia: {used} su un massimo di {max}. Un personaggio può sintonizzarsi con al massimo {max} oggetti per volta.',
+        'attune-ok': 'Sintonia sotto controllo: {used} oggetti su {max}.',
+        'dup-slot': 'Hai {count} oggetti dello stesso tipo ({type}): di norma se ne equipaggia uno solo, gli altri sono ridondanti.',
+        'noncaster-spells': 'La classe {clazz} non lancia incantesimi: quelli inseriti non avrebbero effetto.',
+        'caster-no-spells': 'La classe {clazz} è incantatrice: aggiungi qualche incantesimo per sfruttarla al meglio.',
+        'spells-offclass': 'Hai {count} incantesimi che non compaiono nella lista della tua classe.',
+        'spells-onclass': 'Tutti gli incantesimi scelti appartengono alla lista della tua classe.',
+        'no-class': 'Scegli una classe: l’assistente potrà darti consigli più precisi.',
+        'no-offense': 'Nessun modo per attaccare: aggiungi un’arma oppure qualche incantesimo offensivo.',
+        'has-weapon': 'Hai almeno un’arma per affrontare il combattimento.',
+        'too-legendary': 'Hai {count} oggetti leggendari o artefatti: una build così potrebbe risultare sbilanciata per il livello.'
+      }
     },
     dm: {
       title: 'Strumenti del Dungeon Master',
@@ -1389,7 +1492,52 @@
       bonus: { resist: ["fire"], spellSaveDcBonus: 2, spellAttackBonus: 2, extra: "Domini il fuoco: immunità alle fiamme e poteri vulcanici da artefatto" },
       tags: ["artefatto", "esempio", "fuoco", "potere assoluto"],
       descrizione: "Esempio illustrativo di artefatto: gemma incandescente che racchiude un vulcano dormiente. Concede immunità al fuoco e magie devastanti, ma rischia di consumare chi non ne domina la sete di distruzione.",
-      source: "Esempio" }
+      source: "Esempio" },
+
+    // ---------------- AGGIUNTE (update 1.2.0) ----------------
+    {
+      id: "adamantine-armor", name: "Adamantine Armor", type: "armor", rarity: "uncommon",
+      attunement: false, bonus: { extra: "Ogni colpo critico contro di te diventa un colpo normale" },
+      tags: ["armatura", "difesa"],
+      descrizione: "Quest'armatura è rinforzata con adamantio. Mentre la indossi, ogni colpo critico messo a segno contro di te diventa un colpo normale.",
+      source: "SRD"
+    },
+    {
+      id: "boots-of-elvenkind", name: "Boots of Elvenkind", type: "wondrous", rarity: "uncommon",
+      attunement: false, bonus: { extra: "Passi silenziosi: vantaggio alla Furtività per muoverti senza far rumore" },
+      tags: ["furtività", "movimento"],
+      descrizione: "Mentre indossi questi stivali i tuoi passi non fanno alcun rumore: hai vantaggio alle prove di Destrezza (Furtività) basate sul muoverti in silenzio.",
+      source: "SRD"
+    },
+    {
+      id: "brooch-of-shielding", name: "Brooch of Shielding", type: "wondrous", rarity: "uncommon",
+      attunement: true, bonus: { resist: ["force"], extra: "Immune ai danni di dardo incantato (magic missile)" },
+      tags: ["difesa", "protezione"],
+      descrizione: "Mentre indossi questa spilla hai resistenza ai danni da forza e sei immune ai danni inflitti dall'incantesimo dardo incantato.",
+      source: "SRD"
+    },
+    {
+      id: "mace-of-smiting", name: "Mace of Smiting", type: "weapon", rarity: "rare",
+      attunement: false, bonus: { weaponBonus: 1, extra: "+3 a colpire e danni contro i costrutti; con un 20 naturale può distruggere un costrutto" },
+      tags: ["arma", "costrutti"],
+      descrizione: "Questa mazza concede +1 ai tiri per colpire e ai danni, che diventano +3 contro i costrutti. Con un 20 naturale infligge danni extra e può distruggere un costrutto.",
+      source: "SRD"
+    },
+    {
+      id: "periapt-of-wound-closure", name: "Periapt of Wound Closure", type: "wondrous", rarity: "rare",
+      attunement: true, bonus: { extra: "Ti stabilizzi automaticamente e raddoppi i PF recuperati con i dadi vita" },
+      tags: ["cura", "sopravvivenza"],
+      descrizione: "Mentre indossi questo ciondolo ti stabilizzi automaticamente quando sei morente e raddoppi i punti ferita recuperati spendendo i dadi vita.",
+      source: "SRD"
+    },
+    {
+      id: "dwarven-thrower", name: "Dwarven Thrower", type: "weapon", rarity: "very-rare",
+      attunement: true, attunementNote: "da un nano",
+      bonus: { weaponBonus: 3, extra: "Se lanciato torna subito in mano; danni extra, ancora maggiori contro i giganti" },
+      tags: ["arma", "lancio", "nani"],
+      descrizione: "Questo martello da guerra concede +3 ai tiri per colpire e ai danni. Puoi lanciarlo: dopo l'attacco torna immediatamente nella tua mano e infligge danni extra, devastanti contro i giganti.",
+      source: "SRD"
+    }
   ];
 });
 
@@ -2079,6 +2227,38 @@
       castingTime: "action", range: "1,5 km", components: { v: true, s: true, m: false },
       duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
       descrizione: "Una tempesta colossale che ogni round scatena tuoni, acido, fulmini, grandine e venti gelidi sull'area.",
+      source: "SRD" },
+
+    // ===================== AGGIUNTE (update 1.2.0) =====================
+    { id: "bane", name: "Bane", level: 1, school: "enchantment", classes: ["bard", "cleric"],
+      castingTime: "action", range: "9 metri", components: { v: true, s: true, m: true, material: "una goccia di sangue" },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Fino a tre creature a tua scelta tirano 1d4 e sottraggono il risultato a ogni loro tiro per colpire e tiro salvezza, finché mantieni la concentrazione.",
+      higherLevels: "Colpisci una creatura aggiuntiva per ogni slot oltre il 1° livello.", source: "SRD" },
+    { id: "fog-cloud", name: "Fog Cloud", level: 1, school: "conjuration", classes: ["druid", "ranger", "sorcerer", "wizard"],
+      castingTime: "action", range: "36 metri", components: { v: true, s: true, m: false },
+      duration: "Concentrazione, fino a 1 ora", concentration: true, ritual: false,
+      descrizione: "Crei una sfera di nebbia del raggio di 6 metri centrata su un punto: l'area è pesantemente oscurata. Un vento forte la disperde.",
+      higherLevels: "Il raggio della nebbia aumenta di 6 metri per ogni slot oltre il 1° livello.", source: "SRD" },
+    { id: "enhance-ability", name: "Enhance Ability", level: 2, school: "transmutation", classes: ["bard", "cleric", "druid", "sorcerer"],
+      castingTime: "action", range: "Contatto", components: { v: true, s: true, m: true, material: "pelo o piuma di animale" },
+      duration: "Concentrazione, fino a 1 ora", concentration: true, ritual: false,
+      descrizione: "Tocchi una creatura e le concedi vantaggio alle prove di una caratteristica a tua scelta; alcune scelte aggiungono un beneficio extra, come punti ferita temporanei.",
+      higherLevels: "Bersagli una creatura aggiuntiva per ogni slot oltre il 2° livello.", source: "SRD" },
+    { id: "silence", name: "Silence", level: 2, school: "illusion", classes: ["bard", "cleric"],
+      castingTime: "action", range: "36 metri", components: { v: true, s: true, m: false },
+      duration: "Concentrazione, fino a 10 minuti", concentration: true, ritual: true,
+      descrizione: "Per la durata nessun suono nasce o penetra in una sfera di 6 metri di raggio: l'area è immune ai danni da tuono e impedisce di lanciare incantesimi con componente verbale.",
+      source: "SRD" },
+    { id: "slow", name: "Slow", level: 3, school: "transmutation", classes: ["sorcerer", "wizard"],
+      castingTime: "action", range: "36 metri", components: { v: true, s: true, m: true, material: "una goccia di melassa" },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Fino a sei creature in un cubo di 12 metri devono superare un TS su Saggezza o essere rallentate: CA e TS su Destrezza ridotti, una sola azione o azione bonus per turno e niente reazioni.",
+      source: "SRD" },
+    { id: "blink", name: "Blink", level: 3, school: "transmutation", classes: ["sorcerer", "wizard"],
+      castingTime: "action", range: "Personale", components: { v: true, s: true, m: false },
+      duration: "1 minuto", concentration: false, ritual: false,
+      descrizione: "Alla fine di ogni tuo turno tira 1d20: con 11 o più svanisci nel Piano Etereo fino all'inizio del tuo turno successivo, diventando irraggiungibile dal piano materiale.",
       source: "SRD" }
   ];
 });
@@ -2432,6 +2612,19 @@
 
   // Voci in ordine cronologico inverso (la più recente per prima).
   return [
+    {
+      version: '1.2.0',
+      date: '2026-06-06',
+      title: 'Le mie Build',
+      added: [
+        'Nuova sezione « Build »: crea le tue build dando un nome e scegliendo una classe, poi aggiungi gli oggetti e gli incantesimi presenti nel sito.',
+        'Assistente della build integrato: assegna un punteggio di equilibrio (0–100), segnala che cosa rivedere, che cosa conviene aggiungere o togliere e i punti di forza della build.',
+        'Più build salvate insieme: creane quante vuoi, rinominale, duplicale ed eliminale. Tutto resta salvato su questo dispositivo e si ritrova alla riapertura dell’app.',
+        'Sei nuovi oggetti magici (tra cui Armatura adamantina, Stivali elfici e Martello nanico) e sei nuovi incantesimi (tra cui Nube di nebbia, Silenzio e Lentezza).'
+      ],
+      improved: [],
+      fixed: []
+    },
     {
       version: '1.1.0',
       date: '2026-06-05',
@@ -3183,6 +3376,213 @@
 
   </script>
   <script>
+  /* ===== src/core/builds.js ===== */
+/*
+ * builds.js — Logica pura per le build personalizzate dell'utente (niente DOM).
+ * Crea/modifica build (nome, classe, oggetti, incantesimi) in modo immutabile e
+ * le valuta con un assistente a regole. Nessuna dipendenza esterna: i dati
+ * (oggetti, incantesimi, classi) arrivano via `ctx`, così la logica è testabile.
+ * Pattern UMD-lite: nel browser espone DND.builds, in Node module.exports.
+ */
+(function (root, factory) {
+  'use strict';
+  var mod = factory();
+  if (typeof module !== 'undefined' && module.exports) { module.exports = mod; }
+  if (root) { root.DND = root.DND || {}; root.DND.builds = mod; }
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  var MAX_ATTUNEMENT = 3;
+  // Slot che di norma si equipaggiano in un solo esemplare: i doppioni sono ridondanti.
+  var UNIQUE_SLOTS = { armor: 1, shield: 1 };
+
+  function str(v) { return (v === undefined || v === null) ? '' : String(v); }
+  function trim(v) { return str(v).trim(); }
+
+  // Lista di stringhe ripulite, senza vuoti né duplicati (mantiene l'ordine).
+  function uniqueStrings(arr) {
+    if (!Array.isArray(arr)) { return []; }
+    var out = [], seen = {};
+    for (var i = 0; i < arr.length; i++) {
+      var s = trim(arr[i]);
+      if (s && !seen[s]) { seen[s] = true; out.push(s); }
+    }
+    return out;
+  }
+
+  function assign(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var src = arguments[i];
+      if (!src) { continue; }
+      for (var k in src) { if (Object.prototype.hasOwnProperty.call(src, k)) { target[k] = src[k]; } }
+    }
+    return target;
+  }
+
+  var counter = 0;
+  function uid() { counter += 1; return 'b' + Date.now().toString(36) + '-' + counter; }
+
+  // Crea una build normalizzata. `opts`: id, itemIds, spellIds (usati anche al
+  // ripristino da localStorage).
+  function makeBuild(name, clazz, opts) {
+    opts = opts || {};
+    return {
+      id: opts.id || uid(),
+      name: trim(name) || 'Nuova build',
+      clazz: trim(clazz),
+      itemIds: uniqueStrings(opts.itemIds),
+      spellIds: uniqueStrings(opts.spellIds)
+    };
+  }
+
+  // Restituisce una NUOVA build con la lista `key` rimpiazzata (deduplicata).
+  function withList(build, key, list) {
+    var patch = {}; patch[key] = uniqueStrings(list);
+    return assign({}, build, patch);
+  }
+
+  function addItem(build, id) {
+    id = trim(id);
+    if (!id) { return build; }
+    return withList(build, 'itemIds', (build.itemIds || []).concat([id]));
+  }
+  function removeItem(build, id) {
+    id = trim(id);
+    return withList(build, 'itemIds', (build.itemIds || []).filter(function (x) { return x !== id; }));
+  }
+  function addSpell(build, id) {
+    id = trim(id);
+    if (!id) { return build; }
+    return withList(build, 'spellIds', (build.spellIds || []).concat([id]));
+  }
+  function removeSpell(build, id) {
+    id = trim(id);
+    return withList(build, 'spellIds', (build.spellIds || []).filter(function (x) { return x !== id; }));
+  }
+  function rename(build, name) {
+    return assign({}, build, { name: trim(name) || build.name });
+  }
+  function setClass(build, clazz) {
+    return assign({}, build, { clazz: trim(clazz) });
+  }
+  function hasItem(build, id) { return (build.itemIds || []).indexOf(trim(id)) !== -1; }
+  function hasSpell(build, id) { return (build.spellIds || []).indexOf(trim(id)) !== -1; }
+
+  // ---- Assistente: valutazione a regole -------------------------------------
+  // ctx: { itemById, spellById, classById }. Restituisce un report con
+  // punteggio 0-100, verdetto e liste di codici (warnings/suggestions/positives)
+  // che la UI traduce in messaggi localizzati.
+  function evaluateBuild(build, ctx) {
+    ctx = ctx || {};
+    build = build || {};
+    var itemById = ctx.itemById || {};
+    var spellById = ctx.spellById || {};
+    var classById = ctx.classById || {};
+
+    var items = (build.itemIds || []).map(function (id) { return itemById[id]; }).filter(Boolean);
+    var spells = (build.spellIds || []).map(function (id) { return spellById[id]; }).filter(Boolean);
+    var info = classById[build.clazz] || null;
+    var isCaster = !!(info && info.caster);
+
+    var warnings = [], suggestions = [], positives = [];
+
+    // Build vuota: niente da valutare.
+    if (items.length === 0 && spells.length === 0) {
+      return {
+        score: 0, verdict: 'empty', isCaster: isCaster,
+        itemCount: 0, spellCount: 0, attunementUsed: 0, attunementMax: MAX_ATTUNEMENT,
+        warnings: [], suggestions: [{ code: 'empty' }], positives: []
+      };
+    }
+
+    var score = 100;
+
+    // Budget di sintonia (max 3).
+    var attuneUsed = 0;
+    items.forEach(function (it) { if (it.attunement) { attuneUsed++; } });
+    if (attuneUsed > MAX_ATTUNEMENT) {
+      warnings.push({ code: 'attune-over', used: attuneUsed, max: MAX_ATTUNEMENT });
+      score -= 12 * (attuneUsed - MAX_ATTUNEMENT);
+    } else if (attuneUsed > 0) {
+      positives.push({ code: 'attune-ok', used: attuneUsed, max: MAX_ATTUNEMENT });
+    }
+
+    // Doppioni di slot tipicamente unici (armatura, scudo).
+    var typeCount = {};
+    items.forEach(function (it) { typeCount[it.type] = (typeCount[it.type] || 0) + 1; });
+    Object.keys(UNIQUE_SLOTS).forEach(function (type) {
+      if ((typeCount[type] || 0) > 1) {
+        warnings.push({ code: 'dup-slot', type: type, count: typeCount[type] });
+        score -= 10;
+      }
+    });
+
+    // Coerenza classe / incantesimi.
+    if (info && !isCaster && spells.length > 0) {
+      warnings.push({ code: 'noncaster-spells', clazz: build.clazz });
+      score -= 12;
+    }
+    if (isCaster && spells.length === 0) {
+      suggestions.push({ code: 'caster-no-spells', clazz: build.clazz });
+      score -= 8;
+    }
+    if (isCaster && spells.length > 0) {
+      var offClass = spells.filter(function (sp) { return (sp.classes || []).indexOf(build.clazz) === -1; });
+      if (offClass.length > 0) {
+        warnings.push({ code: 'spells-offclass', count: offClass.length });
+        score -= 4 * offClass.length;
+      } else {
+        positives.push({ code: 'spells-onclass', count: spells.length });
+      }
+    }
+
+    // Classe non scelta.
+    if (!info) {
+      suggestions.push({ code: 'no-class' });
+      score -= 6;
+    }
+
+    // Nessun modo di attaccare: né arma né incantesimi.
+    var hasWeapon = (typeCount['weapon'] || 0) > 0;
+    if (!hasWeapon && spells.length === 0) {
+      suggestions.push({ code: 'no-offense' });
+      score -= 8;
+    } else if (hasWeapon) {
+      positives.push({ code: 'has-weapon' });
+    }
+
+    // Troppi oggetti di altissima potenza.
+    var legendary = items.filter(function (it) { return it.rarity === 'legendary' || it.rarity === 'artifact'; }).length;
+    if (legendary > 2) {
+      warnings.push({ code: 'too-legendary', count: legendary });
+      score -= 6;
+    }
+
+    if (score < 0) { score = 0; }
+    if (score > 100) { score = 100; }
+    var verdict = score >= 80 ? 'great' : (score >= 55 ? 'good' : 'review');
+
+    return {
+      score: score, verdict: verdict, isCaster: isCaster,
+      itemCount: items.length, spellCount: spells.length,
+      attunementUsed: attuneUsed, attunementMax: MAX_ATTUNEMENT,
+      warnings: warnings, suggestions: suggestions, positives: positives
+    };
+  }
+
+  return {
+    MAX_ATTUNEMENT: MAX_ATTUNEMENT,
+    makeBuild: makeBuild,
+    addItem: addItem, removeItem: removeItem,
+    addSpell: addSpell, removeSpell: removeSpell,
+    rename: rename, setClass: setClass,
+    hasItem: hasItem, hasSpell: hasSpell,
+    evaluateBuild: evaluateBuild
+  };
+});
+
+  </script>
+  <script>
   /* ===== src/ui/app.js ===== */
 /*
  * app.js — Controller dell'interfaccia (vanilla JS).
@@ -3201,6 +3601,15 @@
   var ITEM_BY_ID = index(ITEMS);
   var SPELL_BY_ID = index(SPELLS);
   var CHANGELOG = D.changelog || []; // cronologia versioni (Patch Notes)
+
+  // Build personalizzate dell'utente: logica pura in builds.js, stato persistito
+  // in localStorage. `builds` è l'elenco salvato, `activeBuildId` quella in modifica.
+  var BUILDS = D.builds;
+  var BUILD_STORE_KEY = 'dnd.builds';
+  var builds = [];
+  var activeBuildId = null;
+  var buildItemQuery = '';   // testo di ricerca « aggiungi oggetto »
+  var buildSpellQuery = '';  // testo di ricerca « aggiungi incantesimo »
 
   // DM: logica del tracker (funzioni pure) e materiale di riferimento.
   var E = D.encounter;
@@ -3302,6 +3711,7 @@
       { id: 'items', label: t.nav.items },
       { id: 'spells', label: t.nav.spells },
       { id: 'assistant', label: t.nav.assistant },
+      { id: 'build', label: t.nav.build },
       { id: 'dm', label: t.nav.dm },
       { id: 'patch', label: t.nav.patch }
     ];
@@ -3336,6 +3746,18 @@
     $('lbl-a-abilities').textContent = t.assistant.abilities;
     $('a-generate').textContent = t.assistant.generate;
     $('assistant-empty').textContent = t.assistant.emptyState;
+
+    // Build personalizzate
+    $('build-title').textContent = t.build.title;
+    $('build-intro').textContent = t.build.intro;
+    $('build-new-title').textContent = t.build.newTitle;
+    $('lbl-build-name').textContent = t.build.name;
+    $('build-name').placeholder = t.build.namePlaceholder;
+    $('lbl-build-class').textContent = t.build.class;
+    $('build-create').textContent = t.build.create;
+    $('build-saved-title').textContent = t.build.savedTitle;
+    $('build-saved-empty').textContent = t.build.savedEmpty;
+    $('build-editor-empty').textContent = t.build.editorEmpty;
 
     $('dm-title').textContent = t.dm.title;
     $('dm-intro').textContent = t.dm.intro;
@@ -3381,7 +3803,7 @@
       var btn = e.target.closest('[data-tab]');
       if (!btn) { return; }
       var id = btn.getAttribute('data-tab');
-      ['items', 'spells', 'assistant', 'dm', 'patch'].forEach(function (p) {
+      ['items', 'spells', 'assistant', 'build', 'dm', 'patch'].forEach(function (p) {
         $('panel-' + p).classList.toggle('hidden', p !== id);
       });
       Array.prototype.forEach.call($('tabs').children, function (c) {
@@ -4226,6 +4648,377 @@
     list.innerHTML = CHANGELOG.map(patchCard).join('');
   }
 
+  // ---- Build personalizzate ------------------------------------------------
+  var BUILD_CTX = { itemById: ITEM_BY_ID, spellById: SPELL_BY_ID, classById: CLASS_BY_ID };
+  var BUILD_VERDICT = {
+    great:  { key: 'verdictGreat',  color: '#34d399' },
+    good:   { key: 'verdictGood',   color: '#d9b65f' },
+    review: { key: 'verdictReview', color: '#f87171' },
+    empty:  { key: 'verdictEmpty',  color: '#9b94ac' }
+  };
+
+  function buildClassLabel(id) { return (CLASS_BY_ID[id] || { label: id }).label; }
+  function buildTypeLabel(id) { return (ITEM_TYPE_BY_ID[id] || { label: id }).label; }
+
+  // Traduce un codice di evaluateBuild nel messaggio localizzato, interpolando i campi.
+  function buildMessage(entry) {
+    var tpl = (t.build.msg && t.build.msg[entry.code]) || entry.code;
+    return tpl
+      .replace(/\{used\}/g, entry.used)
+      .replace(/\{max\}/g, entry.max)
+      .replace(/\{count\}/g, entry.count)
+      .replace(/\{clazz\}/g, buildClassLabel(entry.clazz))
+      .replace(/\{type\}/g, buildTypeLabel(entry.type));
+  }
+
+  function buildLoad() {
+    try {
+      var raw = window.localStorage.getItem(BUILD_STORE_KEY);
+      if (!raw) { return []; }
+      var arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) { return []; }
+      return arr.map(function (b) {
+        return BUILDS.makeBuild(b.name, b.clazz, { id: b.id, itemIds: b.itemIds, spellIds: b.spellIds });
+      });
+    } catch (e) { return []; }
+  }
+  function buildSave() {
+    try { window.localStorage.setItem(BUILD_STORE_KEY, JSON.stringify(builds)); } catch (e) { /* spazio non disponibile: ignora */ }
+  }
+  function activeBuild() {
+    for (var i = 0; i < builds.length; i++) { if (builds[i].id === activeBuildId) { return builds[i]; } }
+    return null;
+  }
+  function buildIndexOf(id) {
+    for (var i = 0; i < builds.length; i++) { if (builds[i].id === id) { return i; } }
+    return -1;
+  }
+  // Rimpiazza in elenco la build attiva con la sua nuova versione (immutabile) e salva.
+  function replaceActive(next) {
+    var idx = buildIndexOf(activeBuildId);
+    if (idx < 0) { return; }
+    builds[idx] = next;
+    buildSave();
+  }
+  function setActiveBuild(id) {
+    activeBuildId = id;
+    buildItemQuery = '';
+    buildSpellQuery = '';
+  }
+
+  // Opzioni del menu classe (con voce « Nessuna classe »).
+  function buildClassOptions(selected) {
+    return '<option value="">' + esc(t.build.noClass) + '</option>' +
+      D.CLASSES.map(function (c) {
+        return '<option value="' + esc(c.id) + '"' + (c.id === selected ? ' selected' : '') + '>' + esc(c.label) + '</option>';
+      }).join('');
+  }
+
+  // Elenco delle build salvate (colonna sinistra).
+  function renderBuildList() {
+    var box = $('build-list');
+    if (!box) { return; }
+    var n = builds.length;
+    $('build-count').textContent = n + ' ' + (n === 1 ? t.build.countOne : t.build.count);
+    $('build-saved-empty').classList.toggle('hidden', n !== 0);
+    box.innerHTML = builds.map(function (b) {
+      var active = b.id === activeBuildId;
+      var clazz = b.clazz ? buildClassLabel(b.clazz) : t.build.noClass;
+      var counts = (b.itemIds || []).length + ' ' + t.build.itemsCount + ' · ' + (b.spellIds || []).length + ' ' + t.build.spellsCount;
+      var wrap = 'rounded-lg border px-3 py-2 transition ' +
+        (active ? 'border-gold/70 bg-gold/10' : 'border-edge bg-panel2/60 hover:border-gold/50');
+      return '<div data-bid="' + esc(b.id) + '" class="' + wrap + '">' +
+        '<div class="flex items-center justify-between gap-2">' +
+          '<button type="button" data-act="select" class="text-left min-w-0 flex-1">' +
+            '<span class="block font-display text-sm text-parchment truncate">' + esc(b.name) + '</span>' +
+            '<span class="block text-[11px] text-muted truncate">' + esc(clazz) + ' · ' + esc(counts) + '</span>' +
+          '</button>' +
+          '<div class="flex items-center gap-1 shrink-0">' +
+            '<button type="button" data-act="duplicate" title="' + esc(t.build.duplicate) + '" aria-label="' + esc(t.build.duplicate) + '" class="w-7 h-7 rounded border border-edge text-muted hover:text-gold hover:border-gold/60 flex items-center justify-center text-xs leading-none">&#10697;</button>' +
+            '<button type="button" data-act="delete" title="' + esc(t.build.delete) + '" aria-label="' + esc(t.build.delete) + '" class="w-7 h-7 rounded border border-edge text-muted hover:text-crimson hover:border-crimson/60 flex items-center justify-center text-sm leading-none">&times;</button>' +
+          '</div>' +
+        '</div>' +
+        (active ? '<span class="mt-1 inline-block text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/40">' + esc(t.build.active) + '</span>' : '') +
+      '</div>';
+    }).join('');
+  }
+
+  // Editor completo della build attiva. Ricostruito per intero solo quando cambia
+  // la build attiva o la classe; gli aggiornamenti minori toccano i sotto-contenitori.
+  function renderBuildEditor() {
+    var editor = $('build-editor');
+    var empty = $('build-editor-empty');
+    if (!editor) { return; }
+    var b = activeBuild();
+    if (!b) {
+      editor.classList.add('hidden');
+      editor.classList.remove('flex');
+      editor.innerHTML = '';
+      if (empty) { empty.classList.remove('hidden'); }
+      return;
+    }
+    if (empty) { empty.classList.add('hidden'); }
+    editor.classList.remove('hidden');
+    editor.classList.add('flex');
+
+    var info = CLASS_BY_ID[b.clazz] || null;
+    var isCaster = !!(info && info.caster);
+
+    var spellsSection = isCaster
+      ? '<h4 class="font-display text-base text-parchment mb-2">' + esc(t.build.spellsTitle) + '</h4>' +
+        '<div id="build-spells" class="grid gap-2 sm:grid-cols-2"></div>' +
+        '<p id="build-spells-empty" class="text-xs text-muted py-2"></p>' +
+        '<input id="build-spell-search" type="search" autocomplete="off" placeholder="' + esc(t.build.spellSearch) + '" ' +
+          'class="mt-2 w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-sm text-parchment placeholder-muted focus:outline-none focus:border-gold/70" />' +
+        '<div id="build-spell-results" class="mt-2 flex flex-col gap-1.5"></div>'
+      : '<h4 class="font-display text-base text-parchment mb-2">' + esc(t.build.spellsTitle) + '</h4>' +
+        '<p class="text-sm text-muted rounded-lg border border-dashed border-edge px-3 py-3">' + esc(t.build.spellsNonCaster) + '</p>';
+
+    editor.innerHTML =
+      '<div class="rounded-xl bg-panel border border-edge p-4">' +
+        '<div class="grid gap-3 sm:grid-cols-3">' +
+          '<div class="sm:col-span-2">' +
+            '<label class="block text-[11px] uppercase tracking-wider text-muted mb-1" for="build-ed-name">' + esc(t.build.name) + '</label>' +
+            '<input id="build-ed-name" type="text" autocomplete="off" value="' + esc(b.name) + '" ' +
+              'class="w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment focus:outline-none focus:border-gold/70" />' +
+          '</div>' +
+          '<div>' +
+            '<label class="block text-[11px] uppercase tracking-wider text-muted mb-1" for="build-ed-class">' + esc(t.build.class) + '</label>' +
+            '<select id="build-ed-class" class="w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment focus:outline-none focus:border-gold/70">' + buildClassOptions(b.clazz) + '</select>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rounded-xl bg-panel border border-edge p-4">' +
+        '<h4 class="font-display text-base text-parchment mb-2">' + esc(t.build.itemsTitle) + '</h4>' +
+        '<div id="build-items" class="grid gap-2 sm:grid-cols-2"></div>' +
+        '<p id="build-items-empty" class="text-xs text-muted py-2"></p>' +
+        '<input id="build-item-search" type="search" autocomplete="off" placeholder="' + esc(t.build.itemSearch) + '" ' +
+          'class="mt-2 w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-sm text-parchment placeholder-muted focus:outline-none focus:border-gold/70" />' +
+        '<div id="build-item-results" class="mt-2 flex flex-col gap-1.5"></div>' +
+      '</div>' +
+      '<div class="rounded-xl bg-panel border border-edge p-4">' + spellsSection + '</div>' +
+      '<div id="build-assist"></div>';
+
+    var itemSearch = $('build-item-search');
+    if (itemSearch) { itemSearch.value = buildItemQuery; }
+    var spellSearch = $('build-spell-search');
+    if (spellSearch) { spellSearch.value = buildSpellQuery; }
+
+    renderBuildItems();
+    renderBuildSpells();
+    renderItemSearch();
+    renderSpellSearch();
+    renderBuildAssist();
+  }
+
+  function buildItemChip(item) {
+    var r = RARITY_BY_ID[item.rarity] || { label: item.rarity, color: '#888' };
+    var att = item.attunement ? '<span class="text-[10px] text-gold/90 whitespace-nowrap">' + esc(t.common.attunement) + '</span>' : '';
+    return '<div class="flex items-center gap-2 rounded-lg bg-panel2 border border-edge pl-2 pr-1 py-1" style="border-left:3px solid ' + r.color + '">' +
+      '<button type="button" data-act="open-item" data-id="' + esc(item.id) + '" class="flex-1 min-w-0 text-left text-sm text-parchment hover:text-gold transition truncate">' + esc(item.name) + '</button>' + att +
+      '<button type="button" data-act="remove-item" data-id="' + esc(item.id) + '" aria-label="' + esc(t.build.remove) + '" class="w-6 h-6 rounded border border-edge text-muted hover:text-crimson hover:border-crimson/60 flex items-center justify-center text-sm leading-none shrink-0">&times;</button>' +
+    '</div>';
+  }
+  function renderBuildItems() {
+    var b = activeBuild();
+    var box = $('build-items');
+    if (!b || !box) { return; }
+    var items = (b.itemIds || []).map(function (id) { return ITEM_BY_ID[id]; }).filter(Boolean);
+    box.innerHTML = items.map(buildItemChip).join('');
+    var empty = $('build-items-empty');
+    if (empty) { empty.textContent = t.build.itemsEmpty; empty.classList.toggle('hidden', items.length !== 0); }
+  }
+
+  function buildSpellChip(spell) {
+    var color = SCHOOL_COLORS[spell.school] || '#888';
+    return '<div class="flex items-center gap-2 rounded-lg bg-panel2 border border-edge pl-2 pr-1 py-1" style="border-left:3px solid ' + color + '">' +
+      '<span class="shrink-0 w-6 h-6 rounded flex items-center justify-center font-display text-[11px] font-bold" style="background:' + color + '22;color:' + color + ';border:1px solid ' + color + '66">' + (spell.level === 0 ? '0' : spell.level) + '</span>' +
+      '<button type="button" data-act="open-spell" data-id="' + esc(spell.id) + '" class="flex-1 min-w-0 text-left text-sm text-parchment hover:text-gold transition truncate">' + esc(spell.name) + '</button>' +
+      '<button type="button" data-act="remove-spell" data-id="' + esc(spell.id) + '" aria-label="' + esc(t.build.remove) + '" class="w-6 h-6 rounded border border-edge text-muted hover:text-crimson hover:border-crimson/60 flex items-center justify-center text-sm leading-none shrink-0">&times;</button>' +
+    '</div>';
+  }
+  function renderBuildSpells() {
+    var b = activeBuild();
+    var box = $('build-spells');
+    if (!b || !box) { return; } // sezione assente per i non-incantatori
+    var spells = (b.spellIds || []).map(function (id) { return SPELL_BY_ID[id]; }).filter(Boolean);
+    box.innerHTML = spells.map(buildSpellChip).join('');
+    var empty = $('build-spells-empty');
+    if (empty) { empty.textContent = t.build.spellsEmpty; empty.classList.toggle('hidden', spells.length !== 0); }
+  }
+
+  // Riga di un risultato di ricerca: « + Aggiungi » oppure stato « già nella build ».
+  function buildSearchRow(kind, id, name, tag, has) {
+    var cls = 'w-full text-left flex items-center gap-2 rounded-lg border px-2 py-1.5 transition ' +
+      (has ? 'border-edge/50 bg-panel2/40 opacity-60 cursor-default' : 'border-edge bg-panel2 hover:border-gold/60');
+    var tail = has
+      ? '<span class="text-[10px] text-muted whitespace-nowrap">' + esc(t.build.inBuild) + '</span>'
+      : '<span class="text-[11px] text-gold whitespace-nowrap font-semibold">+ ' + esc(t.build.add) + '</span>';
+    return '<button type="button"' + (has ? ' disabled' : ' data-act="add-' + kind + '"') + ' data-id="' + esc(id) + '" class="' + cls + '">' +
+      '<span class="flex-1 min-w-0 truncate text-sm text-parchment">' + esc(name) + '</span>' + badge(tag.label, tag.color) + tail +
+    '</button>';
+  }
+  function renderItemSearch() {
+    var box = $('build-item-results');
+    if (!box) { return; }
+    var b = activeBuild();
+    var q = (buildItemQuery || '').trim();
+    if (!b || !q) { box.innerHTML = ''; return; }
+    var list = D.filterItems(ITEMS, { text: q }).slice(0, 8);
+    if (!list.length) { box.innerHTML = '<p class="text-xs text-muted px-1 py-1">' + esc(t.build.searchEmpty) + '</p>'; return; }
+    box.innerHTML = list.map(function (item) {
+      return buildSearchRow('item', item.id, item.name, RARITY_BY_ID[item.rarity] || { label: item.rarity, color: '#888' }, (b.itemIds || []).indexOf(item.id) !== -1);
+    }).join('');
+  }
+  function renderSpellSearch() {
+    var box = $('build-spell-results');
+    if (!box) { return; }
+    var b = activeBuild();
+    var q = (buildSpellQuery || '').trim();
+    if (!b || !q) { box.innerHTML = ''; return; }
+    var list = D.filterSpells(SPELLS, { text: q }).slice(0, 8);
+    if (!list.length) { box.innerHTML = '<p class="text-xs text-muted px-1 py-1">' + esc(t.build.searchEmpty) + '</p>'; return; }
+    box.innerHTML = list.map(function (spell) {
+      return buildSearchRow('spell', spell.id, spell.name, { label: levelLabel(spell.level), color: SCHOOL_COLORS[spell.school] || '#888' }, (b.spellIds || []).indexOf(spell.id) !== -1);
+    }).join('');
+  }
+
+  function buildAssistGroup(title, color, entries) {
+    if (!entries || !entries.length) { return ''; }
+    return '<div class="mt-3">' +
+      '<div class="text-xs uppercase tracking-wide font-semibold mb-1.5" style="color:' + color + '">' + esc(title) + '</div>' +
+      '<ul class="space-y-1.5">' +
+      entries.map(function (en) {
+        return '<li class="flex gap-2 text-sm text-parchment/90 leading-snug">' +
+          '<span aria-hidden="true" style="color:' + color + '">•</span><span>' + esc(buildMessage(en)) + '</span></li>';
+      }).join('') +
+      '</ul></div>';
+  }
+  function renderBuildAssist() {
+    var box = $('build-assist');
+    var b = activeBuild();
+    if (!box || !b) { return; }
+    var rep = BUILDS.evaluateBuild(b, BUILD_CTX);
+    var v = BUILD_VERDICT[rep.verdict] || BUILD_VERDICT.empty;
+    box.innerHTML =
+      '<div class="rounded-xl bg-panel border border-edge p-4">' +
+        '<div class="flex items-center justify-between gap-3 flex-wrap">' +
+          '<h4 class="font-display text-base text-parchment">' + esc(t.build.assistantTitle) + '</h4>' +
+          '<span class="text-sm font-display font-semibold" style="color:' + v.color + '">' + esc(t.build[v.key]) + '</span>' +
+        '</div>' +
+        '<div class="mt-3 flex items-center gap-3">' +
+          '<span class="font-display text-3xl font-bold tabular-nums" style="color:' + v.color + '">' + rep.score + '</span>' +
+          '<span class="text-xs text-muted whitespace-nowrap">/ 100 · ' + esc(t.build.score) + '</span>' +
+          '<div class="flex-1 h-2 rounded-full bg-ink/70 border border-edge/60 overflow-hidden">' +
+            '<div class="h-full rounded-full" style="width:' + rep.score + '%;background:' + v.color + '"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">' +
+          '<span>' + rep.itemCount + ' ' + esc(t.build.itemsCount) + '</span>' +
+          '<span>' + rep.spellCount + ' ' + esc(t.build.spellsCount) + '</span>' +
+          '<span>' + esc(t.build.attunement) + ': ' + rep.attunementUsed + ' / ' + rep.attunementMax + '</span>' +
+        '</div>' +
+        buildAssistGroup(t.build.problemsTitle, '#f87171', rep.warnings) +
+        buildAssistGroup(t.build.suggestionsTitle, '#d9b65f', rep.suggestions) +
+        buildAssistGroup(t.build.positivesTitle, '#34d399', rep.positives) +
+      '</div>';
+  }
+
+  function initBuild() {
+    if (!BUILDS) { return; } // modulo non caricato: salta senza rompere il resto
+    builds = buildLoad();
+    if (builds.length) { activeBuildId = builds[0].id; }
+
+    $('build-class').innerHTML = buildClassOptions('');
+
+    // Crea una nuova build dal form e la rende attiva.
+    $('build-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var b = BUILDS.makeBuild($('build-name').value, $('build-class').value, {});
+      builds.unshift(b);
+      setActiveBuild(b.id);
+      buildSave();
+      $('build-name').value = '';
+      $('build-class').value = '';
+      renderBuildList();
+      renderBuildEditor();
+    });
+
+    // Elenco build: selezione, duplica, elimina (un solo listener delegato).
+    $('build-list').addEventListener('click', function (e) {
+      var card = e.target.closest('[data-bid]');
+      if (!card) { return; }
+      var id = card.getAttribute('data-bid');
+      var btn = e.target.closest('[data-act]');
+      var act = btn ? btn.getAttribute('data-act') : 'select';
+      if (act === 'select') {
+        if (id !== activeBuildId) { setActiveBuild(id); renderBuildList(); renderBuildEditor(); }
+        return;
+      }
+      if (act === 'duplicate') {
+        var src = builds[buildIndexOf(id)];
+        if (!src) { return; }
+        var copy = BUILDS.makeBuild(src.name + ' (copia)', src.clazz, { itemIds: src.itemIds, spellIds: src.spellIds });
+        builds.unshift(copy);
+        setActiveBuild(copy.id);
+        buildSave();
+        renderBuildList();
+        renderBuildEditor();
+        return;
+      }
+      if (act === 'delete') {
+        if (!window.confirm(t.build.confirmDelete)) { return; }
+        builds = builds.filter(function (x) { return x.id !== id; });
+        if (activeBuildId === id) { activeBuildId = builds.length ? builds[0].id : null; buildItemQuery = ''; buildSpellQuery = ''; }
+        buildSave();
+        renderBuildList();
+        renderBuildEditor();
+      }
+    });
+
+    // Editor — input delegato: rinomina e campi di ricerca (focus preservato:
+    // aggiorniamo solo i sotto-contenitori, non l'intero editor).
+    $('build-editor').addEventListener('input', function (e) {
+      if (e.target.id === 'build-ed-name') {
+        var b = activeBuild();
+        if (b) { replaceActive(BUILDS.rename(b, e.target.value)); renderBuildList(); }
+        return;
+      }
+      if (e.target.id === 'build-item-search') { buildItemQuery = e.target.value; renderItemSearch(); return; }
+      if (e.target.id === 'build-spell-search') { buildSpellQuery = e.target.value; renderSpellSearch(); }
+    });
+
+    // Editor — change delegato: la classe (la sezione incantesimi dipende da essa).
+    $('build-editor').addEventListener('change', function (e) {
+      if (e.target.id === 'build-ed-class') {
+        var b = activeBuild();
+        if (!b) { return; }
+        replaceActive(BUILDS.setClass(b, e.target.value));
+        renderBuildList();
+        renderBuildEditor();
+      }
+    });
+
+    // Editor — click delegato: apri dettaglio, aggiungi/rimuovi oggetti e incantesimi.
+    $('build-editor').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-act]');
+      if (!btn) { return; }
+      var act = btn.getAttribute('data-act');
+      var id = btn.getAttribute('data-id');
+      var b = activeBuild();
+      if (!b) { return; }
+      if (act === 'open-item') { openItemDrawer(id); return; }
+      if (act === 'open-spell') { openSpellDrawer(id); return; }
+      if (act === 'add-item') { replaceActive(BUILDS.addItem(b, id)); renderBuildItems(); renderItemSearch(); renderBuildAssist(); return; }
+      if (act === 'remove-item') { replaceActive(BUILDS.removeItem(b, id)); renderBuildItems(); renderItemSearch(); renderBuildAssist(); return; }
+      if (act === 'add-spell') { replaceActive(BUILDS.addSpell(b, id)); renderBuildSpells(); renderSpellSearch(); renderBuildAssist(); return; }
+      if (act === 'remove-spell') { replaceActive(BUILDS.removeSpell(b, id)); renderBuildSpells(); renderSpellSearch(); renderBuildAssist(); }
+    });
+
+    renderBuildList();
+    renderBuildEditor();
+  }
+
   // ---- Boot ----------------------------------------------------------------
   function boot() {
     if (!t || !D.filterItems) {
@@ -4240,6 +5033,7 @@
     initAssistant();
     initDrawer();
     initDM();
+    initBuild();
     initPatch();
   }
 

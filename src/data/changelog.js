@@ -15,6 +15,19 @@
   // Voci in ordine cronologico inverso (la più recente per prima).
   return [
     {
+      version: '1.2.0',
+      date: '2026-06-06',
+      title: 'Le mie Build',
+      added: [
+        'Nuova sezione « Build »: crea le tue build dando un nome e scegliendo una classe, poi aggiungi gli oggetti e gli incantesimi presenti nel sito.',
+        'Assistente della build integrato: assegna un punteggio di equilibrio (0–100), segnala che cosa rivedere, che cosa conviene aggiungere o togliere e i punti di forza della build.',
+        'Più build salvate insieme: creane quante vuoi, rinominale, duplicale ed eliminale. Tutto resta salvato su questo dispositivo e si ritrova alla riapertura dell’app.',
+        'Sei nuovi oggetti magici (tra cui Armatura adamantina, Stivali elfici e Martello nanico) e sei nuovi incantesimi (tra cui Nube di nebbia, Silenzio e Lentezza).'
+      ],
+      improved: [],
+      fixed: []
+    },
+    {
       version: '1.1.0',
       date: '2026-06-05',
       title: 'Strumenti del Dungeon Master',

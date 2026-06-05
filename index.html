@@ -190,6 +190,47 @@
       </div>
     </section>
 
+    <!-- PANEL: BUILD -->
+    <section id="panel-build" data-panel="build" class="hidden">
+      <h2 id="build-title" class="font-display text-lg text-gold mb-2"></h2>
+      <p id="build-intro" class="text-sm text-muted mb-5 max-w-2xl"></p>
+
+      <div class="grid gap-6 lg:grid-cols-5 items-start">
+        <!-- Colonna sinistra: crea + elenco build salvate -->
+        <div class="lg:col-span-2 flex flex-col gap-4">
+          <form id="build-form" class="rounded-xl bg-panel border border-edge p-4 flex flex-col gap-3">
+            <h3 id="build-new-title" class="font-display text-base text-parchment"></h3>
+            <div>
+              <label class="block text-[11px] uppercase tracking-wider text-muted mb-1" id="lbl-build-name"></label>
+              <input id="build-name" type="text" autocomplete="off"
+                class="w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment placeholder-muted focus:outline-none focus:border-gold/70" />
+            </div>
+            <div>
+              <label class="block text-[11px] uppercase tracking-wider text-muted mb-1" id="lbl-build-class"></label>
+              <select id="build-class" class="w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment focus:outline-none focus:border-gold/70"></select>
+            </div>
+            <button id="build-create" type="submit"
+              class="rounded-lg bg-gradient-to-b from-gold to-goldsoft text-ink font-semibold py-2 hover:brightness-105 active:brightness-95 transition"></button>
+          </form>
+
+          <div class="rounded-xl bg-panel border border-edge p-4">
+            <div class="flex items-center justify-between gap-3 mb-3">
+              <h3 id="build-saved-title" class="font-display text-base text-parchment"></h3>
+              <span id="build-count" class="text-xs text-muted"></span>
+            </div>
+            <div id="build-list" class="flex flex-col gap-2"></div>
+            <p id="build-saved-empty" class="text-center text-muted py-6 text-sm"></p>
+          </div>
+        </div>
+
+        <!-- Colonna destra: editor della build attiva + assistente -->
+        <div class="lg:col-span-3">
+          <p id="build-editor-empty" class="text-center text-muted py-16 rounded-xl border border-dashed border-edge"></p>
+          <div id="build-editor" class="hidden flex-col gap-4"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- PANEL: DM -->
     <section id="panel-dm" data-panel="dm" class="hidden">
       <h2 id="dm-title" class="font-display text-lg text-gold mb-2"></h2>
@@ -327,6 +368,7 @@
   <script src="src/core/recommend.js"></script>
   <script src="src/core/encounter.js"></script>
   <script src="src/core/names.js"></script>
+  <script src="src/core/builds.js"></script>
   <script src="src/ui/app.js"></script>
 </body>
 </html>

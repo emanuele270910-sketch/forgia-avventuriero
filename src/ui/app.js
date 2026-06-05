@@ -16,6 +16,15 @@
   var SPELL_BY_ID = index(SPELLS);
   var CHANGELOG = D.changelog || []; // cronologia versioni (Patch Notes)
 
+  // Build personalizzate dell'utente: logica pura in builds.js, stato persistito
+  // in localStorage. `builds` è l'elenco salvato, `activeBuildId` quella in modifica.
+  var BUILDS = D.builds;
+  var BUILD_STORE_KEY = 'dnd.builds';
+  var builds = [];
+  var activeBuildId = null;
+  var buildItemQuery = '';   // testo di ricerca « aggiungi oggetto »
+  var buildSpellQuery = '';  // testo di ricerca « aggiungi incantesimo »
+
   // DM: logica del tracker (funzioni pure) e materiale di riferimento.
   var E = D.encounter;
   var DM = D.dm;
@@ -116,6 +125,7 @@
       { id: 'items', label: t.nav.items },
       { id: 'spells', label: t.nav.spells },
       { id: 'assistant', label: t.nav.assistant },
+      { id: 'build', label: t.nav.build },
       { id: 'dm', label: t.nav.dm },
       { id: 'patch', label: t.nav.patch }
     ];
@@ -150,6 +160,18 @@
     $('lbl-a-abilities').textContent = t.assistant.abilities;
     $('a-generate').textContent = t.assistant.generate;
     $('assistant-empty').textContent = t.assistant.emptyState;
+
+    // Build personalizzate
+    $('build-title').textContent = t.build.title;
+    $('build-intro').textContent = t.build.intro;
+    $('build-new-title').textContent = t.build.newTitle;
+    $('lbl-build-name').textContent = t.build.name;
+    $('build-name').placeholder = t.build.namePlaceholder;
+    $('lbl-build-class').textContent = t.build.class;
+    $('build-create').textContent = t.build.create;
+    $('build-saved-title').textContent = t.build.savedTitle;
+    $('build-saved-empty').textContent = t.build.savedEmpty;
+    $('build-editor-empty').textContent = t.build.editorEmpty;
 
     $('dm-title').textContent = t.dm.title;
     $('dm-intro').textContent = t.dm.intro;
@@ -195,7 +217,7 @@
       var btn = e.target.closest('[data-tab]');
       if (!btn) { return; }
       var id = btn.getAttribute('data-tab');
-      ['items', 'spells', 'assistant', 'dm', 'patch'].forEach(function (p) {
+      ['items', 'spells', 'assistant', 'build', 'dm', 'patch'].forEach(function (p) {
         $('panel-' + p).classList.toggle('hidden', p !== id);
       });
       Array.prototype.forEach.call($('tabs').children, function (c) {
@@ -1040,6 +1062,377 @@
     list.innerHTML = CHANGELOG.map(patchCard).join('');
   }
 
+  // ---- Build personalizzate ------------------------------------------------
+  var BUILD_CTX = { itemById: ITEM_BY_ID, spellById: SPELL_BY_ID, classById: CLASS_BY_ID };
+  var BUILD_VERDICT = {
+    great:  { key: 'verdictGreat',  color: '#34d399' },
+    good:   { key: 'verdictGood',   color: '#d9b65f' },
+    review: { key: 'verdictReview', color: '#f87171' },
+    empty:  { key: 'verdictEmpty',  color: '#9b94ac' }
+  };
+
+  function buildClassLabel(id) { return (CLASS_BY_ID[id] || { label: id }).label; }
+  function buildTypeLabel(id) { return (ITEM_TYPE_BY_ID[id] || { label: id }).label; }
+
+  // Traduce un codice di evaluateBuild nel messaggio localizzato, interpolando i campi.
+  function buildMessage(entry) {
+    var tpl = (t.build.msg && t.build.msg[entry.code]) || entry.code;
+    return tpl
+      .replace(/\{used\}/g, entry.used)
+      .replace(/\{max\}/g, entry.max)
+      .replace(/\{count\}/g, entry.count)
+      .replace(/\{clazz\}/g, buildClassLabel(entry.clazz))
+      .replace(/\{type\}/g, buildTypeLabel(entry.type));
+  }
+
+  function buildLoad() {
+    try {
+      var raw = window.localStorage.getItem(BUILD_STORE_KEY);
+      if (!raw) { return []; }
+      var arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) { return []; }
+      return arr.map(function (b) {
+        return BUILDS.makeBuild(b.name, b.clazz, { id: b.id, itemIds: b.itemIds, spellIds: b.spellIds });
+      });
+    } catch (e) { return []; }
+  }
+  function buildSave() {
+    try { window.localStorage.setItem(BUILD_STORE_KEY, JSON.stringify(builds)); } catch (e) { /* spazio non disponibile: ignora */ }
+  }
+  function activeBuild() {
+    for (var i = 0; i < builds.length; i++) { if (builds[i].id === activeBuildId) { return builds[i]; } }
+    return null;
+  }
+  function buildIndexOf(id) {
+    for (var i = 0; i < builds.length; i++) { if (builds[i].id === id) { return i; } }
+    return -1;
+  }
+  // Rimpiazza in elenco la build attiva con la sua nuova versione (immutabile) e salva.
+  function replaceActive(next) {
+    var idx = buildIndexOf(activeBuildId);
+    if (idx < 0) { return; }
+    builds[idx] = next;
+    buildSave();
+  }
+  function setActiveBuild(id) {
+    activeBuildId = id;
+    buildItemQuery = '';
+    buildSpellQuery = '';
+  }
+
+  // Opzioni del menu classe (con voce « Nessuna classe »).
+  function buildClassOptions(selected) {
+    return '<option value="">' + esc(t.build.noClass) + '</option>' +
+      D.CLASSES.map(function (c) {
+        return '<option value="' + esc(c.id) + '"' + (c.id === selected ? ' selected' : '') + '>' + esc(c.label) + '</option>';
+      }).join('');
+  }
+
+  // Elenco delle build salvate (colonna sinistra).
+  function renderBuildList() {
+    var box = $('build-list');
+    if (!box) { return; }
+    var n = builds.length;
+    $('build-count').textContent = n + ' ' + (n === 1 ? t.build.countOne : t.build.count);
+    $('build-saved-empty').classList.toggle('hidden', n !== 0);
+    box.innerHTML = builds.map(function (b) {
+      var active = b.id === activeBuildId;
+      var clazz = b.clazz ? buildClassLabel(b.clazz) : t.build.noClass;
+      var counts = (b.itemIds || []).length + ' ' + t.build.itemsCount + ' · ' + (b.spellIds || []).length + ' ' + t.build.spellsCount;
+      var wrap = 'rounded-lg border px-3 py-2 transition ' +
+        (active ? 'border-gold/70 bg-gold/10' : 'border-edge bg-panel2/60 hover:border-gold/50');
+      return '<div data-bid="' + esc(b.id) + '" class="' + wrap + '">' +
+        '<div class="flex items-center justify-between gap-2">' +
+          '<button type="button" data-act="select" class="text-left min-w-0 flex-1">' +
+            '<span class="block font-display text-sm text-parchment truncate">' + esc(b.name) + '</span>' +
+            '<span class="block text-[11px] text-muted truncate">' + esc(clazz) + ' · ' + esc(counts) + '</span>' +
+          '</button>' +
+          '<div class="flex items-center gap-1 shrink-0">' +
+            '<button type="button" data-act="duplicate" title="' + esc(t.build.duplicate) + '" aria-label="' + esc(t.build.duplicate) + '" class="w-7 h-7 rounded border border-edge text-muted hover:text-gold hover:border-gold/60 flex items-center justify-center text-xs leading-none">&#10697;</button>' +
+            '<button type="button" data-act="delete" title="' + esc(t.build.delete) + '" aria-label="' + esc(t.build.delete) + '" class="w-7 h-7 rounded border border-edge text-muted hover:text-crimson hover:border-crimson/60 flex items-center justify-center text-sm leading-none">&times;</button>' +
+          '</div>' +
+        '</div>' +
+        (active ? '<span class="mt-1 inline-block text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/40">' + esc(t.build.active) + '</span>' : '') +
+      '</div>';
+    }).join('');
+  }
+
+  // Editor completo della build attiva. Ricostruito per intero solo quando cambia
+  // la build attiva o la classe; gli aggiornamenti minori toccano i sotto-contenitori.
+  function renderBuildEditor() {
+    var editor = $('build-editor');
+    var empty = $('build-editor-empty');
+    if (!editor) { return; }
+    var b = activeBuild();
+    if (!b) {
+      editor.classList.add('hidden');
+      editor.classList.remove('flex');
+      editor.innerHTML = '';
+      if (empty) { empty.classList.remove('hidden'); }
+      return;
+    }
+    if (empty) { empty.classList.add('hidden'); }
+    editor.classList.remove('hidden');
+    editor.classList.add('flex');
+
+    var info = CLASS_BY_ID[b.clazz] || null;
+    var isCaster = !!(info && info.caster);
+
+    var spellsSection = isCaster
+      ? '<h4 class="font-display text-base text-parchment mb-2">' + esc(t.build.spellsTitle) + '</h4>' +
+        '<div id="build-spells" class="grid gap-2 sm:grid-cols-2"></div>' +
+        '<p id="build-spells-empty" class="text-xs text-muted py-2"></p>' +
+        '<input id="build-spell-search" type="search" autocomplete="off" placeholder="' + esc(t.build.spellSearch) + '" ' +
+          'class="mt-2 w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-sm text-parchment placeholder-muted focus:outline-none focus:border-gold/70" />' +
+        '<div id="build-spell-results" class="mt-2 flex flex-col gap-1.5"></div>'
+      : '<h4 class="font-display text-base text-parchment mb-2">' + esc(t.build.spellsTitle) + '</h4>' +
+        '<p class="text-sm text-muted rounded-lg border border-dashed border-edge px-3 py-3">' + esc(t.build.spellsNonCaster) + '</p>';
+
+    editor.innerHTML =
+      '<div class="rounded-xl bg-panel border border-edge p-4">' +
+        '<div class="grid gap-3 sm:grid-cols-3">' +
+          '<div class="sm:col-span-2">' +
+            '<label class="block text-[11px] uppercase tracking-wider text-muted mb-1" for="build-ed-name">' + esc(t.build.name) + '</label>' +
+            '<input id="build-ed-name" type="text" autocomplete="off" value="' + esc(b.name) + '" ' +
+              'class="w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment focus:outline-none focus:border-gold/70" />' +
+          '</div>' +
+          '<div>' +
+            '<label class="block text-[11px] uppercase tracking-wider text-muted mb-1" for="build-ed-class">' + esc(t.build.class) + '</label>' +
+            '<select id="build-ed-class" class="w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment focus:outline-none focus:border-gold/70">' + buildClassOptions(b.clazz) + '</select>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rounded-xl bg-panel border border-edge p-4">' +
+        '<h4 class="font-display text-base text-parchment mb-2">' + esc(t.build.itemsTitle) + '</h4>' +
+        '<div id="build-items" class="grid gap-2 sm:grid-cols-2"></div>' +
+        '<p id="build-items-empty" class="text-xs text-muted py-2"></p>' +
+        '<input id="build-item-search" type="search" autocomplete="off" placeholder="' + esc(t.build.itemSearch) + '" ' +
+          'class="mt-2 w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-sm text-parchment placeholder-muted focus:outline-none focus:border-gold/70" />' +
+        '<div id="build-item-results" class="mt-2 flex flex-col gap-1.5"></div>' +
+      '</div>' +
+      '<div class="rounded-xl bg-panel border border-edge p-4">' + spellsSection + '</div>' +
+      '<div id="build-assist"></div>';
+
+    var itemSearch = $('build-item-search');
+    if (itemSearch) { itemSearch.value = buildItemQuery; }
+    var spellSearch = $('build-spell-search');
+    if (spellSearch) { spellSearch.value = buildSpellQuery; }
+
+    renderBuildItems();
+    renderBuildSpells();
+    renderItemSearch();
+    renderSpellSearch();
+    renderBuildAssist();
+  }
+
+  function buildItemChip(item) {
+    var r = RARITY_BY_ID[item.rarity] || { label: item.rarity, color: '#888' };
+    var att = item.attunement ? '<span class="text-[10px] text-gold/90 whitespace-nowrap">' + esc(t.common.attunement) + '</span>' : '';
+    return '<div class="flex items-center gap-2 rounded-lg bg-panel2 border border-edge pl-2 pr-1 py-1" style="border-left:3px solid ' + r.color + '">' +
+      '<button type="button" data-act="open-item" data-id="' + esc(item.id) + '" class="flex-1 min-w-0 text-left text-sm text-parchment hover:text-gold transition truncate">' + esc(item.name) + '</button>' + att +
+      '<button type="button" data-act="remove-item" data-id="' + esc(item.id) + '" aria-label="' + esc(t.build.remove) + '" class="w-6 h-6 rounded border border-edge text-muted hover:text-crimson hover:border-crimson/60 flex items-center justify-center text-sm leading-none shrink-0">&times;</button>' +
+    '</div>';
+  }
+  function renderBuildItems() {
+    var b = activeBuild();
+    var box = $('build-items');
+    if (!b || !box) { return; }
+    var items = (b.itemIds || []).map(function (id) { return ITEM_BY_ID[id]; }).filter(Boolean);
+    box.innerHTML = items.map(buildItemChip).join('');
+    var empty = $('build-items-empty');
+    if (empty) { empty.textContent = t.build.itemsEmpty; empty.classList.toggle('hidden', items.length !== 0); }
+  }
+
+  function buildSpellChip(spell) {
+    var color = SCHOOL_COLORS[spell.school] || '#888';
+    return '<div class="flex items-center gap-2 rounded-lg bg-panel2 border border-edge pl-2 pr-1 py-1" style="border-left:3px solid ' + color + '">' +
+      '<span class="shrink-0 w-6 h-6 rounded flex items-center justify-center font-display text-[11px] font-bold" style="background:' + color + '22;color:' + color + ';border:1px solid ' + color + '66">' + (spell.level === 0 ? '0' : spell.level) + '</span>' +
+      '<button type="button" data-act="open-spell" data-id="' + esc(spell.id) + '" class="flex-1 min-w-0 text-left text-sm text-parchment hover:text-gold transition truncate">' + esc(spell.name) + '</button>' +
+      '<button type="button" data-act="remove-spell" data-id="' + esc(spell.id) + '" aria-label="' + esc(t.build.remove) + '" class="w-6 h-6 rounded border border-edge text-muted hover:text-crimson hover:border-crimson/60 flex items-center justify-center text-sm leading-none shrink-0">&times;</button>' +
+    '</div>';
+  }
+  function renderBuildSpells() {
+    var b = activeBuild();
+    var box = $('build-spells');
+    if (!b || !box) { return; } // sezione assente per i non-incantatori
+    var spells = (b.spellIds || []).map(function (id) { return SPELL_BY_ID[id]; }).filter(Boolean);
+    box.innerHTML = spells.map(buildSpellChip).join('');
+    var empty = $('build-spells-empty');
+    if (empty) { empty.textContent = t.build.spellsEmpty; empty.classList.toggle('hidden', spells.length !== 0); }
+  }
+
+  // Riga di un risultato di ricerca: « + Aggiungi » oppure stato « già nella build ».
+  function buildSearchRow(kind, id, name, tag, has) {
+    var cls = 'w-full text-left flex items-center gap-2 rounded-lg border px-2 py-1.5 transition ' +
+      (has ? 'border-edge/50 bg-panel2/40 opacity-60 cursor-default' : 'border-edge bg-panel2 hover:border-gold/60');
+    var tail = has
+      ? '<span class="text-[10px] text-muted whitespace-nowrap">' + esc(t.build.inBuild) + '</span>'
+      : '<span class="text-[11px] text-gold whitespace-nowrap font-semibold">+ ' + esc(t.build.add) + '</span>';
+    return '<button type="button"' + (has ? ' disabled' : ' data-act="add-' + kind + '"') + ' data-id="' + esc(id) + '" class="' + cls + '">' +
+      '<span class="flex-1 min-w-0 truncate text-sm text-parchment">' + esc(name) + '</span>' + badge(tag.label, tag.color) + tail +
+    '</button>';
+  }
+  function renderItemSearch() {
+    var box = $('build-item-results');
+    if (!box) { return; }
+    var b = activeBuild();
+    var q = (buildItemQuery || '').trim();
+    if (!b || !q) { box.innerHTML = ''; return; }
+    var list = D.filterItems(ITEMS, { text: q }).slice(0, 8);
+    if (!list.length) { box.innerHTML = '<p class="text-xs text-muted px-1 py-1">' + esc(t.build.searchEmpty) + '</p>'; return; }
+    box.innerHTML = list.map(function (item) {
+      return buildSearchRow('item', item.id, item.name, RARITY_BY_ID[item.rarity] || { label: item.rarity, color: '#888' }, (b.itemIds || []).indexOf(item.id) !== -1);
+    }).join('');
+  }
+  function renderSpellSearch() {
+    var box = $('build-spell-results');
+    if (!box) { return; }
+    var b = activeBuild();
+    var q = (buildSpellQuery || '').trim();
+    if (!b || !q) { box.innerHTML = ''; return; }
+    var list = D.filterSpells(SPELLS, { text: q }).slice(0, 8);
+    if (!list.length) { box.innerHTML = '<p class="text-xs text-muted px-1 py-1">' + esc(t.build.searchEmpty) + '</p>'; return; }
+    box.innerHTML = list.map(function (spell) {
+      return buildSearchRow('spell', spell.id, spell.name, { label: levelLabel(spell.level), color: SCHOOL_COLORS[spell.school] || '#888' }, (b.spellIds || []).indexOf(spell.id) !== -1);
+    }).join('');
+  }
+
+  function buildAssistGroup(title, color, entries) {
+    if (!entries || !entries.length) { return ''; }
+    return '<div class="mt-3">' +
+      '<div class="text-xs uppercase tracking-wide font-semibold mb-1.5" style="color:' + color + '">' + esc(title) + '</div>' +
+      '<ul class="space-y-1.5">' +
+      entries.map(function (en) {
+        return '<li class="flex gap-2 text-sm text-parchment/90 leading-snug">' +
+          '<span aria-hidden="true" style="color:' + color + '">•</span><span>' + esc(buildMessage(en)) + '</span></li>';
+      }).join('') +
+      '</ul></div>';
+  }
+  function renderBuildAssist() {
+    var box = $('build-assist');
+    var b = activeBuild();
+    if (!box || !b) { return; }
+    var rep = BUILDS.evaluateBuild(b, BUILD_CTX);
+    var v = BUILD_VERDICT[rep.verdict] || BUILD_VERDICT.empty;
+    box.innerHTML =
+      '<div class="rounded-xl bg-panel border border-edge p-4">' +
+        '<div class="flex items-center justify-between gap-3 flex-wrap">' +
+          '<h4 class="font-display text-base text-parchment">' + esc(t.build.assistantTitle) + '</h4>' +
+          '<span class="text-sm font-display font-semibold" style="color:' + v.color + '">' + esc(t.build[v.key]) + '</span>' +
+        '</div>' +
+        '<div class="mt-3 flex items-center gap-3">' +
+          '<span class="font-display text-3xl font-bold tabular-nums" style="color:' + v.color + '">' + rep.score + '</span>' +
+          '<span class="text-xs text-muted whitespace-nowrap">/ 100 · ' + esc(t.build.score) + '</span>' +
+          '<div class="flex-1 h-2 rounded-full bg-ink/70 border border-edge/60 overflow-hidden">' +
+            '<div class="h-full rounded-full" style="width:' + rep.score + '%;background:' + v.color + '"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">' +
+          '<span>' + rep.itemCount + ' ' + esc(t.build.itemsCount) + '</span>' +
+          '<span>' + rep.spellCount + ' ' + esc(t.build.spellsCount) + '</span>' +
+          '<span>' + esc(t.build.attunement) + ': ' + rep.attunementUsed + ' / ' + rep.attunementMax + '</span>' +
+        '</div>' +
+        buildAssistGroup(t.build.problemsTitle, '#f87171', rep.warnings) +
+        buildAssistGroup(t.build.suggestionsTitle, '#d9b65f', rep.suggestions) +
+        buildAssistGroup(t.build.positivesTitle, '#34d399', rep.positives) +
+      '</div>';
+  }
+
+  function initBuild() {
+    if (!BUILDS) { return; } // modulo non caricato: salta senza rompere il resto
+    builds = buildLoad();
+    if (builds.length) { activeBuildId = builds[0].id; }
+
+    $('build-class').innerHTML = buildClassOptions('');
+
+    // Crea una nuova build dal form e la rende attiva.
+    $('build-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var b = BUILDS.makeBuild($('build-name').value, $('build-class').value, {});
+      builds.unshift(b);
+      setActiveBuild(b.id);
+      buildSave();
+      $('build-name').value = '';
+      $('build-class').value = '';
+      renderBuildList();
+      renderBuildEditor();
+    });
+
+    // Elenco build: selezione, duplica, elimina (un solo listener delegato).
+    $('build-list').addEventListener('click', function (e) {
+      var card = e.target.closest('[data-bid]');
+      if (!card) { return; }
+      var id = card.getAttribute('data-bid');
+      var btn = e.target.closest('[data-act]');
+      var act = btn ? btn.getAttribute('data-act') : 'select';
+      if (act === 'select') {
+        if (id !== activeBuildId) { setActiveBuild(id); renderBuildList(); renderBuildEditor(); }
+        return;
+      }
+      if (act === 'duplicate') {
+        var src = builds[buildIndexOf(id)];
+        if (!src) { return; }
+        var copy = BUILDS.makeBuild(src.name + ' (copia)', src.clazz, { itemIds: src.itemIds, spellIds: src.spellIds });
+        builds.unshift(copy);
+        setActiveBuild(copy.id);
+        buildSave();
+        renderBuildList();
+        renderBuildEditor();
+        return;
+      }
+      if (act === 'delete') {
+        if (!window.confirm(t.build.confirmDelete)) { return; }
+        builds = builds.filter(function (x) { return x.id !== id; });
+        if (activeBuildId === id) { activeBuildId = builds.length ? builds[0].id : null; buildItemQuery = ''; buildSpellQuery = ''; }
+        buildSave();
+        renderBuildList();
+        renderBuildEditor();
+      }
+    });
+
+    // Editor — input delegato: rinomina e campi di ricerca (focus preservato:
+    // aggiorniamo solo i sotto-contenitori, non l'intero editor).
+    $('build-editor').addEventListener('input', function (e) {
+      if (e.target.id === 'build-ed-name') {
+        var b = activeBuild();
+        if (b) { replaceActive(BUILDS.rename(b, e.target.value)); renderBuildList(); }
+        return;
+      }
+      if (e.target.id === 'build-item-search') { buildItemQuery = e.target.value; renderItemSearch(); return; }
+      if (e.target.id === 'build-spell-search') { buildSpellQuery = e.target.value; renderSpellSearch(); }
+    });
+
+    // Editor — change delegato: la classe (la sezione incantesimi dipende da essa).
+    $('build-editor').addEventListener('change', function (e) {
+      if (e.target.id === 'build-ed-class') {
+        var b = activeBuild();
+        if (!b) { return; }
+        replaceActive(BUILDS.setClass(b, e.target.value));
+        renderBuildList();
+        renderBuildEditor();
+      }
+    });
+
+    // Editor — click delegato: apri dettaglio, aggiungi/rimuovi oggetti e incantesimi.
+    $('build-editor').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-act]');
+      if (!btn) { return; }
+      var act = btn.getAttribute('data-act');
+      var id = btn.getAttribute('data-id');
+      var b = activeBuild();
+      if (!b) { return; }
+      if (act === 'open-item') { openItemDrawer(id); return; }
+      if (act === 'open-spell') { openSpellDrawer(id); return; }
+      if (act === 'add-item') { replaceActive(BUILDS.addItem(b, id)); renderBuildItems(); renderItemSearch(); renderBuildAssist(); return; }
+      if (act === 'remove-item') { replaceActive(BUILDS.removeItem(b, id)); renderBuildItems(); renderItemSearch(); renderBuildAssist(); return; }
+      if (act === 'add-spell') { replaceActive(BUILDS.addSpell(b, id)); renderBuildSpells(); renderSpellSearch(); renderBuildAssist(); return; }
+      if (act === 'remove-spell') { replaceActive(BUILDS.removeSpell(b, id)); renderBuildSpells(); renderSpellSearch(); renderBuildAssist(); }
+    });
+
+    renderBuildList();
+    renderBuildEditor();
+  }
+
   // ---- Boot ----------------------------------------------------------------
   function boot() {
     if (!t || !D.filterItems) {
@@ -1054,6 +1447,7 @@
     initAssistant();
     initDrawer();
     initDM();
+    initBuild();
     initPatch();
   }
 
