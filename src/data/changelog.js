@@ -15,6 +15,18 @@
   // Voci in ordine cronologico inverso (la più recente per prima).
   return [
     {
+      version: '1.3.0',
+      date: '2026-06-06',
+      title: 'Armi corpo a corpo',
+      added: [
+        'Dieci nuove armi da mischia, soprattutto spade: Spada affilata, Spada succhia-vita, Spada vulnerante, Spada danzante, Ammazzadraghi, Ammazzagiganti e Lama fortunata.',
+        'Più varietà anche per asce e mazze: Ascia furente (Berserker), Mazza della disgregazione e il letale Ladro di nove vite.',
+        'Tutte le nuove armi sono cercabili nel Database Oggetti (filtro « Tipo: Arma ») e si possono aggiungere alle tue build.'
+      ],
+      improved: [],
+      fixed: []
+    },
+    {
       version: '1.2.0',
       date: '2026-06-06',
       title: 'Le mie Build',

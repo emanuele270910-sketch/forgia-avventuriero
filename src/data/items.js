@@ -780,6 +780,78 @@
       tags: ["arma", "lancio", "nani"],
       descrizione: "Questo martello da guerra concede +3 ai tiri per colpire e ai danni. Puoi lanciarlo: dopo l'attacco torna immediatamente nella tua mano e infligge danni extra, devastanti contro i giganti.",
       source: "SRD"
+    },
+
+    // ---------------- ARMI CORPO A CORPO (update 1.3.0) ----------------
+    {
+      id: "sword-of-life-stealing", name: "Sword of Life Stealing", type: "weapon", rarity: "rare",
+      attunement: true, bonus: { extra: "Con un 20 naturale: +3d6 danni necrotici e altrettanti PF temporanei" },
+      tags: ["arma", "spada", "necrotico"],
+      descrizione: "Quando colpisci una creatura con un 20 naturale, la lama ne drena la forza vitale: infligge 3d6 danni necrotici aggiuntivi e tu guadagni un numero di punti ferita temporanei pari ai danni extra.",
+      source: "SRD"
+    },
+    {
+      id: "sword-of-wounding", name: "Sword of Wounding", type: "weapon", rarity: "rare",
+      attunement: true, bonus: { extra: "Le ferite sanguinano: 1d4 danni a inizio turno e PF massimi ridotti finché non si rimargina" },
+      tags: ["arma", "spada", "necrotico"],
+      descrizione: "Quando colpisci, il bersaglio subisce una ferita persistente. All'inizio di ogni suo turno perde 1d4 punti ferita per ciascuna ferita e i suoi PF massimi calano, finché non riesce in una prova di Costituzione per fermare l'emorragia.",
+      source: "SRD"
+    },
+    {
+      id: "dragon-slayer", name: "Dragon Slayer", type: "weapon", rarity: "rare",
+      attunement: true, bonus: { weaponBonus: 1, extra: "+3d6 danni contro i draghi e le creature draconiche" },
+      tags: ["arma", "spada", "draghi"],
+      descrizione: "Questa spada concede +1 ai tiri per colpire e ai danni. Contro i draghi e le creature draconiche infligge 3d6 danni aggiuntivi a ogni colpo.",
+      source: "SRD"
+    },
+    {
+      id: "giant-slayer", name: "Giant Slayer", type: "weapon", rarity: "rare",
+      attunement: true, bonus: { weaponBonus: 1, extra: "+2d6 danni contro i giganti, che possono cadere a terra" },
+      tags: ["arma", "spada", "ascia", "giganti"],
+      descrizione: "Quest'arma (un'ascia o una spada) concede +1 ai tiri per colpire e ai danni. Contro i giganti infligge 2d6 danni aggiuntivi e, se non superano un tiro salvezza, li fa cadere proni.",
+      source: "SRD"
+    },
+    {
+      id: "berserker-axe", name: "Berserker Axe", type: "weapon", rarity: "rare",
+      attunement: true, bonus: { weaponBonus: 1, extra: "Aumenta i tuoi PF massimi; maledetta: in combattimento puoi essere costretto ad attaccare" },
+      tags: ["arma", "ascia", "maledizione"],
+      descrizione: "Ascia +1 che aumenta i tuoi punti ferita massimi mentre sei sintonizzato. È però maledetta: quando subisci danni in battaglia puoi essere costretto ad avventarti sul nemico più vicino.",
+      source: "SRD"
+    },
+    {
+      id: "mace-of-disruption", name: "Mace of Disruption", type: "weapon", rarity: "rare",
+      attunement: true, bonus: { extra: "+2d6 danni radiosi a immondi e non morti; possono essere spaventati o distrutti" },
+      tags: ["arma", "mazza", "radioso", "non morti"],
+      descrizione: "Contro immondi e non morti questa mazza infligge 2d6 danni radiosi aggiuntivi. Se il colpo li riduce in fin di vita vengono distrutti, altrimenti restano spaventati da te.",
+      source: "SRD"
+    },
+    {
+      id: "sword-of-sharpness", name: "Sword of Sharpness", type: "weapon", rarity: "very-rare",
+      attunement: true, bonus: { extra: "Danni massimi agli oggetti; con un 20 naturale +4d6 da taglio e può amputare un arto" },
+      tags: ["arma", "spada", "taglio"],
+      descrizione: "Lama straordinariamente affilata: contro gli oggetti i dadi di danno sono sempre al massimo. Con un 20 naturale infliggi 4d6 danni da taglio aggiuntivi e puoi mozzare di netto un arto del bersaglio.",
+      source: "SRD"
+    },
+    {
+      id: "nine-lives-stealer", name: "Nine Lives Stealer", type: "weapon", rarity: "very-rare",
+      attunement: true, bonus: { weaponBonus: 2, extra: "Con un colpo critico può uccidere all'istante un bersaglio sotto i 100 PF (cariche limitate)" },
+      tags: ["arma", "spada", "morte"],
+      descrizione: "Spada +2 che intrappola le anime. Con un colpo critico contro una creatura che ha meno di 100 punti ferita, questa deve superare un tiro salvezza o morire all'istante. Dispone di un numero limitato di cariche.",
+      source: "SRD"
+    },
+    {
+      id: "dancing-sword", name: "Dancing Sword", type: "weapon", rarity: "very-rare",
+      attunement: true, bonus: { extra: "Con un'azione bonus la lanci in aria: vola e combatte da sola per qualche turno" },
+      tags: ["arma", "spada", "volante"],
+      descrizione: "Con un'azione bonus puoi lanciare in aria questa spada: inizia a fluttuare e attacca da sola un bersaglio a tua scelta entro pochi metri, per poi tornare nella tua mano dopo qualche turno.",
+      source: "SRD"
+    },
+    {
+      id: "luck-blade", name: "Luck Blade", type: "weapon", rarity: "legendary",
+      attunement: true, bonus: { weaponBonus: 1, saveBonus: 1, extra: "Una volta al giorno ritira un tiro fallito; può custodire un incantesimo Desiderio" },
+      tags: ["arma", "spada", "fortuna"],
+      descrizione: "Spada +1 che concede anche +1 a tutti i tiri salvezza mentre la impugni. Una volta al giorno puoi ripetere un tiro per colpire, una prova di caratteristica o un tiro salvezza fallito; può inoltre racchiudere un raro incantesimo Desiderio.",
+      source: "SRD"
     }
   ];
 });
