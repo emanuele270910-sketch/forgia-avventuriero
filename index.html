@@ -290,6 +290,14 @@
       <h3 id="dm-ref-title" class="font-display text-base text-gold mb-3"></h3>
       <div id="dm-reference" class="grid gap-3 lg:grid-cols-2 items-start"></div>
     </section>
+
+    <!-- PANEL: NOVITÀ / PATCH NOTES -->
+    <section id="panel-patch" data-panel="patch" class="hidden">
+      <h2 id="patch-title" class="font-display text-lg text-gold mb-2"></h2>
+      <p id="patch-intro" class="text-sm text-muted mb-5 max-w-2xl"></p>
+      <div id="patch-list" class="flex flex-col gap-4"></div>
+      <p id="patch-empty" class="hidden text-center text-muted py-16"></p>
+    </section>
   </main>
 
   <footer class="max-w-6xl mx-auto px-4 py-8 text-center text-xs text-muted/70">
@@ -313,6 +321,7 @@
   <script src="src/data/items.js"></script>
   <script src="src/data/spells.js"></script>
   <script src="src/data/dm.js"></script>
+  <script src="src/data/changelog.js"></script>
   <script src="src/core/search.js"></script>
   <script src="src/core/filter.js"></script>
   <script src="src/core/recommend.js"></script>

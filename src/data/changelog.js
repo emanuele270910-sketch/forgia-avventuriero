@@ -1,0 +1,45 @@
+/*
+ * changelog.js — Cronologia delle versioni (Patch Notes), dalla più recente.
+ * CONVENZIONE: a OGNI update dell'app aggiungere qui in cima una nuova voce
+ * { version, date, title, added[], improved[], fixed[] }. Le liste vuote
+ * non vengono mostrate. Esposto come DND.changelog nel browser, module.exports in Node.
+ */
+(function (root, factory) {
+  'use strict';
+  var data = factory();
+  if (typeof module !== 'undefined' && module.exports) { module.exports = data; }
+  if (root) { root.DND = root.DND || {}; root.DND.changelog = data; }
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  // Voci in ordine cronologico inverso (la più recente per prima).
+  return [
+    {
+      version: '1.1.0',
+      date: '2026-06-05',
+      title: 'Strumenti del Dungeon Master',
+      added: [
+        'Condizioni di stato su mostri e PG: 15 condizioni SRD con descrizione, badge rimovibili e menu rapido « Aggiungi stato ».',
+        'Tracker dell’iniziativa: aggiungi i personaggi (PG), ordina i combattenti per iniziativa e scorri i turni con il contatore dei round.',
+        'Generatore di nomi per PNG, taverne e luoghi: un clic su un nome per copiarlo.'
+      ],
+      improved: [
+        'Le schede dei combattenti distinguono i PG dai mostri ed evidenziano il turno attivo durante il combattimento.'
+      ],
+      fixed: []
+    },
+    {
+      version: '1.0.0',
+      date: '2026-06-05',
+      title: 'Primo rilascio',
+      added: [
+        'Database degli oggetti magici con ricerca e filtri per rarità, tipo e sintonia.',
+        'Grimorio degli incantesimi con filtri per classe, livello, scuola e componenti.',
+        'Assistente Build: suggerisce equipaggiamento e incantesimi in base a classe, livello e caratteristiche.',
+        'Strumenti del Dungeon Master: tracker dei mostri con punti ferita, mostri iconici e tabelle di riferimento SRD.'
+      ],
+      improved: [],
+      fixed: []
+    }
+  ];
+});

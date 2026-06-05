@@ -290,6 +290,14 @@
       <h3 id="dm-ref-title" class="font-display text-base text-gold mb-3"></h3>
       <div id="dm-reference" class="grid gap-3 lg:grid-cols-2 items-start"></div>
     </section>
+
+    <!-- PANEL: NOVITÀ / PATCH NOTES -->
+    <section id="panel-patch" data-panel="patch" class="hidden">
+      <h2 id="patch-title" class="font-display text-lg text-gold mb-2"></h2>
+      <p id="patch-intro" class="text-sm text-muted mb-5 max-w-2xl"></p>
+      <div id="patch-list" class="flex flex-col gap-4"></div>
+      <p id="patch-empty" class="hidden text-center text-muted py-16"></p>
+    </section>
   </main>
 
   <footer class="max-w-6xl mx-auto px-4 py-8 text-center text-xs text-muted/70">
@@ -442,7 +450,8 @@
       items: 'Oggetti',
       spells: 'Incantesimi',
       assistant: 'Assistente',
-      dm: 'DM'
+      dm: 'DM',
+      patch: 'Novità'
     },
     common: {
       search: 'Cerca…',
@@ -575,6 +584,15 @@
       namesGenerate: 'Genera',
       namesCopied: 'Copiato!',
       namesEmpty: 'Premi « Genera » per creare dei nomi.'
+    },
+    patch: {
+      title: 'Novità e Patch Notes',
+      intro: 'Tutte le novità dell’app, dalla versione più recente. A ogni aggiornamento trovi qui che cosa è stato aggiunto, migliorato e corretto.',
+      added: 'Aggiunto',
+      improved: 'Migliorato',
+      fixed: 'Corretto',
+      version: 'Versione',
+      empty: 'Nessuna novità da mostrare.'
     }
   };
 });
@@ -2397,6 +2415,55 @@
 
   </script>
   <script>
+  /* ===== src/data/changelog.js ===== */
+/*
+ * changelog.js — Cronologia delle versioni (Patch Notes), dalla più recente.
+ * CONVENZIONE: a OGNI update dell'app aggiungere qui in cima una nuova voce
+ * { version, date, title, added[], improved[], fixed[] }. Le liste vuote
+ * non vengono mostrate. Esposto come DND.changelog nel browser, module.exports in Node.
+ */
+(function (root, factory) {
+  'use strict';
+  var data = factory();
+  if (typeof module !== 'undefined' && module.exports) { module.exports = data; }
+  if (root) { root.DND = root.DND || {}; root.DND.changelog = data; }
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  // Voci in ordine cronologico inverso (la più recente per prima).
+  return [
+    {
+      version: '1.1.0',
+      date: '2026-06-05',
+      title: 'Strumenti del Dungeon Master',
+      added: [
+        'Condizioni di stato su mostri e PG: 15 condizioni SRD con descrizione, badge rimovibili e menu rapido « Aggiungi stato ».',
+        'Tracker dell’iniziativa: aggiungi i personaggi (PG), ordina i combattenti per iniziativa e scorri i turni con il contatore dei round.',
+        'Generatore di nomi per PNG, taverne e luoghi: un clic su un nome per copiarlo.'
+      ],
+      improved: [
+        'Le schede dei combattenti distinguono i PG dai mostri ed evidenziano il turno attivo durante il combattimento.'
+      ],
+      fixed: []
+    },
+    {
+      version: '1.0.0',
+      date: '2026-06-05',
+      title: 'Primo rilascio',
+      added: [
+        'Database degli oggetti magici con ricerca e filtri per rarità, tipo e sintonia.',
+        'Grimorio degli incantesimi con filtri per classe, livello, scuola e componenti.',
+        'Assistente Build: suggerisce equipaggiamento e incantesimi in base a classe, livello e caratteristiche.',
+        'Strumenti del Dungeon Master: tracker dei mostri con punti ferita, mostri iconici e tabelle di riferimento SRD.'
+      ],
+      improved: [],
+      fixed: []
+    }
+  ];
+});
+
+  </script>
+  <script>
   /* ===== src/core/search.js ===== */
 /*
  * search.js — Ricerca testuale su oggetti e incantesimi.
@@ -3133,6 +3200,7 @@
   var SPELLS = D.spells || [];
   var ITEM_BY_ID = index(ITEMS);
   var SPELL_BY_ID = index(SPELLS);
+  var CHANGELOG = D.changelog || []; // cronologia versioni (Patch Notes)
 
   // DM: logica del tracker (funzioni pure) e materiale di riferimento.
   var E = D.encounter;
@@ -3234,7 +3302,8 @@
       { id: 'items', label: t.nav.items },
       { id: 'spells', label: t.nav.spells },
       { id: 'assistant', label: t.nav.assistant },
-      { id: 'dm', label: t.nav.dm }
+      { id: 'dm', label: t.nav.dm },
+      { id: 'patch', label: t.nav.patch }
     ];
     $('tabs').innerHTML = tabs.map(function (tab, i) {
       var cls = 'px-3 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition ' + (i === 0 ? 'tab-active' : 'text-muted hover:text-parchment');
@@ -3298,6 +3367,11 @@
     $('lbl-dm-names-kind').textContent = t.dm.namesKind;
     $('dm-name-gen').textContent = t.dm.namesGenerate;
 
+    // Novità / Patch Notes
+    $('patch-title').textContent = t.patch.title;
+    $('patch-intro').textContent = t.patch.intro;
+    $('patch-empty').textContent = t.patch.empty;
+
     $('drawer-close').setAttribute('aria-label', t.common.close);
   }
 
@@ -3307,7 +3381,7 @@
       var btn = e.target.closest('[data-tab]');
       if (!btn) { return; }
       var id = btn.getAttribute('data-tab');
-      ['items', 'spells', 'assistant', 'dm'].forEach(function (p) {
+      ['items', 'spells', 'assistant', 'dm', 'patch'].forEach(function (p) {
         $('panel-' + p).classList.toggle('hidden', p !== id);
       });
       Array.prototype.forEach.call($('tabs').children, function (c) {
@@ -4103,6 +4177,55 @@
     }
   }
 
+  // ---- Novità / Patch Notes ------------------------------------------------
+  var PATCH_GROUP_COLOR = { added: '#34d399', improved: '#d9b65f', fixed: '#f87171' };
+
+  // Una sezione (Aggiunto / Migliorato / Corretto): vuota → stringa vuota (non resa).
+  function patchGroup(label, color, items) {
+    if (!items || !items.length) { return ''; }
+    return '' +
+      '<div class="mt-3">' +
+        '<div class="text-xs uppercase tracking-wide font-semibold mb-1.5" style="color:' + color + '">' + esc(label) + '</div>' +
+        '<ul class="space-y-1.5">' +
+          items.map(function (line) {
+            return '<li class="flex gap-2 text-sm text-parchment/90 leading-snug">' +
+              '<span aria-hidden="true" style="color:' + color + '">•</span>' +
+              '<span>' + esc(line) + '</span></li>';
+          }).join('') +
+        '</ul>' +
+      '</div>';
+  }
+
+  // Scheda di una versione con titolo, data e i tre gruppi di modifiche.
+  function patchCard(v) {
+    var date = v.date ? '<span class="text-xs text-muted whitespace-nowrap">' + esc(v.date) + '</span>' : '';
+    var ver = '<span class="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/40 whitespace-nowrap">' + esc(t.patch.version) + ' ' + esc(v.version) + '</span>';
+    return '' +
+      '<article class="rounded-xl bg-panel border border-edge p-4 fade-in">' +
+        '<div class="flex items-center justify-between gap-3 flex-wrap border-b border-edge/60 pb-3">' +
+          '<div class="flex items-center gap-2 min-w-0">' + ver +
+            '<h3 class="font-display text-base text-parchment leading-tight truncate">' + esc(v.title || '') + '</h3>' +
+          '</div>' + date +
+        '</div>' +
+        patchGroup(t.patch.added, PATCH_GROUP_COLOR.added, v.added) +
+        patchGroup(t.patch.improved, PATCH_GROUP_COLOR.improved, v.improved) +
+        patchGroup(t.patch.fixed, PATCH_GROUP_COLOR.fixed, v.fixed) +
+      '</article>';
+  }
+
+  function initPatch() {
+    var list = $('patch-list');
+    if (!list) { return; }
+    var empty = $('patch-empty');
+    if (!CHANGELOG.length) {
+      list.innerHTML = '';
+      if (empty) { empty.classList.remove('hidden'); }
+      return;
+    }
+    if (empty) { empty.classList.add('hidden'); }
+    list.innerHTML = CHANGELOG.map(patchCard).join('');
+  }
+
   // ---- Boot ----------------------------------------------------------------
   function boot() {
     if (!t || !D.filterItems) {
@@ -4117,6 +4240,7 @@
     initAssistant();
     initDrawer();
     initDM();
+    initPatch();
   }
 
   if (document.readyState === 'loading') {

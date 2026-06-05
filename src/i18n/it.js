@@ -16,7 +16,8 @@
       items: 'Oggetti',
       spells: 'Incantesimi',
       assistant: 'Assistente',
-      dm: 'DM'
+      dm: 'DM',
+      patch: 'Novità'
     },
     common: {
       search: 'Cerca…',
@@ -149,6 +150,15 @@
       namesGenerate: 'Genera',
       namesCopied: 'Copiato!',
       namesEmpty: 'Premi « Genera » per creare dei nomi.'
+    },
+    patch: {
+      title: 'Novità e Patch Notes',
+      intro: 'Tutte le novità dell’app, dalla versione più recente. A ogni aggiornamento trovi qui che cosa è stato aggiunto, migliorato e corretto.',
+      added: 'Aggiunto',
+      improved: 'Migliorato',
+      fixed: 'Corretto',
+      version: 'Versione',
+      empty: 'Nessuna novità da mostrare.'
     }
   };
 });

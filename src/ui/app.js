@@ -14,6 +14,7 @@
   var SPELLS = D.spells || [];
   var ITEM_BY_ID = index(ITEMS);
   var SPELL_BY_ID = index(SPELLS);
+  var CHANGELOG = D.changelog || []; // cronologia versioni (Patch Notes)
 
   // DM: logica del tracker (funzioni pure) e materiale di riferimento.
   var E = D.encounter;
@@ -115,7 +116,8 @@
       { id: 'items', label: t.nav.items },
       { id: 'spells', label: t.nav.spells },
       { id: 'assistant', label: t.nav.assistant },
-      { id: 'dm', label: t.nav.dm }
+      { id: 'dm', label: t.nav.dm },
+      { id: 'patch', label: t.nav.patch }
     ];
     $('tabs').innerHTML = tabs.map(function (tab, i) {
       var cls = 'px-3 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition ' + (i === 0 ? 'tab-active' : 'text-muted hover:text-parchment');
@@ -179,6 +181,11 @@
     $('lbl-dm-names-kind').textContent = t.dm.namesKind;
     $('dm-name-gen').textContent = t.dm.namesGenerate;
 
+    // Novità / Patch Notes
+    $('patch-title').textContent = t.patch.title;
+    $('patch-intro').textContent = t.patch.intro;
+    $('patch-empty').textContent = t.patch.empty;
+
     $('drawer-close').setAttribute('aria-label', t.common.close);
   }
 
@@ -188,7 +195,7 @@
       var btn = e.target.closest('[data-tab]');
       if (!btn) { return; }
       var id = btn.getAttribute('data-tab');
-      ['items', 'spells', 'assistant', 'dm'].forEach(function (p) {
+      ['items', 'spells', 'assistant', 'dm', 'patch'].forEach(function (p) {
         $('panel-' + p).classList.toggle('hidden', p !== id);
       });
       Array.prototype.forEach.call($('tabs').children, function (c) {
@@ -984,6 +991,55 @@
     }
   }
 
+  // ---- Novità / Patch Notes ------------------------------------------------
+  var PATCH_GROUP_COLOR = { added: '#34d399', improved: '#d9b65f', fixed: '#f87171' };
+
+  // Una sezione (Aggiunto / Migliorato / Corretto): vuota → stringa vuota (non resa).
+  function patchGroup(label, color, items) {
+    if (!items || !items.length) { return ''; }
+    return '' +
+      '<div class="mt-3">' +
+        '<div class="text-xs uppercase tracking-wide font-semibold mb-1.5" style="color:' + color + '">' + esc(label) + '</div>' +
+        '<ul class="space-y-1.5">' +
+          items.map(function (line) {
+            return '<li class="flex gap-2 text-sm text-parchment/90 leading-snug">' +
+              '<span aria-hidden="true" style="color:' + color + '">•</span>' +
+              '<span>' + esc(line) + '</span></li>';
+          }).join('') +
+        '</ul>' +
+      '</div>';
+  }
+
+  // Scheda di una versione con titolo, data e i tre gruppi di modifiche.
+  function patchCard(v) {
+    var date = v.date ? '<span class="text-xs text-muted whitespace-nowrap">' + esc(v.date) + '</span>' : '';
+    var ver = '<span class="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/40 whitespace-nowrap">' + esc(t.patch.version) + ' ' + esc(v.version) + '</span>';
+    return '' +
+      '<article class="rounded-xl bg-panel border border-edge p-4 fade-in">' +
+        '<div class="flex items-center justify-between gap-3 flex-wrap border-b border-edge/60 pb-3">' +
+          '<div class="flex items-center gap-2 min-w-0">' + ver +
+            '<h3 class="font-display text-base text-parchment leading-tight truncate">' + esc(v.title || '') + '</h3>' +
+          '</div>' + date +
+        '</div>' +
+        patchGroup(t.patch.added, PATCH_GROUP_COLOR.added, v.added) +
+        patchGroup(t.patch.improved, PATCH_GROUP_COLOR.improved, v.improved) +
+        patchGroup(t.patch.fixed, PATCH_GROUP_COLOR.fixed, v.fixed) +
+      '</article>';
+  }
+
+  function initPatch() {
+    var list = $('patch-list');
+    if (!list) { return; }
+    var empty = $('patch-empty');
+    if (!CHANGELOG.length) {
+      list.innerHTML = '';
+      if (empty) { empty.classList.remove('hidden'); }
+      return;
+    }
+    if (empty) { empty.classList.add('hidden'); }
+    list.innerHTML = CHANGELOG.map(patchCard).join('');
+  }
+
   // ---- Boot ----------------------------------------------------------------
   function boot() {
     if (!t || !D.filterItems) {
@@ -998,6 +1054,7 @@
     initAssistant();
     initDrawer();
     initDM();
+    initPatch();
   }
 
   if (document.readyState === 'loading') {
