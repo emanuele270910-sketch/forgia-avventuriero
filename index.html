@@ -220,19 +220,70 @@
               class="w-full rounded-lg bg-gradient-to-b from-gold to-goldsoft text-ink font-semibold py-2 hover:brightness-105 active:brightness-95 transition"></button>
           </div>
         </form>
+
+        <!-- Aggiunta personaggi (PG) per l'iniziativa -->
+        <form id="dm-pc-form" class="mt-3 grid gap-3 sm:grid-cols-12 sm:items-end border-t border-edge/60 pt-3">
+          <p id="dm-pc-add-title" class="sm:col-span-12 text-[11px] uppercase tracking-wider text-indigo-300/90"></p>
+          <div class="sm:col-span-7">
+            <label class="block text-[11px] uppercase tracking-wider text-muted mb-1" id="lbl-dm-pc-name"></label>
+            <input id="dm-pc-name" type="text" autocomplete="off"
+              class="w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment placeholder-muted focus:outline-none focus:border-indigo-400/70" />
+          </div>
+          <div class="sm:col-span-3">
+            <label class="block text-[11px] uppercase tracking-wider text-muted mb-1" id="lbl-dm-pc-init"></label>
+            <input id="dm-pc-init" type="number" inputmode="numeric"
+              class="w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment placeholder-muted focus:outline-none focus:border-indigo-400/70" />
+          </div>
+          <div class="sm:col-span-2">
+            <button id="dm-pc-add" type="submit"
+              class="w-full rounded-lg bg-gradient-to-b from-indigo-400 to-indigo-500 text-ink font-semibold py-2 hover:brightness-105 active:brightness-95 transition"></button>
+          </div>
+        </form>
+
         <div class="mt-3 flex items-center justify-between gap-3 flex-wrap">
           <span id="dm-monster-count" class="text-xs text-muted"></span>
           <button id="dm-clear" class="text-xs text-muted hover:text-crimson underline underline-offset-2"></button>
         </div>
+
+        <!-- Barra combattimento / iniziativa -->
+        <div id="dm-combat" class="mt-3 hidden">
+          <button id="dm-combat-start"
+            class="w-full sm:w-auto rounded-lg border border-indigo-400/60 bg-indigo-500/10 text-indigo-200 font-semibold px-4 py-2 hover:bg-indigo-500/20 transition"></button>
+          <div id="dm-combat-panel" class="hidden flex-wrap items-center gap-3 rounded-lg border border-indigo-400/50 bg-indigo-500/10 px-4 py-3">
+            <span id="dm-combat-info" class="font-display text-indigo-100"></span>
+            <div class="ml-auto flex gap-2">
+              <button id="dm-combat-next"
+                class="rounded-lg bg-gradient-to-b from-indigo-400 to-indigo-500 text-ink font-semibold px-4 py-2 hover:brightness-105 transition"></button>
+              <button id="dm-combat-end"
+                class="rounded-lg border border-edge text-muted hover:text-crimson px-3 py-2 transition"></button>
+            </div>
+          </div>
+        </div>
+
         <div id="dm-monster-list" class="mt-3 grid gap-3"></div>
         <p id="dm-monster-empty" class="text-center text-muted py-10"></p>
       </div>
 
       <!-- Mostri iconici pronti da aggiungere -->
-      <div class="rounded-xl bg-panel border border-edge p-4 mb-8">
+      <div class="rounded-xl bg-panel border border-edge p-4 mb-6">
         <h3 id="dm-quick-title" class="font-display text-base text-parchment mb-1"></h3>
         <p id="dm-quick-hint" class="text-xs text-muted mb-3"></p>
         <div id="dm-quick-list" class="flex flex-wrap gap-2"></div>
+      </div>
+
+      <!-- Generatore di nomi per PNG -->
+      <div class="rounded-xl bg-panel border border-edge p-4 mb-8">
+        <h3 id="dm-names-title" class="font-display text-base text-parchment mb-1"></h3>
+        <p id="dm-names-hint" class="text-xs text-muted mb-3"></p>
+        <div class="flex flex-wrap items-end gap-3">
+          <div>
+            <label class="block text-[11px] uppercase tracking-wider text-muted mb-1" id="lbl-dm-names-kind"></label>
+            <select id="dm-name-kind" class="rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment focus:outline-none focus:border-gold/70"></select>
+          </div>
+          <button id="dm-name-gen"
+            class="rounded-lg bg-gradient-to-b from-gold to-goldsoft text-ink font-semibold px-4 py-2 hover:brightness-105 active:brightness-95 transition"></button>
+        </div>
+        <div id="dm-name-out" class="mt-3 flex flex-wrap gap-2"></div>
       </div>
 
       <!-- Tabelle e regole di riferimento -->
@@ -266,6 +317,7 @@
   <script src="src/core/filter.js"></script>
   <script src="src/core/recommend.js"></script>
   <script src="src/core/encounter.js"></script>
+  <script src="src/core/names.js"></script>
   <script src="src/ui/app.js"></script>
 </body>
 </html>

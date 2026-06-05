@@ -18,8 +18,14 @@
   // DM: logica del tracker (funzioni pure) e materiale di riferimento.
   var E = D.encounter;
   var DM = D.dm;
+  var NAMES = D.names;
   var DM_STORE_KEY = 'dnd.encounter.monsters';
   var dmMonsters = []; // stato del tracker, persistito in localStorage
+  var dmCombat = { active: false, round: 1, turnIndex: 0 }; // stato del combattimento (non persistito)
+
+  // Mappa chiave→condizione per le etichette dei badge di stato.
+  var CONDITION_BY_KEY = {};
+  ((DM && DM.conditions) ? DM.conditions : []).forEach(function (c) { CONDITION_BY_KEY[c.key] = c; });
 
   // Lookup costanti
   var RARITY_BY_ID = D.RARITY_BY_ID;
@@ -156,6 +162,22 @@
     $('dm-quick-title').textContent = t.dm.quickTitle;
     $('dm-quick-hint').textContent = t.dm.quickHint;
     $('dm-ref-title').textContent = t.dm.referenceTitle;
+
+    // PG, iniziativa e combattimento
+    $('dm-pc-add-title').textContent = t.dm.pcAddTitle;
+    $('lbl-dm-pc-name').textContent = t.dm.pcName;
+    $('dm-pc-name').placeholder = t.dm.pcNamePlaceholder;
+    $('lbl-dm-pc-init').textContent = t.dm.pcInit;
+    $('dm-pc-add').textContent = t.dm.pcAdd;
+    $('dm-combat-start').textContent = t.dm.combatStart;
+    $('dm-combat-next').textContent = t.dm.combatNext;
+    $('dm-combat-end').textContent = t.dm.combatEnd;
+
+    // Generatore di nomi
+    $('dm-names-title').textContent = t.dm.namesTitle;
+    $('dm-names-hint').textContent = t.dm.namesHint;
+    $('lbl-dm-names-kind').textContent = t.dm.namesKind;
+    $('dm-name-gen').textContent = t.dm.namesGenerate;
 
     $('drawer-close').setAttribute('aria-label', t.common.close);
   }
@@ -584,12 +606,12 @@
   // ---- DM: tracker mostri + riferimento ------------------------------------
   var DM_STATUS_COLOR = {
     healthy: '#22c55e', wounded: '#d9b65f', bloodied: '#f59e0b',
-    critical: '#ef4444', dead: '#6b7280'
+    critical: '#ef4444', dead: '#6b7280', pc: '#818cf8'
   };
   function dmStatusLabel(st) {
     return {
       healthy: t.dm.statusHealthy, wounded: t.dm.statusWounded, bloodied: t.dm.statusBloodied,
-      critical: t.dm.statusCritical, dead: t.dm.statusDead
+      critical: t.dm.statusCritical, dead: t.dm.statusDead, pc: t.dm.pcBadge
     }[st] || st;
   }
 
@@ -600,7 +622,10 @@
       var arr = JSON.parse(raw);
       if (!Array.isArray(arr)) { return []; }
       return arr.map(function (m) {
-        return E.makeMonster(m.name, m.maxHp, { id: m.id, currentHp: m.currentHp, note: m.note, initiative: m.initiative });
+        return E.makeMonster(m.name, m.maxHp, {
+          id: m.id, currentHp: m.currentHp, note: m.note,
+          initiative: m.initiative, isPC: m.isPC, conditions: m.conditions
+        });
       });
     } catch (e) { return []; }
   }
@@ -623,20 +648,60 @@
     renderMonsters();
   }
 
-  function monsterCard(m) {
+  // Badge rimovibili per le condizioni di stato attive sul combattente.
+  function conditionBadgesHtml(m) {
+    if (!m.conditions || !m.conditions.length) { return ''; }
+    return m.conditions.map(function (key) {
+      var c = CONDITION_BY_KEY[key];
+      var label = c ? c.it : key;
+      var desc = c ? c.it + ' (' + c.en + '): ' + c.desc : key;
+      return '<button type="button" data-act="remove-cond" data-cond="' + esc(key) + '" title="' + esc(desc) + '" ' +
+        'class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-200 border border-amber-500/40 hover:bg-amber-500/25 transition">' +
+        esc(label) + ' <span class="opacity-70">&times;</span></button>';
+    }).join('');
+  }
+
+  // Menu a tendina per aggiungere una condizione non ancora presente.
+  function conditionAddHtml(m) {
+    var current = {};
+    (m.conditions || []).forEach(function (k) { current[k] = true; });
+    var opts = '<option value="">' + esc(t.dm.condAdd) + '</option>';
+    (DM.conditions || []).forEach(function (c) {
+      if (!current[c.key]) { opts += '<option value="' + esc(c.key) + '">' + esc(c.it) + '</option>'; }
+    });
+    return '<select class="dm-cond-add text-[11px] rounded-md bg-panel border border-edge px-2 py-1 text-muted focus:outline-none focus:border-gold/70" title="' + esc(t.dm.condTitle) + '">' + opts + '</select>';
+  }
+
+  function monsterCard(m, activeId) {
+    var isPC = !m.maxHp;
     var st = E.status(m);
-    var pct = E.hpPercent(m);
-    var color = DM_STATUS_COLOR[st];
+    var color = DM_STATUS_COLOR[st] || '#9b94ac';
     var dead = st === 'dead';
-    return '' +
-      '<div data-mid="' + esc(m.id) + '" class="rounded-lg border border-edge bg-panel2/60 p-3' + (dead ? ' opacity-60' : '') + '">' +
-        '<div class="flex items-center justify-between gap-2">' +
-          '<h4 class="font-display text-base text-parchment leading-tight' + (dead ? ' line-through' : '') + '">' + esc(m.name) + '</h4>' +
-          '<div class="flex items-center gap-2 shrink-0">' +
-            '<span class="text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap" style="background:' + color + '22;color:' + color + ';border:1px solid ' + color + '66">' + esc(dmStatusLabel(st)) + '</span>' +
-            '<button type="button" data-act="remove" aria-label="' + esc(t.dm.remove) + '" class="w-6 h-6 rounded border border-edge text-muted hover:text-crimson hover:border-crimson/60 flex items-center justify-center text-sm leading-none">&times;</button>' +
-          '</div>' +
+    var active = !!activeId && m.id === activeId;
+
+    var wrapCls = 'rounded-lg border p-3 ' +
+      (active ? 'border-indigo-400/80 ring-1 ring-indigo-400/60 bg-indigo-500/10'
+        : (isPC ? 'border-indigo-400/30 bg-panel2/60' : 'border-edge bg-panel2/60')) +
+      (dead ? ' opacity-60' : '');
+
+    var initBox = '<input type="number" inputmode="numeric" value="' + (m.initiative == null ? '' : m.initiative) + '" ' +
+      'class="dm-init w-12 rounded-md bg-panel border border-edge px-1.5 py-1 text-parchment text-sm text-center focus:outline-none focus:border-indigo-400/70" ' +
+      'placeholder="' + esc(t.dm.initShort) + '" title="' + esc(t.dm.initTitle) + '" aria-label="' + esc(t.dm.initTitle) + '" />';
+    var statusBadge = '<span class="text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap" style="background:' + color + '22;color:' + color + ';border:1px solid ' + color + '66">' + esc(dmStatusLabel(st)) + '</span>';
+    var removeBtn = '<button type="button" data-act="remove" aria-label="' + esc(t.dm.remove) + '" class="w-6 h-6 rounded border border-edge text-muted hover:text-crimson hover:border-crimson/60 flex items-center justify-center text-sm leading-none">&times;</button>';
+
+    var header =
+      '<div class="flex items-center justify-between gap-2">' +
+        '<div class="flex items-center gap-2 min-w-0">' + initBox +
+          '<h4 class="font-display text-base text-parchment leading-tight truncate' + (dead ? ' line-through' : '') + '">' + esc(m.name) + '</h4>' +
         '</div>' +
+        '<div class="flex items-center gap-2 shrink-0">' + statusBadge + removeBtn + '</div>' +
+      '</div>';
+
+    var body = '';
+    if (!isPC) {
+      var pct = E.hpPercent(m);
+      body =
         '<div class="mt-2 flex items-center gap-2">' +
           '<div class="flex-1 h-2.5 rounded-full bg-ink/70 overflow-hidden border border-edge/60">' +
             '<div class="h-full rounded-full" style="width:' + pct + '%;background:' + color + '"></div>' +
@@ -647,9 +712,14 @@
           '<input type="number" min="1" inputmode="numeric" class="dm-amount w-20 rounded-md bg-panel border border-edge px-2 py-1.5 text-parchment text-sm focus:outline-none focus:border-gold/70" placeholder="' + esc(t.dm.amountPlaceholder) + '" />' +
           '<button type="button" data-act="damage" class="px-3 py-1.5 rounded-md text-sm font-semibold bg-crimson/20 text-red-300 border border-crimson/50 hover:bg-crimson/30 transition">' + esc(t.dm.damage) + '</button>' +
           '<button type="button" data-act="heal" class="px-3 py-1.5 rounded-md text-sm font-semibold bg-green-500/15 text-green-300 border border-green-500/40 hover:bg-green-500/25 transition">' + esc(t.dm.heal) + '</button>' +
-        '</div>' +
-        (m.note ? '<p class="mt-2 text-xs text-muted leading-snug">' + esc(m.note) + '</p>' : '') +
-      '</div>';
+        '</div>';
+    }
+
+    var condRow =
+      '<div class="mt-2 flex items-center gap-1.5 flex-wrap">' + conditionBadgesHtml(m) + conditionAddHtml(m) + '</div>';
+    var note = m.note ? '<p class="mt-2 text-xs text-muted leading-snug">' + esc(m.note) + '</p>' : '';
+
+    return '<div data-mid="' + esc(m.id) + '" class="' + wrapCls + '">' + header + body + condRow + note + '</div>';
   }
 
   function renderMonsters() {
@@ -657,7 +727,68 @@
     $('dm-monster-count').textContent = n + ' ' + (n === 1 ? t.dm.monsterCountOne : t.dm.monsterCount);
     $('dm-monster-empty').textContent = t.dm.empty;
     $('dm-monster-empty').classList.toggle('hidden', n !== 0);
-    $('dm-monster-list').innerHTML = dmMonsters.map(monsterCard).join('');
+
+    // In combattimento ordina per iniziativa (decrescente) ed evidenzia il turno.
+    var ordered = dmMonsters;
+    var activeId = null;
+    if (dmCombat.active && E.sortByInitiative) {
+      ordered = E.sortByInitiative(dmMonsters);
+      if (ordered.length) {
+        if (dmCombat.turnIndex >= ordered.length) { dmCombat.turnIndex = 0; }
+        activeId = ordered[dmCombat.turnIndex].id;
+      }
+    }
+    $('dm-monster-list').innerHTML = ordered.map(function (m) { return monsterCard(m, activeId); }).join('');
+    renderCombatBar(activeId);
+  }
+
+  // Mostra/aggiorna la barra dell'iniziativa in base allo stato del combattimento.
+  function renderCombatBar(activeId) {
+    var combat = $('dm-combat');
+    if (!combat) { return; }
+    combat.classList.toggle('hidden', dmMonsters.length === 0);
+    var startBtn = $('dm-combat-start');
+    var panel = $('dm-combat-panel');
+    if (dmCombat.active) {
+      startBtn.classList.add('hidden');
+      panel.classList.remove('hidden');
+      panel.classList.add('flex');
+      var active = null;
+      for (var i = 0; i < dmMonsters.length; i++) { if (dmMonsters[i].id === activeId) { active = dmMonsters[i]; break; } }
+      $('dm-combat-info').textContent = t.dm.combatRound + ' ' + dmCombat.round + ' · ' +
+        t.dm.combatTurnOf + ' ' + (active ? active.name : '—');
+    } else {
+      startBtn.classList.remove('hidden');
+      panel.classList.add('hidden');
+      panel.classList.remove('flex');
+    }
+  }
+
+  function startCombat() {
+    if (!dmMonsters.length) { return; }
+    dmCombat.active = true;
+    dmCombat.round = 1;
+    dmCombat.turnIndex = 0;
+    renderMonsters();
+  }
+  function nextTurn() {
+    if (!dmCombat.active) { return; }
+    if (!dmMonsters.length) { endCombat(); return; }
+    dmCombat.turnIndex++;
+    if (dmCombat.turnIndex >= dmMonsters.length) { dmCombat.turnIndex = 0; dmCombat.round++; }
+    renderMonsters();
+  }
+  function endCombat() {
+    dmCombat.active = false;
+    dmCombat.round = 1;
+    dmCombat.turnIndex = 0;
+    renderMonsters();
+  }
+
+  function dmAddPc(name, initiative) {
+    dmMonsters.push(E.makeMonster(name, 0, { isPC: true, initiative: initiative }));
+    dmSave();
+    renderMonsters();
   }
 
   function renderQuickMonsters() {
@@ -723,6 +854,7 @@
       if (!dmMonsters.length) { return; }
       if (!window.confirm(t.dm.confirmClear)) { return; }
       dmMonsters = [];
+      dmCombat.active = false; dmCombat.round = 1; dmCombat.turnIndex = 0;
       dmSave();
       renderMonsters();
     });
@@ -744,12 +876,42 @@
       }
       var idx = dmIndexOf(id);
       if (idx < 0) { return; }
+      if (act === 'remove-cond') {
+        dmMonsters[idx] = E.removeCondition(dmMonsters[idx], btn.getAttribute('data-cond'));
+        dmSave();
+        renderMonsters();
+        return;
+      }
       var input = card.querySelector('.dm-amount');
       var amount = input ? input.value : 0;
       if (act === 'damage') { dmMonsters[idx] = E.applyDamage(dmMonsters[idx], amount); }
       else if (act === 'heal') { dmMonsters[idx] = E.applyHeal(dmMonsters[idx], amount); }
       dmSave();
       renderMonsters();
+    });
+
+    // 'change' delegato: menu « aggiungi stato » (.dm-cond-add) e campo iniziativa (.dm-init).
+    $('dm-monster-list').addEventListener('change', function (e) {
+      var card = e.target.closest('[data-mid]');
+      if (!card) { return; }
+      var idx = dmIndexOf(card.getAttribute('data-mid'));
+      if (idx < 0) { return; }
+      var m = dmMonsters[idx];
+      if (e.target.classList.contains('dm-cond-add')) {
+        var key = e.target.value;
+        if (key) { dmMonsters[idx] = E.addCondition(m, key); dmSave(); renderMonsters(); }
+        return;
+      }
+      if (e.target.classList.contains('dm-init')) {
+        var raw = String(e.target.value).trim();
+        var initVal = raw === '' ? null : E.toInt(raw, 0);
+        dmMonsters[idx] = E.makeMonster(m.name, m.maxHp, {
+          id: m.id, currentHp: m.currentHp, note: m.note,
+          initiative: initVal, isPC: m.isPC, conditions: m.conditions
+        });
+        dmSave();
+        renderMonsters();
+      }
     });
 
     $('dm-quick-list').addEventListener('click', function (e) {
@@ -759,6 +921,67 @@
       if (!mon) { return; }
       dmAddMonsters(mon.name, mon.hp, 1, mon.note);
     });
+
+    // Aggiunta di un personaggio (PG) all'ordine di iniziativa.
+    $('dm-pc-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var initRaw = String($('dm-pc-init').value).trim();
+      var init = initRaw === '' ? null : E.toInt(initRaw, 0);
+      dmAddPc($('dm-pc-name').value, init);
+      $('dm-pc-name').value = '';
+      $('dm-pc-init').value = '';
+      $('dm-pc-name').focus();
+    });
+
+    // Controlli del combattimento.
+    $('dm-combat-start').addEventListener('click', startCombat);
+    $('dm-combat-next').addEventListener('click', nextTurn);
+    $('dm-combat-end').addEventListener('click', endCombat);
+
+    initNames();
+  }
+
+  // ---- DM: generatore di nomi per PNG --------------------------------------
+  function initNames() {
+    if (!NAMES) { return; }
+    var kindLabels = {
+      png: t.dm.namesNpc, maschile: t.dm.namesMale, femminile: t.dm.namesFemale,
+      taverna: t.dm.namesTavern, luogo: t.dm.namesPlace
+    };
+    var sel = $('dm-name-kind');
+    sel.innerHTML = (NAMES.kinds || []).map(function (k) {
+      return '<option value="' + esc(k) + '">' + esc(kindLabels[k] || k) + '</option>';
+    }).join('');
+
+    function generate() {
+      var kind = sel.value || 'png';
+      $('dm-name-out').innerHTML = NAMES.generateMany(6, kind).map(function (nm) {
+        return '<button type="button" data-name="' + esc(nm) + '" title="' + esc(t.dm.namesCopied) + '" ' +
+          'class="text-sm px-3 py-1.5 rounded-full bg-panel2 border border-edge text-parchment hover:border-gold/60 hover:text-gold transition">' +
+          esc(nm) + '</button>';
+      }).join('');
+    }
+
+    $('dm-name-gen').addEventListener('click', generate);
+    sel.addEventListener('change', generate);
+    $('dm-name-out').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-name]');
+      if (btn) { copyName(btn.getAttribute('data-name'), btn); }
+    });
+    generate(); // primo set all'apertura
+  }
+
+  // Copia negli appunti con feedback visivo temporaneo sul chip.
+  function copyName(name, btn) {
+    function flash() {
+      btn.textContent = t.dm.namesCopied;
+      setTimeout(function () { btn.textContent = name; }, 1200);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(name).then(flash, flash);
+    } else {
+      flash();
+    }
   }
 
   // ---- Boot ----------------------------------------------------------------

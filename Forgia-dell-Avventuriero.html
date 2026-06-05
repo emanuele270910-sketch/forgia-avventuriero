@@ -220,19 +220,70 @@
               class="w-full rounded-lg bg-gradient-to-b from-gold to-goldsoft text-ink font-semibold py-2 hover:brightness-105 active:brightness-95 transition"></button>
           </div>
         </form>
+
+        <!-- Aggiunta personaggi (PG) per l'iniziativa -->
+        <form id="dm-pc-form" class="mt-3 grid gap-3 sm:grid-cols-12 sm:items-end border-t border-edge/60 pt-3">
+          <p id="dm-pc-add-title" class="sm:col-span-12 text-[11px] uppercase tracking-wider text-indigo-300/90"></p>
+          <div class="sm:col-span-7">
+            <label class="block text-[11px] uppercase tracking-wider text-muted mb-1" id="lbl-dm-pc-name"></label>
+            <input id="dm-pc-name" type="text" autocomplete="off"
+              class="w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment placeholder-muted focus:outline-none focus:border-indigo-400/70" />
+          </div>
+          <div class="sm:col-span-3">
+            <label class="block text-[11px] uppercase tracking-wider text-muted mb-1" id="lbl-dm-pc-init"></label>
+            <input id="dm-pc-init" type="number" inputmode="numeric"
+              class="w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment placeholder-muted focus:outline-none focus:border-indigo-400/70" />
+          </div>
+          <div class="sm:col-span-2">
+            <button id="dm-pc-add" type="submit"
+              class="w-full rounded-lg bg-gradient-to-b from-indigo-400 to-indigo-500 text-ink font-semibold py-2 hover:brightness-105 active:brightness-95 transition"></button>
+          </div>
+        </form>
+
         <div class="mt-3 flex items-center justify-between gap-3 flex-wrap">
           <span id="dm-monster-count" class="text-xs text-muted"></span>
           <button id="dm-clear" class="text-xs text-muted hover:text-crimson underline underline-offset-2"></button>
         </div>
+
+        <!-- Barra combattimento / iniziativa -->
+        <div id="dm-combat" class="mt-3 hidden">
+          <button id="dm-combat-start"
+            class="w-full sm:w-auto rounded-lg border border-indigo-400/60 bg-indigo-500/10 text-indigo-200 font-semibold px-4 py-2 hover:bg-indigo-500/20 transition"></button>
+          <div id="dm-combat-panel" class="hidden flex-wrap items-center gap-3 rounded-lg border border-indigo-400/50 bg-indigo-500/10 px-4 py-3">
+            <span id="dm-combat-info" class="font-display text-indigo-100"></span>
+            <div class="ml-auto flex gap-2">
+              <button id="dm-combat-next"
+                class="rounded-lg bg-gradient-to-b from-indigo-400 to-indigo-500 text-ink font-semibold px-4 py-2 hover:brightness-105 transition"></button>
+              <button id="dm-combat-end"
+                class="rounded-lg border border-edge text-muted hover:text-crimson px-3 py-2 transition"></button>
+            </div>
+          </div>
+        </div>
+
         <div id="dm-monster-list" class="mt-3 grid gap-3"></div>
         <p id="dm-monster-empty" class="text-center text-muted py-10"></p>
       </div>
 
       <!-- Mostri iconici pronti da aggiungere -->
-      <div class="rounded-xl bg-panel border border-edge p-4 mb-8">
+      <div class="rounded-xl bg-panel border border-edge p-4 mb-6">
         <h3 id="dm-quick-title" class="font-display text-base text-parchment mb-1"></h3>
         <p id="dm-quick-hint" class="text-xs text-muted mb-3"></p>
         <div id="dm-quick-list" class="flex flex-wrap gap-2"></div>
+      </div>
+
+      <!-- Generatore di nomi per PNG -->
+      <div class="rounded-xl bg-panel border border-edge p-4 mb-8">
+        <h3 id="dm-names-title" class="font-display text-base text-parchment mb-1"></h3>
+        <p id="dm-names-hint" class="text-xs text-muted mb-3"></p>
+        <div class="flex flex-wrap items-end gap-3">
+          <div>
+            <label class="block text-[11px] uppercase tracking-wider text-muted mb-1" id="lbl-dm-names-kind"></label>
+            <select id="dm-name-kind" class="rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment focus:outline-none focus:border-gold/70"></select>
+          </div>
+          <button id="dm-name-gen"
+            class="rounded-lg bg-gradient-to-b from-gold to-goldsoft text-ink font-semibold px-4 py-2 hover:brightness-105 active:brightness-95 transition"></button>
+        </div>
+        <div id="dm-name-out" class="mt-3 flex flex-wrap gap-2"></div>
       </div>
 
       <!-- Tabelle e regole di riferimento -->
@@ -494,7 +545,36 @@
       statusWounded: 'Ferito',
       statusBloodied: 'Malconcio',
       statusCritical: 'Critico',
-      statusDead: 'Abbattuto'
+      statusDead: 'Abbattuto',
+      // Iniziativa e combattimento
+      pcBadge: 'PG',
+      pcAddTitle: 'Aggiungi un personaggio (PG)',
+      pcName: 'Nome del PG',
+      pcNamePlaceholder: 'es. Aria, Thorin…',
+      pcInit: 'Iniziativa',
+      pcAdd: 'Aggiungi PG',
+      initShort: 'Iniz.',
+      initTitle: 'Iniziativa',
+      combatStart: 'Inizia combattimento',
+      combatNext: 'Turno successivo',
+      combatEnd: 'Termina',
+      combatRound: 'Round',
+      combatTurnOf: 'Turno di',
+      // Condizioni di stato
+      condAdd: 'Aggiungi stato…',
+      condTitle: 'Condizioni',
+      // Generatore di nomi per PNG
+      namesTitle: 'Generatore di nomi',
+      namesHint: 'Nomi pronti per PNG, taverne e luoghi. Tocca un nome per copiarlo.',
+      namesKind: 'Tipo',
+      namesNpc: 'PNG (casuale)',
+      namesMale: 'PNG maschile',
+      namesFemale: 'PNG femminile',
+      namesTavern: 'Taverna',
+      namesPlace: 'Luogo',
+      namesGenerate: 'Genera',
+      namesCopied: 'Copiato!',
+      namesEmpty: 'Premi « Genera » per creare dei nomi.'
     }
   };
 });
@@ -2269,6 +2349,35 @@
     }
   ];
 
+  // Condizioni di stato (SRD 5.1). key = nome canonico inglese (usato come id);
+  // it = etichetta italiana mostrata nell'interfaccia; desc = effetto in breve.
+  var conditions = [
+    { key: 'blinded', it: 'Accecato', en: 'Blinded', desc: 'Non vede: fallisce le prove che richiedono la vista; svantaggio ai propri attacchi, gli attacchi contro di lui hanno vantaggio.' },
+    { key: 'charmed', it: 'Affascinato', en: 'Charmed', desc: "Non può attaccare chi lo affascina, che ha vantaggio alle prove sociali nei suoi confronti." },
+    { key: 'deafened', it: 'Assordato', en: 'Deafened', desc: "Non sente: fallisce le prove che richiedono l'udito." },
+    { key: 'frightened', it: 'Spaventato', en: 'Frightened', desc: 'Svantaggio a prove e attacchi finché vede la fonte della paura; non può avvicinarsi volontariamente ad essa.' },
+    { key: 'grappled', it: 'Afferrato', en: 'Grappled', desc: 'Velocità ridotta a 0. Termina se chi lo tiene è incapacitato o se viene allontanato.' },
+    { key: 'incapacitated', it: 'Incapacitato', en: 'Incapacitated', desc: 'Non può compiere azioni né reazioni.' },
+    { key: 'invisible', it: 'Invisibile', en: 'Invisible', desc: 'Non visibile senza mezzi speciali. Vantaggio ai propri attacchi, svantaggio agli attacchi contro di lui.' },
+    { key: 'paralyzed', it: 'Paralizzato', en: 'Paralyzed', desc: 'Incapacitato e immobile; fallisce i TS su Forza e Destrezza; ogni colpo ravvicinato che lo raggiunge è un critico.' },
+    { key: 'petrified', it: 'Pietrificato', en: 'Petrified', desc: 'Tramutato in solido: incapacitato, resistenza a tutti i danni, immune a veleno e malattia.' },
+    { key: 'poisoned', it: 'Avvelenato', en: 'Poisoned', desc: 'Svantaggio ai tiri per colpire e alle prove di caratteristica.' },
+    { key: 'prone', it: 'Prono', en: 'Prone', desc: 'A terra: svantaggio agli attacchi; i colpi ravvicinati contro di lui hanno vantaggio, quelli a distanza svantaggio.' },
+    { key: 'restrained', it: 'Trattenuto', en: 'Restrained', desc: 'Velocità 0; svantaggio agli attacchi e ai TS su Destrezza; gli attacchi contro di lui hanno vantaggio.' },
+    { key: 'stunned', it: 'Stordito', en: 'Stunned', desc: 'Incapacitato; fallisce i TS su Forza e Destrezza; gli attacchi contro di lui hanno vantaggio.' },
+    { key: 'unconscious', it: 'Privo di sensi', en: 'Unconscious', desc: 'Incapacitato e prono, lascia cadere ciò che impugna; i colpi ravvicinati che lo raggiungono sono critici.' },
+    { key: 'exhaustion', it: 'Sfinimento', en: 'Exhaustion', desc: 'A livelli (1–6): svantaggio alle prove, poi alla velocità, agli attacchi e ai TS, fino alla morte al livello 6.' }
+  ];
+
+  // Rende le condizioni anche come sezione di riferimento richiudibile.
+  sections.push({
+    id: 'conditions',
+    title: 'Condizioni di stato',
+    icon: '☠️',
+    kind: 'list',
+    items: conditions.map(function (c) { return c.it + ' (' + c.en + '): ' + c.desc; })
+  });
+
   // Mostri iconici pronti da aggiungere al tracker (PF medi da SRD 5.1).
   var monsters = [
     { name: 'Goblin', cr: '1/4', xp: 50, ac: 15, hp: 7, note: 'Scimitarra +4 (1d6+2). Fuggire come azione bonus.' },
@@ -2283,7 +2392,7 @@
     { name: 'Tarrasque', cr: '30', xp: 155000, ac: 25, hp: 676, note: 'Rigenera, immune alla magia non leggendaria.' }
   ];
 
-  return { sections: sections, monsters: monsters };
+  return { sections: sections, monsters: monsters, conditions: conditions };
 });
 
   </script>
@@ -2771,6 +2880,21 @@
     return hp;
   }
 
+  // Normalizza una chiave-condizione (stringa ripulita).
+  function normKey(key) {
+    return (key === undefined || key === null ? '' : String(key)).trim();
+  }
+  // Normalizza una lista di condizioni: stringhe non vuote, senza duplicati.
+  function normConditions(arr) {
+    if (!Array.isArray(arr)) { return []; }
+    var out = [], seen = {};
+    for (var i = 0; i < arr.length; i++) {
+      var s = normKey(arr[i]);
+      if (s && !seen[s]) { seen[s] = true; out.push(s); }
+    }
+    return out;
+  }
+
   // Generatore di id univoci (monotòno anche con creazioni nello stesso ms).
   var counter = 0;
   function uid() {
@@ -2778,22 +2902,32 @@
     return 'm' + Date.now().toString(36) + '-' + counter;
   }
 
-  // Crea un mostro normalizzato. `name` e `hp` obbligatori; `opts` facoltativo
-  // (id, currentHp, note, initiative) — usato al ripristino da localStorage.
+  // Crea un combattente normalizzato. `name` e `hp` obbligatori; `opts` facoltativo
+  // (id, currentHp, note, initiative, isPC, conditions) — usato anche al ripristino
+  // da localStorage. Per un PG (isPC) senza PF indicati, maxHp = 0 (PF non tracciati).
   function makeMonster(name, hp, opts) {
     opts = opts || {};
-    var maxHp = Math.max(1, toInt(hp, 1));
-    var nm = (name === undefined || name === null ? '' : String(name)).trim() || 'Mostro';
-    var cur = opts.currentHp === undefined || opts.currentHp === null
-      ? maxHp
-      : clampHp(toInt(opts.currentHp, maxHp), maxHp);
+    var pc = !!opts.isPC;
+    var rawHp = toInt(hp, pc ? 0 : 1);
+    var maxHp = (pc && rawHp <= 0) ? 0 : Math.max(1, rawHp);
+    var nm = (name === undefined || name === null ? '' : String(name)).trim() || (pc ? 'Personaggio' : 'Mostro');
+    var cur;
+    if (maxHp === 0) {
+      cur = 0;
+    } else if (opts.currentHp === undefined || opts.currentHp === null) {
+      cur = maxHp;
+    } else {
+      cur = clampHp(toInt(opts.currentHp, maxHp), maxHp);
+    }
     return {
       id: opts.id || uid(),
       name: nm,
       maxHp: maxHp,
       currentHp: cur,
       note: opts.note ? String(opts.note) : '',
-      initiative: opts.initiative === undefined || opts.initiative === null ? null : toInt(opts.initiative, 0)
+      initiative: opts.initiative === undefined || opts.initiative === null ? null : toInt(opts.initiative, 0),
+      isPC: pc,
+      conditions: normConditions(opts.conditions)
     };
   }
 
@@ -2816,14 +2950,46 @@
   }
 
   // Stato sintetico in base ai PF residui.
-  //   dead (0) · healthy (100%) · wounded (>50%) · bloodied (>25%) · critical (resto)
+  //   pc (PG senza PF) · dead (0) · healthy (100%) · wounded (>50%) · bloodied (>25%) · critical (resto)
   function status(monster) {
+    if (!monster.maxHp) { return 'pc'; }        // PG senza PF tracciati
     if (monster.currentHp <= 0) { return 'dead'; }
     var pct = monster.currentHp / monster.maxHp;
     if (pct >= 1) { return 'healthy'; }
     if (pct > 0.5) { return 'wounded'; }
     if (pct > 0.25) { return 'bloodied'; }
     return 'critical';
+  }
+
+  // ---- Condizioni di stato (immutabili: restituiscono un NUOVO combattente) --
+  function hasCondition(monster, key) {
+    return normConditions(monster.conditions).indexOf(normKey(key)) !== -1;
+  }
+  function addCondition(monster, key) {
+    var k = normKey(key);
+    var list = normConditions(monster.conditions);
+    if (k && list.indexOf(k) === -1) { list.push(k); }
+    return assign({}, monster, { conditions: list });
+  }
+  function removeCondition(monster, key) {
+    var k = normKey(key);
+    var list = normConditions(monster.conditions).filter(function (c) { return c !== k; });
+    return assign({}, monster, { conditions: list });
+  }
+  function toggleCondition(monster, key) {
+    return hasCondition(monster, key) ? removeCondition(monster, key) : addCondition(monster, key);
+  }
+
+  // Ordina i combattenti per iniziativa decrescente (chi non ce l'ha va in fondo);
+  // a parità, ordine alfabetico. Restituisce un NUOVO array (non muta l'input).
+  function sortByInitiative(list) {
+    function val(m) { return (m && m.initiative !== undefined && m.initiative !== null) ? toInt(m.initiative, 0) : -Infinity; }
+    return (list || []).slice().sort(function (a, b) {
+      var av = val(a), bv = val(b);
+      if (av !== bv) { return bv - av; }
+      var an = (a.name || '').toLowerCase(), bn = (b.name || '').toLowerCase();
+      return an < bn ? -1 : (an > bn ? 1 : 0);
+    });
   }
 
   return {
@@ -2833,7 +2999,118 @@
     applyDamage: applyDamage,
     applyHeal: applyHeal,
     hpPercent: hpPercent,
-    status: status
+    status: status,
+    hasCondition: hasCondition,
+    addCondition: addCondition,
+    removeCondition: removeCondition,
+    toggleCondition: toggleCondition,
+    sortByInitiative: sortByInitiative
+  };
+});
+
+  </script>
+  <script>
+  /* ===== src/core/names.js ===== */
+/*
+ * names.js — Generatore di nomi per PNG, taverne e luoghi (logica pura, niente DOM).
+ * RNG iniettabile (opts) per test deterministici. Pattern UMD-lite:
+ * nel browser espone DND.names, in Node module.exports.
+ */
+(function (root, factory) {
+  'use strict';
+  var mod = factory();
+  if (typeof module !== 'undefined' && module.exports) { module.exports = mod; }
+  if (root) { root.DND = root.DND || {}; root.DND.names = mod; }
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  var maleGiven = [
+    'Aldric', 'Bram', 'Cedric', 'Doran', 'Edmar', 'Fendrel', 'Gareth', 'Halbrek',
+    'Ivor', 'Joren', 'Kael', 'Lothar', 'Magnus', 'Nerian', 'Orin', 'Perrin',
+    'Quillon', 'Roderic', 'Soren', 'Theron', 'Ulric', 'Varic', 'Willem', 'Yorath',
+    'Corvin', 'Dax', 'Eamon', 'Gildas'
+  ];
+
+  var femaleGiven = [
+    'Alenia', 'Brunild', 'Caelia', 'Dahlia', 'Elspeth', 'Fiora', 'Gwendyl', 'Helsa',
+    'Isolde', 'Jessa', 'Kaelis', 'Lirien', 'Mirella', 'Nadira', 'Orla', 'Phaedra',
+    'Quenna', 'Rowena', 'Sariel', 'Thessaly', 'Una', 'Vesper', 'Wynne', 'Ysolde',
+    'Zaria', 'Brisa', 'Cora', 'Elara'
+  ];
+
+  var surname = [
+    'Ombralunga', 'Pietrabianca', 'Mantoscuro', 'Forgiaferro', 'Valfonda', 'Corvonero',
+    'Spadargento', 'Fiammacupa', 'Rocciagrigia', 'Ventofreddo', 'Lunapallida', 'Boscoprofondo',
+    'Cuordacciaio', 'Soleardente', 'Ferroantico', 'Stellacaduta', 'Vallescura', 'Brumalda',
+    'Thornwood', 'Ravenscar', 'Greycastle', 'Blackwood', 'Strongarm', 'Marlowe',
+    'Brennan', 'Castagni', 'Falconeri', 'Lupieri'
+  ];
+
+  var tavern = [
+    'Il Drago Dorato', 'La Rosa Nera', 'Il Boccale Schiumante', 'La Sirena Ubriaca',
+    'Il Grifone Rampante', 'La Lanterna Verde', 'Il Cinghiale Bianco', 'La Corona Spezzata',
+    "Il Calice d'Argento", 'La Volpe Astuta', 'Il Corvo e la Quercia', 'La Spada Arrugginita',
+    'Il Pony Zoppo', 'La Luna Rossa', "Il Tridente d'Oro", 'La Botte Sfondata',
+    "Il Lupo e l'Agnello", 'La Torre Pendente', 'Il Gatto Nero', 'La Rosa dei Venti',
+    "Il Martello e l'Incudine", 'La Stella del Nord', 'Il Vecchio Faro', 'La Quercia Cava'
+  ];
+
+  var place = [
+    'Valfonda', 'Pietraforte', 'Corvospino', 'Ponte Corvo', 'Roccabruna', 'Borgonebbia',
+    'Lago Sereno', 'Colle del Vento', 'Selva Oscura', 'Riva Tetra', 'Montecupo', 'Fontechiara',
+    'Vallenera', 'Capo Tempesta', 'Forte Aldano', 'Guado Lungo', 'Torre Spezzata', 'Acquaviva',
+    'Pietralba', 'Castelgrigio', 'Solitaria', 'Verdivalle', 'Cima Ghiaccio', 'Porto Cenere'
+  ];
+
+  var pools = {
+    maleGiven: maleGiven, femaleGiven: femaleGiven, surname: surname,
+    tavern: tavern, place: place
+  };
+
+  var kinds = ['png', 'maschile', 'femminile', 'taverna', 'luogo'];
+
+  // Sceglie un elemento dell'array usando l'RNG fornito (default Math.random),
+  // restando sempre dentro i limiti anche se l'RNG restituisce 1.
+  function pick(arr, rng) {
+    var r = (typeof rng === 'function') ? rng : Math.random;
+    var i = Math.floor(r() * arr.length);
+    if (i < 0) { i = 0; }
+    if (i >= arr.length) { i = arr.length - 1; }
+    return arr[i];
+  }
+
+  function fullName(given, rng) {
+    return pick(given, rng) + ' ' + pick(surname, rng);
+  }
+
+  // Genera un nome per la categoria richiesta:
+  //   'maschile' | 'femminile' | 'png' (genere casuale) | 'taverna' | 'luogo'
+  function generate(kind, rng) {
+    switch (kind) {
+      case 'maschile': return fullName(maleGiven, rng);
+      case 'femminile': return fullName(femaleGiven, rng);
+      case 'taverna': return pick(tavern, rng);
+      case 'luogo': return pick(place, rng);
+      case 'png':
+      default:
+        return fullName(pick([maleGiven, femaleGiven], rng), rng);
+    }
+  }
+
+  // Genera `n` nomi (minimo 1) della categoria richiesta.
+  function generateMany(n, kind, rng) {
+    n = parseInt(n, 10);
+    if (isNaN(n) || n < 1) { n = 1; }
+    var out = [];
+    for (var i = 0; i < n; i++) { out.push(generate(kind, rng)); }
+    return out;
+  }
+
+  return {
+    pools: pools,
+    kinds: kinds,
+    generate: generate,
+    generateMany: generateMany
   };
 });
 
@@ -2860,8 +3137,14 @@
   // DM: logica del tracker (funzioni pure) e materiale di riferimento.
   var E = D.encounter;
   var DM = D.dm;
+  var NAMES = D.names;
   var DM_STORE_KEY = 'dnd.encounter.monsters';
   var dmMonsters = []; // stato del tracker, persistito in localStorage
+  var dmCombat = { active: false, round: 1, turnIndex: 0 }; // stato del combattimento (non persistito)
+
+  // Mappa chiave→condizione per le etichette dei badge di stato.
+  var CONDITION_BY_KEY = {};
+  ((DM && DM.conditions) ? DM.conditions : []).forEach(function (c) { CONDITION_BY_KEY[c.key] = c; });
 
   // Lookup costanti
   var RARITY_BY_ID = D.RARITY_BY_ID;
@@ -2998,6 +3281,22 @@
     $('dm-quick-title').textContent = t.dm.quickTitle;
     $('dm-quick-hint').textContent = t.dm.quickHint;
     $('dm-ref-title').textContent = t.dm.referenceTitle;
+
+    // PG, iniziativa e combattimento
+    $('dm-pc-add-title').textContent = t.dm.pcAddTitle;
+    $('lbl-dm-pc-name').textContent = t.dm.pcName;
+    $('dm-pc-name').placeholder = t.dm.pcNamePlaceholder;
+    $('lbl-dm-pc-init').textContent = t.dm.pcInit;
+    $('dm-pc-add').textContent = t.dm.pcAdd;
+    $('dm-combat-start').textContent = t.dm.combatStart;
+    $('dm-combat-next').textContent = t.dm.combatNext;
+    $('dm-combat-end').textContent = t.dm.combatEnd;
+
+    // Generatore di nomi
+    $('dm-names-title').textContent = t.dm.namesTitle;
+    $('dm-names-hint').textContent = t.dm.namesHint;
+    $('lbl-dm-names-kind').textContent = t.dm.namesKind;
+    $('dm-name-gen').textContent = t.dm.namesGenerate;
 
     $('drawer-close').setAttribute('aria-label', t.common.close);
   }
@@ -3426,12 +3725,12 @@
   // ---- DM: tracker mostri + riferimento ------------------------------------
   var DM_STATUS_COLOR = {
     healthy: '#22c55e', wounded: '#d9b65f', bloodied: '#f59e0b',
-    critical: '#ef4444', dead: '#6b7280'
+    critical: '#ef4444', dead: '#6b7280', pc: '#818cf8'
   };
   function dmStatusLabel(st) {
     return {
       healthy: t.dm.statusHealthy, wounded: t.dm.statusWounded, bloodied: t.dm.statusBloodied,
-      critical: t.dm.statusCritical, dead: t.dm.statusDead
+      critical: t.dm.statusCritical, dead: t.dm.statusDead, pc: t.dm.pcBadge
     }[st] || st;
   }
 
@@ -3442,7 +3741,10 @@
       var arr = JSON.parse(raw);
       if (!Array.isArray(arr)) { return []; }
       return arr.map(function (m) {
-        return E.makeMonster(m.name, m.maxHp, { id: m.id, currentHp: m.currentHp, note: m.note, initiative: m.initiative });
+        return E.makeMonster(m.name, m.maxHp, {
+          id: m.id, currentHp: m.currentHp, note: m.note,
+          initiative: m.initiative, isPC: m.isPC, conditions: m.conditions
+        });
       });
     } catch (e) { return []; }
   }
@@ -3465,20 +3767,60 @@
     renderMonsters();
   }
 
-  function monsterCard(m) {
+  // Badge rimovibili per le condizioni di stato attive sul combattente.
+  function conditionBadgesHtml(m) {
+    if (!m.conditions || !m.conditions.length) { return ''; }
+    return m.conditions.map(function (key) {
+      var c = CONDITION_BY_KEY[key];
+      var label = c ? c.it : key;
+      var desc = c ? c.it + ' (' + c.en + '): ' + c.desc : key;
+      return '<button type="button" data-act="remove-cond" data-cond="' + esc(key) + '" title="' + esc(desc) + '" ' +
+        'class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-200 border border-amber-500/40 hover:bg-amber-500/25 transition">' +
+        esc(label) + ' <span class="opacity-70">&times;</span></button>';
+    }).join('');
+  }
+
+  // Menu a tendina per aggiungere una condizione non ancora presente.
+  function conditionAddHtml(m) {
+    var current = {};
+    (m.conditions || []).forEach(function (k) { current[k] = true; });
+    var opts = '<option value="">' + esc(t.dm.condAdd) + '</option>';
+    (DM.conditions || []).forEach(function (c) {
+      if (!current[c.key]) { opts += '<option value="' + esc(c.key) + '">' + esc(c.it) + '</option>'; }
+    });
+    return '<select class="dm-cond-add text-[11px] rounded-md bg-panel border border-edge px-2 py-1 text-muted focus:outline-none focus:border-gold/70" title="' + esc(t.dm.condTitle) + '">' + opts + '</select>';
+  }
+
+  function monsterCard(m, activeId) {
+    var isPC = !m.maxHp;
     var st = E.status(m);
-    var pct = E.hpPercent(m);
-    var color = DM_STATUS_COLOR[st];
+    var color = DM_STATUS_COLOR[st] || '#9b94ac';
     var dead = st === 'dead';
-    return '' +
-      '<div data-mid="' + esc(m.id) + '" class="rounded-lg border border-edge bg-panel2/60 p-3' + (dead ? ' opacity-60' : '') + '">' +
-        '<div class="flex items-center justify-between gap-2">' +
-          '<h4 class="font-display text-base text-parchment leading-tight' + (dead ? ' line-through' : '') + '">' + esc(m.name) + '</h4>' +
-          '<div class="flex items-center gap-2 shrink-0">' +
-            '<span class="text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap" style="background:' + color + '22;color:' + color + ';border:1px solid ' + color + '66">' + esc(dmStatusLabel(st)) + '</span>' +
-            '<button type="button" data-act="remove" aria-label="' + esc(t.dm.remove) + '" class="w-6 h-6 rounded border border-edge text-muted hover:text-crimson hover:border-crimson/60 flex items-center justify-center text-sm leading-none">&times;</button>' +
-          '</div>' +
+    var active = !!activeId && m.id === activeId;
+
+    var wrapCls = 'rounded-lg border p-3 ' +
+      (active ? 'border-indigo-400/80 ring-1 ring-indigo-400/60 bg-indigo-500/10'
+        : (isPC ? 'border-indigo-400/30 bg-panel2/60' : 'border-edge bg-panel2/60')) +
+      (dead ? ' opacity-60' : '');
+
+    var initBox = '<input type="number" inputmode="numeric" value="' + (m.initiative == null ? '' : m.initiative) + '" ' +
+      'class="dm-init w-12 rounded-md bg-panel border border-edge px-1.5 py-1 text-parchment text-sm text-center focus:outline-none focus:border-indigo-400/70" ' +
+      'placeholder="' + esc(t.dm.initShort) + '" title="' + esc(t.dm.initTitle) + '" aria-label="' + esc(t.dm.initTitle) + '" />';
+    var statusBadge = '<span class="text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap" style="background:' + color + '22;color:' + color + ';border:1px solid ' + color + '66">' + esc(dmStatusLabel(st)) + '</span>';
+    var removeBtn = '<button type="button" data-act="remove" aria-label="' + esc(t.dm.remove) + '" class="w-6 h-6 rounded border border-edge text-muted hover:text-crimson hover:border-crimson/60 flex items-center justify-center text-sm leading-none">&times;</button>';
+
+    var header =
+      '<div class="flex items-center justify-between gap-2">' +
+        '<div class="flex items-center gap-2 min-w-0">' + initBox +
+          '<h4 class="font-display text-base text-parchment leading-tight truncate' + (dead ? ' line-through' : '') + '">' + esc(m.name) + '</h4>' +
         '</div>' +
+        '<div class="flex items-center gap-2 shrink-0">' + statusBadge + removeBtn + '</div>' +
+      '</div>';
+
+    var body = '';
+    if (!isPC) {
+      var pct = E.hpPercent(m);
+      body =
         '<div class="mt-2 flex items-center gap-2">' +
           '<div class="flex-1 h-2.5 rounded-full bg-ink/70 overflow-hidden border border-edge/60">' +
             '<div class="h-full rounded-full" style="width:' + pct + '%;background:' + color + '"></div>' +
@@ -3489,9 +3831,14 @@
           '<input type="number" min="1" inputmode="numeric" class="dm-amount w-20 rounded-md bg-panel border border-edge px-2 py-1.5 text-parchment text-sm focus:outline-none focus:border-gold/70" placeholder="' + esc(t.dm.amountPlaceholder) + '" />' +
           '<button type="button" data-act="damage" class="px-3 py-1.5 rounded-md text-sm font-semibold bg-crimson/20 text-red-300 border border-crimson/50 hover:bg-crimson/30 transition">' + esc(t.dm.damage) + '</button>' +
           '<button type="button" data-act="heal" class="px-3 py-1.5 rounded-md text-sm font-semibold bg-green-500/15 text-green-300 border border-green-500/40 hover:bg-green-500/25 transition">' + esc(t.dm.heal) + '</button>' +
-        '</div>' +
-        (m.note ? '<p class="mt-2 text-xs text-muted leading-snug">' + esc(m.note) + '</p>' : '') +
-      '</div>';
+        '</div>';
+    }
+
+    var condRow =
+      '<div class="mt-2 flex items-center gap-1.5 flex-wrap">' + conditionBadgesHtml(m) + conditionAddHtml(m) + '</div>';
+    var note = m.note ? '<p class="mt-2 text-xs text-muted leading-snug">' + esc(m.note) + '</p>' : '';
+
+    return '<div data-mid="' + esc(m.id) + '" class="' + wrapCls + '">' + header + body + condRow + note + '</div>';
   }
 
   function renderMonsters() {
@@ -3499,7 +3846,68 @@
     $('dm-monster-count').textContent = n + ' ' + (n === 1 ? t.dm.monsterCountOne : t.dm.monsterCount);
     $('dm-monster-empty').textContent = t.dm.empty;
     $('dm-monster-empty').classList.toggle('hidden', n !== 0);
-    $('dm-monster-list').innerHTML = dmMonsters.map(monsterCard).join('');
+
+    // In combattimento ordina per iniziativa (decrescente) ed evidenzia il turno.
+    var ordered = dmMonsters;
+    var activeId = null;
+    if (dmCombat.active && E.sortByInitiative) {
+      ordered = E.sortByInitiative(dmMonsters);
+      if (ordered.length) {
+        if (dmCombat.turnIndex >= ordered.length) { dmCombat.turnIndex = 0; }
+        activeId = ordered[dmCombat.turnIndex].id;
+      }
+    }
+    $('dm-monster-list').innerHTML = ordered.map(function (m) { return monsterCard(m, activeId); }).join('');
+    renderCombatBar(activeId);
+  }
+
+  // Mostra/aggiorna la barra dell'iniziativa in base allo stato del combattimento.
+  function renderCombatBar(activeId) {
+    var combat = $('dm-combat');
+    if (!combat) { return; }
+    combat.classList.toggle('hidden', dmMonsters.length === 0);
+    var startBtn = $('dm-combat-start');
+    var panel = $('dm-combat-panel');
+    if (dmCombat.active) {
+      startBtn.classList.add('hidden');
+      panel.classList.remove('hidden');
+      panel.classList.add('flex');
+      var active = null;
+      for (var i = 0; i < dmMonsters.length; i++) { if (dmMonsters[i].id === activeId) { active = dmMonsters[i]; break; } }
+      $('dm-combat-info').textContent = t.dm.combatRound + ' ' + dmCombat.round + ' · ' +
+        t.dm.combatTurnOf + ' ' + (active ? active.name : '—');
+    } else {
+      startBtn.classList.remove('hidden');
+      panel.classList.add('hidden');
+      panel.classList.remove('flex');
+    }
+  }
+
+  function startCombat() {
+    if (!dmMonsters.length) { return; }
+    dmCombat.active = true;
+    dmCombat.round = 1;
+    dmCombat.turnIndex = 0;
+    renderMonsters();
+  }
+  function nextTurn() {
+    if (!dmCombat.active) { return; }
+    if (!dmMonsters.length) { endCombat(); return; }
+    dmCombat.turnIndex++;
+    if (dmCombat.turnIndex >= dmMonsters.length) { dmCombat.turnIndex = 0; dmCombat.round++; }
+    renderMonsters();
+  }
+  function endCombat() {
+    dmCombat.active = false;
+    dmCombat.round = 1;
+    dmCombat.turnIndex = 0;
+    renderMonsters();
+  }
+
+  function dmAddPc(name, initiative) {
+    dmMonsters.push(E.makeMonster(name, 0, { isPC: true, initiative: initiative }));
+    dmSave();
+    renderMonsters();
   }
 
   function renderQuickMonsters() {
@@ -3565,6 +3973,7 @@
       if (!dmMonsters.length) { return; }
       if (!window.confirm(t.dm.confirmClear)) { return; }
       dmMonsters = [];
+      dmCombat.active = false; dmCombat.round = 1; dmCombat.turnIndex = 0;
       dmSave();
       renderMonsters();
     });
@@ -3586,12 +3995,42 @@
       }
       var idx = dmIndexOf(id);
       if (idx < 0) { return; }
+      if (act === 'remove-cond') {
+        dmMonsters[idx] = E.removeCondition(dmMonsters[idx], btn.getAttribute('data-cond'));
+        dmSave();
+        renderMonsters();
+        return;
+      }
       var input = card.querySelector('.dm-amount');
       var amount = input ? input.value : 0;
       if (act === 'damage') { dmMonsters[idx] = E.applyDamage(dmMonsters[idx], amount); }
       else if (act === 'heal') { dmMonsters[idx] = E.applyHeal(dmMonsters[idx], amount); }
       dmSave();
       renderMonsters();
+    });
+
+    // 'change' delegato: menu « aggiungi stato » (.dm-cond-add) e campo iniziativa (.dm-init).
+    $('dm-monster-list').addEventListener('change', function (e) {
+      var card = e.target.closest('[data-mid]');
+      if (!card) { return; }
+      var idx = dmIndexOf(card.getAttribute('data-mid'));
+      if (idx < 0) { return; }
+      var m = dmMonsters[idx];
+      if (e.target.classList.contains('dm-cond-add')) {
+        var key = e.target.value;
+        if (key) { dmMonsters[idx] = E.addCondition(m, key); dmSave(); renderMonsters(); }
+        return;
+      }
+      if (e.target.classList.contains('dm-init')) {
+        var raw = String(e.target.value).trim();
+        var initVal = raw === '' ? null : E.toInt(raw, 0);
+        dmMonsters[idx] = E.makeMonster(m.name, m.maxHp, {
+          id: m.id, currentHp: m.currentHp, note: m.note,
+          initiative: initVal, isPC: m.isPC, conditions: m.conditions
+        });
+        dmSave();
+        renderMonsters();
+      }
     });
 
     $('dm-quick-list').addEventListener('click', function (e) {
@@ -3601,6 +4040,67 @@
       if (!mon) { return; }
       dmAddMonsters(mon.name, mon.hp, 1, mon.note);
     });
+
+    // Aggiunta di un personaggio (PG) all'ordine di iniziativa.
+    $('dm-pc-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var initRaw = String($('dm-pc-init').value).trim();
+      var init = initRaw === '' ? null : E.toInt(initRaw, 0);
+      dmAddPc($('dm-pc-name').value, init);
+      $('dm-pc-name').value = '';
+      $('dm-pc-init').value = '';
+      $('dm-pc-name').focus();
+    });
+
+    // Controlli del combattimento.
+    $('dm-combat-start').addEventListener('click', startCombat);
+    $('dm-combat-next').addEventListener('click', nextTurn);
+    $('dm-combat-end').addEventListener('click', endCombat);
+
+    initNames();
+  }
+
+  // ---- DM: generatore di nomi per PNG --------------------------------------
+  function initNames() {
+    if (!NAMES) { return; }
+    var kindLabels = {
+      png: t.dm.namesNpc, maschile: t.dm.namesMale, femminile: t.dm.namesFemale,
+      taverna: t.dm.namesTavern, luogo: t.dm.namesPlace
+    };
+    var sel = $('dm-name-kind');
+    sel.innerHTML = (NAMES.kinds || []).map(function (k) {
+      return '<option value="' + esc(k) + '">' + esc(kindLabels[k] || k) + '</option>';
+    }).join('');
+
+    function generate() {
+      var kind = sel.value || 'png';
+      $('dm-name-out').innerHTML = NAMES.generateMany(6, kind).map(function (nm) {
+        return '<button type="button" data-name="' + esc(nm) + '" title="' + esc(t.dm.namesCopied) + '" ' +
+          'class="text-sm px-3 py-1.5 rounded-full bg-panel2 border border-edge text-parchment hover:border-gold/60 hover:text-gold transition">' +
+          esc(nm) + '</button>';
+      }).join('');
+    }
+
+    $('dm-name-gen').addEventListener('click', generate);
+    sel.addEventListener('change', generate);
+    $('dm-name-out').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-name]');
+      if (btn) { copyName(btn.getAttribute('data-name'), btn); }
+    });
+    generate(); // primo set all'apertura
+  }
+
+  // Copia negli appunti con feedback visivo temporaneo sul chip.
+  function copyName(name, btn) {
+    function flash() {
+      btn.textContent = t.dm.namesCopied;
+      setTimeout(function () { btn.textContent = name; }, 1200);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(name).then(flash, flash);
+    } else {
+      flash();
+    }
   }
 
   // ---- Boot ----------------------------------------------------------------

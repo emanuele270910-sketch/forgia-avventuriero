@@ -15,6 +15,7 @@ require('./search.test.js');
 require('./filter.test.js');
 require('./recommend.test.js');
 require('./encounter.test.js');
+require('./names.test.js');
 
 var report = TestRunner.run();
 

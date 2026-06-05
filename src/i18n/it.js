@@ -119,7 +119,36 @@
       statusWounded: 'Ferito',
       statusBloodied: 'Malconcio',
       statusCritical: 'Critico',
-      statusDead: 'Abbattuto'
+      statusDead: 'Abbattuto',
+      // Iniziativa e combattimento
+      pcBadge: 'PG',
+      pcAddTitle: 'Aggiungi un personaggio (PG)',
+      pcName: 'Nome del PG',
+      pcNamePlaceholder: 'es. Aria, Thorin…',
+      pcInit: 'Iniziativa',
+      pcAdd: 'Aggiungi PG',
+      initShort: 'Iniz.',
+      initTitle: 'Iniziativa',
+      combatStart: 'Inizia combattimento',
+      combatNext: 'Turno successivo',
+      combatEnd: 'Termina',
+      combatRound: 'Round',
+      combatTurnOf: 'Turno di',
+      // Condizioni di stato
+      condAdd: 'Aggiungi stato…',
+      condTitle: 'Condizioni',
+      // Generatore di nomi per PNG
+      namesTitle: 'Generatore di nomi',
+      namesHint: 'Nomi pronti per PNG, taverne e luoghi. Tocca un nome per copiarlo.',
+      namesKind: 'Tipo',
+      namesNpc: 'PNG (casuale)',
+      namesMale: 'PNG maschile',
+      namesFemale: 'PNG femminile',
+      namesTavern: 'Taverna',
+      namesPlace: 'Luogo',
+      namesGenerate: 'Genera',
+      namesCopied: 'Copiato!',
+      namesEmpty: 'Premi « Genera » per creare dei nomi.'
     }
   };
 });

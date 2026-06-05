@@ -99,6 +99,75 @@
     });
   });
 
+  describe('Tracker mostri — condizioni di stato', function () {
+    it('un nuovo combattente nasce senza condizioni', function () {
+      expect(E.makeMonster('Goblin', 7).conditions).toEqual([]);
+    });
+    it('addCondition aggiunge senza duplicare', function () {
+      var m = E.addCondition(E.makeMonster('Goblin', 7), 'poisoned');
+      expect(m.conditions).toEqual(['poisoned']);
+      expect(E.addCondition(m, 'poisoned').conditions).toEqual(['poisoned']);
+    });
+    it('removeCondition rimuove la condizione', function () {
+      var m = E.addCondition(E.makeMonster('Goblin', 7), 'prone');
+      expect(E.removeCondition(m, 'prone').conditions).toEqual([]);
+    });
+    it('toggleCondition alterna presenza e assenza', function () {
+      var a = E.toggleCondition(E.makeMonster('Goblin', 7), 'stunned');
+      expect(a.conditions).toEqual(['stunned']);
+      expect(E.toggleCondition(a, 'stunned').conditions).toEqual([]);
+    });
+    it('hasCondition riconosce la condizione attiva', function () {
+      var m = E.addCondition(E.makeMonster('Goblin', 7), 'blinded');
+      expect(E.hasCondition(m, 'blinded')).toBe(true);
+      expect(E.hasCondition(m, 'poisoned')).toBe(false);
+    });
+    it('non muta il combattente originale (funzioni pure)', function () {
+      var m = E.makeMonster('Goblin', 7);
+      E.addCondition(m, 'poisoned');
+      expect(m.conditions).toEqual([]);
+    });
+    it('ripristina le condizioni salvate senza duplicati', function () {
+      var m = E.makeMonster('Orco', 15, { conditions: ['poisoned', 'prone', 'poisoned'] });
+      expect(m.conditions).toEqual(['poisoned', 'prone']);
+    });
+  });
+
+  describe('Tracker — personaggi (PG) e iniziativa', function () {
+    it('un PG senza PF ha maxHp 0 e stato « pc »', function () {
+      var pg = E.makeMonster('Aria', '', { isPC: true });
+      expect(pg.isPC).toBe(true);
+      expect(pg.maxHp).toBe(0);
+      expect(E.status(pg)).toBe('pc');
+    });
+    it('un PG con PF viene tracciato normalmente', function () {
+      var pg = E.makeMonster('Thorin', 30, { isPC: true });
+      expect(pg.maxHp).toBe(30);
+      expect(E.status(pg)).toBe('healthy');
+    });
+    it('un PG senza PF resta a 0 anche dopo il ripristino', function () {
+      expect(E.makeMonster('Aria', 0, { isPC: true }).maxHp).toBe(0);
+    });
+    it('un mostro normale mantiene PF minimi pari a 1', function () {
+      expect(E.makeMonster('Goblin', 0).maxHp).toBe(1);
+    });
+    it('sortByInitiative ordina in modo decrescente, chi non ha iniziativa va in fondo', function () {
+      var list = [
+        E.makeMonster('A', 10, { initiative: 5 }),
+        E.makeMonster('B', 10, { initiative: 20 }),
+        E.makeMonster('C', 10),
+        E.makeMonster('D', 10, { initiative: 12 })
+      ];
+      var names = E.sortByInitiative(list).map(function (m) { return m.name; });
+      expect(names).toEqual(['B', 'D', 'A', 'C']);
+    });
+    it('sortByInitiative non muta la lista originale', function () {
+      var list = [E.makeMonster('A', 10, { initiative: 1 }), E.makeMonster('B', 10, { initiative: 9 })];
+      E.sortByInitiative(list);
+      expect(list[0].name).toBe('A');
+    });
+  });
+
   describe('Dati DM', function () {
     it('espone sezioni di riferimento e mostri', function () {
       expect(Array.isArray(dm.sections)).toBe(true);
@@ -140,6 +209,22 @@
         expect(mon.name.length).toBeGreaterThan(0);
         expect(typeof mon.hp).toBe('number');
         expect(mon.hp).toBeGreaterThan(0);
+      });
+    });
+
+    it('espone le condizioni di stato con chiave, etichetta e descrizione', function () {
+      expect(Array.isArray(dm.conditions)).toBe(true);
+      expect(dm.conditions.length).toBeGreaterThan(0);
+      var seen = {};
+      dm.conditions.forEach(function (c) {
+        expect(typeof c.key).toBe('string');
+        expect(c.key.length).toBeGreaterThan(0);
+        expect(seen[c.key]).toBeFalsy();   // chiavi univoche
+        seen[c.key] = true;
+        expect(typeof c.it).toBe('string');
+        expect(c.it.length).toBeGreaterThan(0);
+        expect(typeof c.desc).toBe('string');
+        expect(c.desc.length).toBeGreaterThan(0);
       });
     });
   });

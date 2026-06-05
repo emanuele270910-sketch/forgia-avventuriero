@@ -18,6 +18,7 @@
     T.spells = require('../src/data/spells.js');
     T.encounter = require('../src/core/encounter.js');
     T.dm = require('../src/data/dm.js');
+    T.names = require('../src/core/names.js');
   }
   root.T = T;
   if (typeof module !== 'undefined' && module.exports) { module.exports = T; }

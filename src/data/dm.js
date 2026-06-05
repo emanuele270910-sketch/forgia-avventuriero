@@ -279,6 +279,35 @@
     }
   ];
 
+  // Condizioni di stato (SRD 5.1). key = nome canonico inglese (usato come id);
+  // it = etichetta italiana mostrata nell'interfaccia; desc = effetto in breve.
+  var conditions = [
+    { key: 'blinded', it: 'Accecato', en: 'Blinded', desc: 'Non vede: fallisce le prove che richiedono la vista; svantaggio ai propri attacchi, gli attacchi contro di lui hanno vantaggio.' },
+    { key: 'charmed', it: 'Affascinato', en: 'Charmed', desc: "Non può attaccare chi lo affascina, che ha vantaggio alle prove sociali nei suoi confronti." },
+    { key: 'deafened', it: 'Assordato', en: 'Deafened', desc: "Non sente: fallisce le prove che richiedono l'udito." },
+    { key: 'frightened', it: 'Spaventato', en: 'Frightened', desc: 'Svantaggio a prove e attacchi finché vede la fonte della paura; non può avvicinarsi volontariamente ad essa.' },
+    { key: 'grappled', it: 'Afferrato', en: 'Grappled', desc: 'Velocità ridotta a 0. Termina se chi lo tiene è incapacitato o se viene allontanato.' },
+    { key: 'incapacitated', it: 'Incapacitato', en: 'Incapacitated', desc: 'Non può compiere azioni né reazioni.' },
+    { key: 'invisible', it: 'Invisibile', en: 'Invisible', desc: 'Non visibile senza mezzi speciali. Vantaggio ai propri attacchi, svantaggio agli attacchi contro di lui.' },
+    { key: 'paralyzed', it: 'Paralizzato', en: 'Paralyzed', desc: 'Incapacitato e immobile; fallisce i TS su Forza e Destrezza; ogni colpo ravvicinato che lo raggiunge è un critico.' },
+    { key: 'petrified', it: 'Pietrificato', en: 'Petrified', desc: 'Tramutato in solido: incapacitato, resistenza a tutti i danni, immune a veleno e malattia.' },
+    { key: 'poisoned', it: 'Avvelenato', en: 'Poisoned', desc: 'Svantaggio ai tiri per colpire e alle prove di caratteristica.' },
+    { key: 'prone', it: 'Prono', en: 'Prone', desc: 'A terra: svantaggio agli attacchi; i colpi ravvicinati contro di lui hanno vantaggio, quelli a distanza svantaggio.' },
+    { key: 'restrained', it: 'Trattenuto', en: 'Restrained', desc: 'Velocità 0; svantaggio agli attacchi e ai TS su Destrezza; gli attacchi contro di lui hanno vantaggio.' },
+    { key: 'stunned', it: 'Stordito', en: 'Stunned', desc: 'Incapacitato; fallisce i TS su Forza e Destrezza; gli attacchi contro di lui hanno vantaggio.' },
+    { key: 'unconscious', it: 'Privo di sensi', en: 'Unconscious', desc: 'Incapacitato e prono, lascia cadere ciò che impugna; i colpi ravvicinati che lo raggiungono sono critici.' },
+    { key: 'exhaustion', it: 'Sfinimento', en: 'Exhaustion', desc: 'A livelli (1–6): svantaggio alle prove, poi alla velocità, agli attacchi e ai TS, fino alla morte al livello 6.' }
+  ];
+
+  // Rende le condizioni anche come sezione di riferimento richiudibile.
+  sections.push({
+    id: 'conditions',
+    title: 'Condizioni di stato',
+    icon: '☠️',
+    kind: 'list',
+    items: conditions.map(function (c) { return c.it + ' (' + c.en + '): ' + c.desc; })
+  });
+
   // Mostri iconici pronti da aggiungere al tracker (PF medi da SRD 5.1).
   var monsters = [
     { name: 'Goblin', cr: '1/4', xp: 50, ac: 15, hp: 7, note: 'Scimitarra +4 (1d6+2). Fuggire come azione bonus.' },
@@ -293,5 +322,5 @@
     { name: 'Tarrasque', cr: '30', xp: 155000, ac: 25, hp: 676, note: 'Rigenera, immune alla magia non leggendaria.' }
   ];
 
-  return { sections: sections, monsters: monsters };
+  return { sections: sections, monsters: monsters, conditions: conditions };
 });
