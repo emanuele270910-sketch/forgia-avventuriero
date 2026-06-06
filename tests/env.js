@@ -21,6 +21,7 @@
     T.names = require('../src/core/names.js');
     T.changelog = require('../src/data/changelog.js');
     T.builds = require('../src/core/builds.js');
+    T.dice = require('../src/core/dice.js');
   }
   root.T = T;
   if (typeof module !== 'undefined' && module.exports) { module.exports = T; }

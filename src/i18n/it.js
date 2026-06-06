@@ -18,6 +18,7 @@
       assistant: 'Assistente',
       build: 'Build',
       dm: 'DM',
+      dice: 'Dadi',
       patch: 'Novità'
     },
     common: {
@@ -221,6 +222,23 @@
       fixed: 'Corretto',
       version: 'Versione',
       empty: 'Nessuna novità da mostrare.'
+    },
+    dice: {
+      title: 'Lancio dei dadi',
+      intro: 'Scegli un dado, quanti lanciarne e un eventuale modificatore (per esempio 2d6+3), poi premi « Lancia »: i dadi rotolano a schermo e leggi sia i singoli risultati sia il totale.',
+      die: 'Dado',
+      quantity: 'Quantità',
+      modifier: 'Modificatore',
+      roll: 'Lancia i dadi',
+      rolling: 'Sto lanciando…',
+      resultTitle: 'Risultato',
+      total: 'Totale',
+      empty: 'Imposta il tuo tiro e premi « Lancia » per far rotolare i dadi.',
+      sumLabel: 'Dadi',
+      modLabel: 'Modificatore',
+      historyTitle: 'Tiri recenti',
+      historyClear: 'Cancella',
+      historyEmpty: 'Ancora nessun tiro: i tuoi ultimi lanci compariranno qui.'
     }
   };
 });

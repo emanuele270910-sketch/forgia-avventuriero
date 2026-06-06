@@ -77,6 +77,7 @@
     { id: '10min',    label: '10 minuti' },
     { id: '1hr',      label: '1 ora' },
     { id: '8hr',      label: '8 ore' },
+    { id: '12hr',     label: '12 ore' },
     { id: '24hr',     label: '24 ore' }
   ];
 

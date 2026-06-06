@@ -15,6 +15,7 @@
   var ITEM_BY_ID = index(ITEMS);
   var SPELL_BY_ID = index(SPELLS);
   var CHANGELOG = D.changelog || []; // cronologia versioni (Patch Notes)
+  var DICE = D.dice; // logica pura del lancio dei dadi (RNG iniettabile)
 
   // Build personalizzate dell'utente: logica pura in builds.js, stato persistito
   // in localStorage. `builds` è l'elenco salvato, `activeBuildId` quella in modifica.
@@ -127,6 +128,7 @@
       { id: 'assistant', label: t.nav.assistant },
       { id: 'build', label: t.nav.build },
       { id: 'dm', label: t.nav.dm },
+      { id: 'dice', label: t.nav.dice },
       { id: 'patch', label: t.nav.patch }
     ];
     $('tabs').innerHTML = tabs.map(function (tab, i) {
@@ -208,6 +210,19 @@
     $('patch-intro').textContent = t.patch.intro;
     $('patch-empty').textContent = t.patch.empty;
 
+    // Lancio dei dadi
+    $('dice-title').textContent = t.dice.title;
+    $('dice-intro').textContent = t.dice.intro;
+    $('lbl-dice-die').textContent = t.dice.die;
+    $('lbl-dice-qty').textContent = t.dice.quantity;
+    $('lbl-dice-mod').textContent = t.dice.modifier;
+    $('dice-roll').textContent = t.dice.roll;
+    $('dice-result-title').textContent = t.dice.resultTitle;
+    $('dice-empty').textContent = t.dice.empty;
+    $('dice-history-title').textContent = t.dice.historyTitle;
+    $('dice-history-clear').textContent = t.dice.historyClear;
+    $('dice-history-empty').textContent = t.dice.historyEmpty;
+
     $('drawer-close').setAttribute('aria-label', t.common.close);
   }
 
@@ -217,7 +232,7 @@
       var btn = e.target.closest('[data-tab]');
       if (!btn) { return; }
       var id = btn.getAttribute('data-tab');
-      ['items', 'spells', 'assistant', 'build', 'dm', 'patch'].forEach(function (p) {
+      ['items', 'spells', 'assistant', 'build', 'dm', 'dice', 'patch'].forEach(function (p) {
         $('panel-' + p).classList.toggle('hidden', p !== id);
       });
       Array.prototype.forEach.call($('tabs').children, function (c) {
@@ -1062,6 +1077,117 @@
     list.innerHTML = CHANGELOG.map(patchCard).join('');
   }
 
+  // ---- Lancio dei dadi -----------------------------------------------------
+  var diceState = { sides: 20, count: 1, modifier: 0 };
+  var diceHistory = [];
+  var diceRolling = false;
+  var diceAnimTimer = null;
+
+  function diceReadInputs() {
+    diceState.count = DICE.clampInt($('dice-qty').value, 1, DICE.MAX_COUNT, 1);
+    diceState.modifier = DICE.clampInt($('dice-mod').value, -99, 99, 0);
+  }
+  function diceUpdateNotation() { $('dice-notation').textContent = DICE.notation(diceState); }
+
+  function diceRenderTypes() {
+    $('dice-types').innerHTML = DICE.DICE.map(function (d) {
+      return '<button type="button" class="' + chipClass(d.sides === diceState.sides) + '" data-sides="' + d.sides + '">' + esc(d.label) + '</button>';
+    }).join('');
+  }
+  function diceRestyleTypes() {
+    Array.prototype.forEach.call($('dice-types').children, function (c) {
+      c.className = chipClass(Number(c.getAttribute('data-sides')) === diceState.sides);
+    });
+  }
+
+  function dieFaceHtml(value, cls) {
+    return '<span class="die-face ' + cls + '">' + esc(String(value)) + '</span>';
+  }
+  function diceModText(mod) {
+    if (mod > 0) { return ' + ' + mod; }
+    if (mod < 0) { return ' - ' + Math.abs(mod); }
+    return '';
+  }
+
+  function diceRenderHistory() {
+    var box = $('dice-history');
+    var empty = $('dice-history-empty');
+    if (!diceHistory.length) { box.innerHTML = ''; empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+    box.innerHTML = diceHistory.map(function (h) {
+      return '<div class="flex items-center justify-between gap-3 text-sm border-b border-edge/40 pb-2 last:border-0 last:pb-0">' +
+        '<span class="text-muted shrink-0">' + esc(h.notation) + '</span>' +
+        '<span class="text-parchment/80 truncate">' + esc(h.rolls.join(' + ') + diceModText(h.modifier)) + '</span>' +
+        '<span class="font-display text-gold text-lg shrink-0">' + h.total + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
+  // Mostra il risultato finale: facce ferme, totale e scomposizione.
+  function diceShowResult(result) {
+    $('dice-empty').classList.add('hidden');
+    $('dice-faces').innerHTML = result.rolls.map(function (v) { return dieFaceHtml(v, 'settled'); }).join('');
+    $('dice-total-wrap').classList.remove('hidden');
+    $('dice-total-label').textContent = t.dice.total;
+    var totalEl = $('dice-total');
+    totalEl.textContent = result.total;
+    totalEl.classList.remove('die-total'); void totalEl.offsetWidth; totalEl.classList.add('die-total'); // riavvia il "pop"
+    var bd = t.dice.sumLabel + ' ' + result.sum;
+    if (result.modifier) { bd += '  ·  ' + t.dice.modLabel + ' ' + (result.modifier > 0 ? '+' + result.modifier : result.modifier); }
+    $('dice-breakdown').textContent = bd;
+  }
+
+  function diceDoRoll() {
+    if (diceRolling) { return; }
+    diceReadInputs();
+    var result = DICE.roll(diceState); // RNG di default (Math.random)
+    diceRolling = true;
+    var btn = $('dice-roll');
+    btn.disabled = true;
+    btn.textContent = t.dice.rolling;
+    $('dice-total-wrap').classList.add('hidden');
+    $('dice-empty').classList.add('hidden');
+
+    // Animazione: le facce "rotolano" mostrando numeri casuali, poi si fermano.
+    var faces = $('dice-faces');
+    faces.innerHTML = result.rolls.map(function () { return dieFaceHtml('?', 'is-rolling'); }).join('');
+    var spins = 0;
+    diceAnimTimer = window.setInterval(function () {
+      spins++;
+      Array.prototype.forEach.call(faces.children, function (el) { el.textContent = DICE.rollDie(result.sides); });
+      if (spins >= 11) {
+        window.clearInterval(diceAnimTimer);
+        diceAnimTimer = null;
+        diceShowResult(result);
+        diceHistory.unshift({ notation: DICE.notation(diceState), rolls: result.rolls, modifier: result.modifier, total: result.total });
+        if (diceHistory.length > 8) { diceHistory.pop(); }
+        diceRenderHistory();
+        diceRolling = false;
+        btn.disabled = false;
+        btn.textContent = t.dice.roll;
+      }
+    }, 55);
+  }
+
+  function initDice() {
+    if (!DICE || !$('dice-types')) { return; } // modulo o markup assenti: salta senza rompere
+    diceRenderTypes();
+    diceUpdateNotation();
+    diceRenderHistory();
+
+    $('dice-types').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-sides]');
+      if (!btn) { return; }
+      diceState.sides = Number(btn.getAttribute('data-sides'));
+      diceRestyleTypes();
+      diceUpdateNotation();
+    });
+    $('dice-qty').addEventListener('input', function () { diceReadInputs(); diceUpdateNotation(); });
+    $('dice-mod').addEventListener('input', function () { diceReadInputs(); diceUpdateNotation(); });
+    $('dice-roll').addEventListener('click', diceDoRoll);
+    $('dice-history-clear').addEventListener('click', function () { diceHistory = []; diceRenderHistory(); });
+  }
+
   // ---- Build personalizzate ------------------------------------------------
   var BUILD_CTX = { itemById: ITEM_BY_ID, spellById: SPELL_BY_ID, classById: CLASS_BY_ID };
   var BUILD_VERDICT = {
@@ -1448,6 +1574,7 @@
     initDrawer();
     initDM();
     initBuild();
+    initDice();
     initPatch();
   }
 

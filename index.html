@@ -67,6 +67,31 @@
 
     .chip { transition: background-color .12s ease, color .12s ease, border-color .12s ease; }
 
+    /* Lancio dei dadi */
+    .die-face {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 3.25rem; height: 3.25rem; border-radius: .6rem;
+      background: linear-gradient(180deg, #241f33, #1b1726);
+      border: 1px solid #4a3e63; color: #ece5d3;
+      font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: 1.15rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 4px 12px rgba(0,0,0,.35);
+    }
+    .die-face.is-rolling { animation: die-tumble .5s linear infinite; color: #d9b65f; }
+    .die-face.settled { animation: die-pop .35s cubic-bezier(.22,.61,.36,1) both; border-color: #d9b65f; }
+    @keyframes die-tumble {
+      0%   { transform: rotate(0deg)   scale(1); }
+      25%  { transform: rotate(-12deg) scale(1.08); }
+      50%  { transform: rotate(10deg)  scale(.96); }
+      75%  { transform: rotate(-6deg)  scale(1.05); }
+      100% { transform: rotate(0deg)   scale(1); }
+    }
+    @keyframes die-pop {
+      0%   { transform: scale(.6); opacity: .2; }
+      60%  { transform: scale(1.12); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    .die-total { animation: die-pop .35s cubic-bezier(.22,.61,.36,1) both; }
+
     /* Bordo a sinistra colorato per rarità/scuola, impostato via style inline */
     .accent-left { border-left-width: 4px; }
     details > summary { list-style: none; cursor: pointer; }
@@ -333,6 +358,59 @@
     </section>
 
     <!-- PANEL: NOVITÀ / PATCH NOTES -->
+    <!-- PANEL: DADI -->
+    <section id="panel-dice" data-panel="dice" class="hidden">
+      <h2 id="dice-title" class="font-display text-lg text-gold mb-2"></h2>
+      <p id="dice-intro" class="text-sm text-muted mb-5 max-w-2xl"></p>
+
+      <div class="grid lg:grid-cols-2 gap-5">
+        <!-- Controlli del tiro -->
+        <div class="rounded-xl bg-panel/70 border border-edge p-5">
+          <label id="lbl-dice-die" class="block text-xs uppercase tracking-widest text-muted mb-2"></label>
+          <div id="dice-types" class="flex flex-wrap gap-2 mb-5"></div>
+
+          <div class="flex flex-wrap gap-4 mb-5">
+            <div>
+              <label id="lbl-dice-qty" for="dice-qty" class="block text-xs uppercase tracking-widest text-muted mb-1"></label>
+              <input id="dice-qty" type="number" min="1" max="20" value="1" inputmode="numeric"
+                class="w-24 bg-panel2 border border-edge rounded-lg px-3 py-2 text-parchment focus:border-gold outline-none" />
+            </div>
+            <div>
+              <label id="lbl-dice-mod" for="dice-mod" class="block text-xs uppercase tracking-widest text-muted mb-1"></label>
+              <input id="dice-mod" type="number" min="-99" max="99" value="0" inputmode="numeric"
+                class="w-24 bg-panel2 border border-edge rounded-lg px-3 py-2 text-parchment focus:border-gold outline-none" />
+            </div>
+          </div>
+
+          <button id="dice-roll" type="button"
+            class="w-full px-4 py-3 rounded-lg bg-gradient-to-b from-gold to-goldsoft text-ink font-semibold tracking-wide shadow-lg hover:brightness-105 transition"></button>
+          <p id="dice-notation" class="text-center text-sm text-muted mt-3"></p>
+        </div>
+
+        <!-- Risultato del tiro -->
+        <div class="rounded-xl bg-panel/70 border border-edge p-5 flex flex-col">
+          <h3 id="dice-result-title" class="text-xs uppercase tracking-widest text-muted mb-3"></h3>
+          <div id="dice-faces" class="flex flex-wrap gap-2 justify-center mb-4 min-h-[3.5rem] items-center"></div>
+          <div id="dice-total-wrap" class="hidden text-center mt-auto">
+            <div id="dice-total-label" class="text-xs uppercase tracking-widest text-muted"></div>
+            <div id="dice-total" class="die-total font-display text-5xl text-gold leading-none mt-1"></div>
+            <div id="dice-breakdown" class="text-xs text-muted mt-2"></div>
+          </div>
+          <p id="dice-empty" class="text-center text-muted py-10"></p>
+        </div>
+      </div>
+
+      <!-- Cronologia dei tiri -->
+      <div class="rounded-xl bg-panel/70 border border-edge p-5 mt-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 id="dice-history-title" class="text-xs uppercase tracking-widest text-muted"></h3>
+          <button id="dice-history-clear" type="button" class="text-xs text-muted hover:text-parchment underline-offset-2 hover:underline"></button>
+        </div>
+        <div id="dice-history" class="flex flex-col gap-2"></div>
+        <p id="dice-history-empty" class="text-sm text-muted"></p>
+      </div>
+    </section>
+
     <section id="panel-patch" data-panel="patch" class="hidden">
       <h2 id="patch-title" class="font-display text-lg text-gold mb-2"></h2>
       <p id="patch-intro" class="text-sm text-muted mb-5 max-w-2xl"></p>
@@ -369,6 +447,7 @@
   <script src="src/core/encounter.js"></script>
   <script src="src/core/names.js"></script>
   <script src="src/core/builds.js"></script>
+  <script src="src/core/dice.js"></script>
   <script src="src/ui/app.js"></script>
 </body>
 </html>

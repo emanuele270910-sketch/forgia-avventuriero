@@ -15,6 +15,23 @@
   // Voci in ordine cronologico inverso (la più recente per prima).
   return [
     {
+      version: '1.5.0',
+      date: '2026-06-06',
+      title: 'Lancio dei dadi e contenuti ufficiali',
+      added: [
+        'Nuova sezione « Dadi »: scegli un dado (d4, d6, d8, d10, d12, d20, d100), quanti lanciarne e un eventuale modificatore (per esempio 2d6+3), poi premi « Lancia » e guarda i dadi rotolare a schermo fino al risultato.',
+        'Cronologia dei tiri recenti: gli ultimi lanci restano a portata di mano, con il dettaglio dei singoli dadi e del totale.',
+        'Cinquanta nuovi incantesimi ufficiali, cinque per ogni livello dallo 0 al 9 — tra cui Vera trasformazione, Simulacro, Labirinto, Nube mortale e Gabbia di forza.',
+        'Quattro armi-artefatto leggendarie: la Spada di Kas, l’Ascia dei Signori dei Nani, la Bacchetta di Orcus e la Spada di Zariel.'
+      ],
+      improved: [
+        'Tutti i contenuti del sito sono ora ufficiali di D&D 5e: oggetti e incantesimi presi dai manuali (SRD, Manuale del DM, Guida di Xanathar), senza nulla di inventato.'
+      ],
+      fixed: [
+        'Le armi non ufficiali introdotte di recente sono state sostituite con armi magiche ufficiali, tra cui Lama solare, Lingua di fuoco, Spada vorpal e il Sacro vendicatore.'
+      ]
+    },
+    {
       version: '1.4.0',
       date: '2026-06-06',
       title: 'Arsenale da mischia',

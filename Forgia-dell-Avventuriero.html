@@ -67,6 +67,31 @@
 
     .chip { transition: background-color .12s ease, color .12s ease, border-color .12s ease; }
 
+    /* Lancio dei dadi */
+    .die-face {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 3.25rem; height: 3.25rem; border-radius: .6rem;
+      background: linear-gradient(180deg, #241f33, #1b1726);
+      border: 1px solid #4a3e63; color: #ece5d3;
+      font-family: 'Cinzel', Georgia, serif; font-weight: 700; font-size: 1.15rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 4px 12px rgba(0,0,0,.35);
+    }
+    .die-face.is-rolling { animation: die-tumble .5s linear infinite; color: #d9b65f; }
+    .die-face.settled { animation: die-pop .35s cubic-bezier(.22,.61,.36,1) both; border-color: #d9b65f; }
+    @keyframes die-tumble {
+      0%   { transform: rotate(0deg)   scale(1); }
+      25%  { transform: rotate(-12deg) scale(1.08); }
+      50%  { transform: rotate(10deg)  scale(.96); }
+      75%  { transform: rotate(-6deg)  scale(1.05); }
+      100% { transform: rotate(0deg)   scale(1); }
+    }
+    @keyframes die-pop {
+      0%   { transform: scale(.6); opacity: .2; }
+      60%  { transform: scale(1.12); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    .die-total { animation: die-pop .35s cubic-bezier(.22,.61,.36,1) both; }
+
     /* Bordo a sinistra colorato per rarità/scuola, impostato via style inline */
     .accent-left { border-left-width: 4px; }
     details > summary { list-style: none; cursor: pointer; }
@@ -333,6 +358,59 @@
     </section>
 
     <!-- PANEL: NOVITÀ / PATCH NOTES -->
+    <!-- PANEL: DADI -->
+    <section id="panel-dice" data-panel="dice" class="hidden">
+      <h2 id="dice-title" class="font-display text-lg text-gold mb-2"></h2>
+      <p id="dice-intro" class="text-sm text-muted mb-5 max-w-2xl"></p>
+
+      <div class="grid lg:grid-cols-2 gap-5">
+        <!-- Controlli del tiro -->
+        <div class="rounded-xl bg-panel/70 border border-edge p-5">
+          <label id="lbl-dice-die" class="block text-xs uppercase tracking-widest text-muted mb-2"></label>
+          <div id="dice-types" class="flex flex-wrap gap-2 mb-5"></div>
+
+          <div class="flex flex-wrap gap-4 mb-5">
+            <div>
+              <label id="lbl-dice-qty" for="dice-qty" class="block text-xs uppercase tracking-widest text-muted mb-1"></label>
+              <input id="dice-qty" type="number" min="1" max="20" value="1" inputmode="numeric"
+                class="w-24 bg-panel2 border border-edge rounded-lg px-3 py-2 text-parchment focus:border-gold outline-none" />
+            </div>
+            <div>
+              <label id="lbl-dice-mod" for="dice-mod" class="block text-xs uppercase tracking-widest text-muted mb-1"></label>
+              <input id="dice-mod" type="number" min="-99" max="99" value="0" inputmode="numeric"
+                class="w-24 bg-panel2 border border-edge rounded-lg px-3 py-2 text-parchment focus:border-gold outline-none" />
+            </div>
+          </div>
+
+          <button id="dice-roll" type="button"
+            class="w-full px-4 py-3 rounded-lg bg-gradient-to-b from-gold to-goldsoft text-ink font-semibold tracking-wide shadow-lg hover:brightness-105 transition"></button>
+          <p id="dice-notation" class="text-center text-sm text-muted mt-3"></p>
+        </div>
+
+        <!-- Risultato del tiro -->
+        <div class="rounded-xl bg-panel/70 border border-edge p-5 flex flex-col">
+          <h3 id="dice-result-title" class="text-xs uppercase tracking-widest text-muted mb-3"></h3>
+          <div id="dice-faces" class="flex flex-wrap gap-2 justify-center mb-4 min-h-[3.5rem] items-center"></div>
+          <div id="dice-total-wrap" class="hidden text-center mt-auto">
+            <div id="dice-total-label" class="text-xs uppercase tracking-widest text-muted"></div>
+            <div id="dice-total" class="die-total font-display text-5xl text-gold leading-none mt-1"></div>
+            <div id="dice-breakdown" class="text-xs text-muted mt-2"></div>
+          </div>
+          <p id="dice-empty" class="text-center text-muted py-10"></p>
+        </div>
+      </div>
+
+      <!-- Cronologia dei tiri -->
+      <div class="rounded-xl bg-panel/70 border border-edge p-5 mt-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 id="dice-history-title" class="text-xs uppercase tracking-widest text-muted"></h3>
+          <button id="dice-history-clear" type="button" class="text-xs text-muted hover:text-parchment underline-offset-2 hover:underline"></button>
+        </div>
+        <div id="dice-history" class="flex flex-col gap-2"></div>
+        <p id="dice-history-empty" class="text-sm text-muted"></p>
+      </div>
+    </section>
+
     <section id="panel-patch" data-panel="patch" class="hidden">
       <h2 id="patch-title" class="font-display text-lg text-gold mb-2"></h2>
       <p id="patch-intro" class="text-sm text-muted mb-5 max-w-2xl"></p>
@@ -437,6 +515,7 @@
     { id: '10min',    label: '10 minuti' },
     { id: '1hr',      label: '1 ora' },
     { id: '8hr',      label: '8 ore' },
+    { id: '12hr',     label: '12 ore' },
     { id: '24hr',     label: '24 ore' }
   ];
 
@@ -493,6 +572,7 @@
       assistant: 'Assistente',
       build: 'Build',
       dm: 'DM',
+      dice: 'Dadi',
       patch: 'Novità'
     },
     common: {
@@ -696,6 +776,23 @@
       fixed: 'Corretto',
       version: 'Versione',
       empty: 'Nessuna novità da mostrare.'
+    },
+    dice: {
+      title: 'Lancio dei dadi',
+      intro: 'Scegli un dado, quanti lanciarne e un eventuale modificatore (per esempio 2d6+3), poi premi « Lancia »: i dadi rotolano a schermo e leggi sia i singoli risultati sia il totale.',
+      die: 'Dado',
+      quantity: 'Quantità',
+      modifier: 'Modificatore',
+      roll: 'Lancia i dadi',
+      rolling: 'Sto lanciando…',
+      resultTitle: 'Risultato',
+      total: 'Totale',
+      empty: 'Imposta il tuo tiro e premi « Lancia » per far rotolare i dadi.',
+      sumLabel: 'Dadi',
+      modLabel: 'Modificatore',
+      historyTitle: 'Tiri recenti',
+      historyClear: 'Cancella',
+      historyEmpty: 'Ancora nessun tiro: i tuoi ultimi lanci compariranno qui.'
     }
   };
 });
@@ -1611,8 +1708,9 @@
       source: "SRD"
     },
 
-    // ================= ARSENALE DA MISCHIA (update 1.4.0) =================
-    // Almeno 5 armi da mischia per ogni rarità. Le voci "Forgia" sono originali.
+    // ============ ARSENALE DA MISCHIA (update 1.4.0 / 1.5.0) ============
+    // Armi da mischia UFFICIALI di D&D 5e (SRD, Manuale del DM, Guida di
+    // Xanathar, avventure ufficiali). Raggruppate per rarità.
 
     // --- Comuni ---
     {
@@ -1621,34 +1719,6 @@
       tags: ["arma", "spada", "argento"],
       descrizione: "Lama placcata d'argento: conta come arma d'argento (efficace contro licantropi e certi immondi) e come magica per superare resistenze e immunità.",
       source: "SRD"
-    },
-    {
-      id: "ember-dagger", name: "Ember Dagger", type: "weapon", rarity: "common",
-      attunement: false, bonus: { extra: "Una volta per turno +1 danno da fuoco; di notte emana un tenue bagliore" },
-      tags: ["arma", "pugnale", "fuoco"],
-      descrizione: "Un pugnale dalle braci sopite. Una volta per turno infliggi +1 danno da fuoco con un colpo; nell'oscurità la lama emana un fioco bagliore rossastro.",
-      source: "Forgia"
-    },
-    {
-      id: "ironwood-club", name: "Ironwood Club", type: "weapon", rarity: "common",
-      attunement: false, bonus: { extra: "Indistruttibile; conta come magica; vantaggio a spezzare oggetti e legature" },
-      tags: ["arma", "mazza", "legno"],
-      descrizione: "Una clava di legnoferro stagionato: praticamente indistruttibile e considerata magica. Concede vantaggio alle prove di Forza per spezzare oggetti o liberarsi da legature.",
-      source: "Forgia"
-    },
-    {
-      id: "hunters-handaxe", name: "Hunter's Handaxe", type: "weapon", rarity: "common",
-      attunement: false, bonus: { extra: "Se lanciata, alla fine del turno torna ai tuoi piedi; conta come magica" },
-      tags: ["arma", "ascia", "lancio"],
-      descrizione: "L'ascia del cacciatore è bilanciata per il lancio: dopo averla scagliata, alla fine del tuo turno rotola magicamente di nuovo ai tuoi piedi. Conta come magica.",
-      source: "Forgia"
-    },
-    {
-      id: "brineworn-spear", name: "Brineworn Spear", type: "weapon", rarity: "common",
-      attunement: false, bonus: { extra: "Sott'acqua niente penalità agli attacchi; non arrugginisce mai" },
-      tags: ["arma", "lancia", "acqua"],
-      descrizione: "Una lancia consumata dalla salsedine ma sempre affilata: sott'acqua non subisci penalità ai tiri per colpire e l'arma non si arrugginisce né si corrode.",
-      source: "Forgia"
     },
 
     // --- Non comuni ---
@@ -1667,25 +1737,25 @@
       source: "SRD"
     },
     {
-      id: "smoldering-scimitar", name: "Smoldering Scimitar", type: "weapon", rarity: "uncommon",
-      attunement: false, bonus: { extra: "Una volta al giorno avvolgi la lama di fuoco: +2d6 danni da fuoco al colpo successivo" },
-      tags: ["arma", "scimitarra", "fuoco"],
-      descrizione: "Una volta al giorno, con un'azione bonus, puoi far ardere la lama: il tuo prossimo colpo a segno entro 1 minuto infligge 2d6 danni da fuoco aggiuntivi.",
-      source: "Forgia"
+      id: "sword-of-vengeance", name: "Sword of Vengeance", type: "weapon", rarity: "uncommon",
+      attunement: true, bonus: { weaponBonus: 1, extra: "Maledetta: uno spirito vendicativo può costringerti a non smettere di combattere" },
+      tags: ["arma", "spada", "maledizione"],
+      descrizione: "Spada +1 abitata da uno spirito assetato di vendetta. È maledetta: mentre sei sintonizzato, se inizi il turno senza poter vedere un nemico potresti essere costretto a raggiungere e attaccare la creatura ostile più vicina.",
+      source: "SRD"
     },
     {
-      id: "thornvine-whip", name: "Thornvine Whip", type: "weapon", rarity: "uncommon",
-      attunement: false, bonus: { extra: "Gittata +1,5 m; con un colpo puoi tentare di far cadere prono il bersaglio" },
-      tags: ["arma", "frusta", "controllo"],
-      descrizione: "Una frusta di rovi vivi: la sua gittata in mischia aumenta di 1,5 metri e, quando colpisci, puoi tentare di trascinare a terra il bersaglio (prova di Forza contrastata).",
-      source: "Forgia"
+      id: "vicious-weapon", name: "Vicious Weapon", type: "weapon", rarity: "uncommon",
+      attunement: false, bonus: { extra: "Con un 20 naturale infliggi 7 danni extra del tipo dell'arma" },
+      tags: ["arma", "critico"],
+      descrizione: "Quando ottieni un 20 naturale al tiro per colpire con quest'arma, il bersaglio subisce 7 danni aggiuntivi dello stesso tipo inflitto dall'arma.",
+      source: "SRD"
     },
     {
-      id: "duelists-rapier", name: "Duelist's Rapier", type: "weapon", rarity: "uncommon",
-      attunement: true, bonus: { acBonus: 1, extra: "+1 alla CA mentre impugni solo questo stocco (in mischia, senza scudo)" },
-      tags: ["arma", "stocco", "difesa"],
-      descrizione: "Uno stocco da duellante perfettamente bilanciato: finché lo impugni in una sola mano, senza scudo né altre armi, ottieni un bonus di +1 alla Classe Armatura.",
-      source: "Forgia"
+      id: "javelin-of-lightning", name: "Javelin of Lightning", type: "weapon", rarity: "uncommon",
+      attunement: false, bonus: { extra: "Lanciato, diventa una saetta: 4d6 danni da fulmine in linea (TS Destrezza)" },
+      tags: ["arma", "giavellotto", "fulmine", "lancio"],
+      descrizione: "Questo giavellotto può essere scagliato come un fulmine: si trasforma in una saetta lunga 30 metri che infligge 4d6 danni da fulmine alle creature sulla linea (tiro salvezza su Destrezza per dimezzare), poi torna a essere un normale giavellotto.",
+      source: "SRD"
     },
 
     // --- Rari ---
@@ -1696,34 +1766,6 @@
       descrizione: "Spendendo una carica e usando un'azione, emani un'ondata di terrore: ogni creatura a tua scelta entro 9 metri deve superare un tiro salvezza su Saggezza o restare spaventata da te per 1 minuto.",
       source: "SRD"
     },
-    {
-      id: "thunderclap-warhammer", name: "Thunderclap Warhammer", type: "weapon", rarity: "rare",
-      attunement: true, bonus: { weaponBonus: 1, extra: "Una volta al giorno il colpo emette un tuono: +2d8 danni da tuono e il bersaglio può essere spinto via" },
-      tags: ["arma", "martello", "tuono"],
-      descrizione: "Martello da guerra +1. Una volta al giorno, quando colpisci, scateni un fragore di tuono: 2d8 danni da tuono aggiuntivi e il bersaglio, se più piccolo, può essere sospinto indietro di 3 metri.",
-      source: "Forgia"
-    },
-    {
-      id: "serpents-fang", name: "Serpent's Fang", type: "weapon", rarity: "rare",
-      attunement: true, bonus: { weaponBonus: 1, extra: "Ignori la resistenza al veleno; una volta al giorno +3d6 danni da veleno" },
-      tags: ["arma", "pugnale", "veleno"],
-      descrizione: "Pugnale +1 a forma di zanna. I tuoi colpi ignorano la resistenza al veleno e, una volta al giorno, puoi iniettare un potente tossico per infliggere 3d6 danni da veleno aggiuntivi (TS Costituzione dimezza).",
-      source: "Forgia"
-    },
-    {
-      id: "reapers-glaive", name: "Reaper's Glaive", type: "weapon", rarity: "rare",
-      attunement: true, bonus: { extra: "Gittata +1,5 m; +1d8 danni necrotici contro bersagli sotto metà PF" },
-      tags: ["arma", "falce", "necrotico"],
-      descrizione: "La falce del mietitore ha una gittata in mischia maggiore di 1,5 metri. Contro una creatura ridotta a metà dei suoi punti ferita o meno, infligge 1d8 danni necrotici aggiuntivi.",
-      source: "Forgia"
-    },
-    {
-      id: "bearclaw-greataxe", name: "Bearclaw Greataxe", type: "weapon", rarity: "rare",
-      attunement: true, bonus: { weaponBonus: 1, extra: "Con un colpo critico ottieni PF temporanei pari al tuo livello" },
-      tags: ["arma", "ascia", "furia"],
-      descrizione: "Un'ascia bipenne +1 intagliata come una zampa d'orso. Quando metti a segno un colpo critico, ottieni un numero di punti ferita temporanei pari al tuo livello e ruggisci con furia primordiale.",
-      source: "Forgia"
-    },
 
     // --- Molto rari ---
     {
@@ -1732,34 +1774,6 @@
       tags: ["arma", "scimitarra", "velocità"],
       descrizione: "Scimitarra +2 dalla leggerezza innaturale. A ogni tuo turno puoi effettuare un attacco aggiuntivo con essa usando un'azione bonus.",
       source: "SRD"
-    },
-    {
-      id: "dawnbringer", name: "Dawnbringer", type: "weapon", rarity: "very-rare",
-      attunement: true, bonus: { weaponBonus: 1, extra: "Emana luce solare; +2d6 danni radiosi a non morti e immondi, che hanno svantaggio contro di te" },
-      tags: ["arma", "spada", "radioso"],
-      descrizione: "Una spada lunga che, evocata, si riveste di luce solare entro 9 metri. Infligge 2d6 danni radiosi aggiuntivi a non morti e immondi, che hanno svantaggio ai tiri per colpire contro chi la impugna.",
-      source: "Forgia"
-    },
-    {
-      id: "stormcaller-halberd", name: "Stormcaller Halberd", type: "weapon", rarity: "very-rare",
-      attunement: true, bonus: { weaponBonus: 1, extra: "+1d8 danni da fulmine; una volta al giorno scateni una saetta in linea (TS Destrezza, 4d8)" },
-      tags: ["arma", "alabarda", "fulmine"],
-      descrizione: "Alabarda +1 percorsa da scariche elettriche: ogni colpo infligge 1d8 danni da fulmine aggiuntivi. Una volta al giorno puoi scatenare una saetta in linea retta di 9 metri (TS Destrezza per dimezzare 4d8 danni da fulmine).",
-      source: "Forgia"
-    },
-    {
-      id: "quicksilver-rapier", name: "Quicksilver Rapier", type: "weapon", rarity: "very-rare",
-      attunement: true, bonus: { weaponBonus: 2, extra: "Quando un nemico ti manca in mischia, puoi reagire con un attacco" },
-      tags: ["arma", "stocco", "riposta"],
-      descrizione: "Stocco +2 d'argentovivo, rapidissimo. Quando una creatura ti attacca in mischia e manca, puoi usare la reazione per effettuare un attacco contro di essa.",
-      source: "Forgia"
-    },
-    {
-      id: "earthshaker-maul", name: "Earthshaker Maul", type: "weapon", rarity: "very-rare",
-      attunement: true, bonus: { weaponBonus: 1, extra: "Una volta al giorno colpisci il suolo: onda d'urto in 4,5 m (TS Forza, proni + 3d10 contundenti)" },
-      tags: ["arma", "maglio", "terremoto"],
-      descrizione: "Un enorme maglio +1. Una volta al giorno puoi abbatterlo al suolo con un'azione: tutte le creature entro 4,5 metri subiscono 3d10 danni contundenti e cadono proni se non superano un tiro salvezza su Forza.",
-      source: "Forgia"
     },
 
     // --- Leggendari ---
@@ -1771,69 +1785,41 @@
       source: "SRD"
     },
     {
-      id: "worldcleaver-greataxe", name: "Worldcleaver Greataxe", type: "weapon", rarity: "legendary",
-      attunement: true, bonus: { weaponBonus: 3, extra: "Critico con 19-20 a danni massimi; una volta al giorno fendi il terreno in una voragine" },
-      tags: ["arma", "ascia", "critico"],
-      descrizione: "Ascia bipenne +3 dalla potenza titanica. Metti a segno un colpo critico con un tiro di 19 o 20 e i tuoi critici infliggono danni massimi. Una volta al giorno puoi spaccare il terreno, creando una voragine che intrappola i nemici.",
-      source: "Forgia"
-    },
-    {
-      id: "kingsbane", name: "Kingsbane", type: "weapon", rarity: "legendary",
-      attunement: true, bonus: { weaponBonus: 3, extra: "Ignori l'immunità ai critici; una volta al giorno il colpo impedisce al bersaglio di curarsi per 1 minuto" },
-      tags: ["arma", "stocco", "esecuzione"],
-      descrizione: "Stocco +3 forgiato per abbattere i potenti. Ignori la resistenza e l'immunità ai colpi critici; una volta al giorno, quando colpisci, il bersaglio non può recuperare punti ferita per 1 minuto (TS Costituzione nega).",
-      source: "Forgia"
-    },
-    {
-      id: "phoenixfire-blade", name: "Phoenixfire Blade", type: "weapon", rarity: "legendary",
-      attunement: true, bonus: { weaponBonus: 3, extra: "+2d6 danni da fuoco e resistenza al fuoco; una volta al giorno, se cadi a 0 PF, rinasci con metà PF in un'esplosione di fiamme" },
-      tags: ["arma", "spada", "fuoco", "rinascita"],
-      descrizione: "Spada lunga +3 avvolta da fiamme eterne: infligge 2d6 danni da fuoco aggiuntivi e ti dona resistenza al fuoco. Una volta al giorno, quando scendi a 0 punti ferita, rinasci come una fenice con metà dei tuoi punti ferita ed esplodi in fiamme attorno a te.",
-      source: "Forgia"
-    },
-    {
-      id: "stormlords-trident", name: "Stormlord's Trident", type: "weapon", rarity: "legendary",
-      attunement: true, bonus: { weaponBonus: 3, extra: "Comandi vento e fulmini; una volta al giorno richiami una saetta dal cielo (8d6 da fulmine)" },
-      tags: ["arma", "tridente", "tempesta"],
-      descrizione: "Tridente +3 del signore delle tempeste. Una volta al giorno puoi richiamare una saetta dal cielo su un bersaglio entro 36 metri: 8d6 danni da fulmine (TS Destrezza dimezza). Quando lo impugni, vento e pioggia ti obbediscono.",
-      source: "Forgia"
+      id: "blackrazor", name: "Blackrazor", type: "weapon", rarity: "legendary",
+      attunement: true, bonus: { weaponBonus: 3, extra: "Spadone senziente divora-anime: chi uccidi gli dona PF temporanei e bonus a te" },
+      tags: ["arma", "spadone", "senziente", "anime", "necrotico"],
+      descrizione: "Spadone +3 nero come la notte, senziente e affamato di anime. Quando riduci a 0 punti ferita una creatura, la spada ne divora l'anima: ottieni punti ferita temporanei e, finché durano, bonus alle prove e un attacco aggiuntivo. Non può cibarsi di non morti né di costrutti.",
+      source: "Manuale del DM"
     },
 
     // --- Artefatti ---
     {
-      id: "worldforge-maul", name: "Maul of the Worldforge", type: "weapon", rarity: "artifact",
-      attunement: true, bonus: { weaponBonus: 3, extra: "Plasma pietra e metallo; ogni colpo infligge danni da forza che ignorano ogni resistenza" },
-      tags: ["arma", "maglio", "forgia", "artefatto"],
-      descrizione: "Il maglio con cui, narra la leggenda, furono forgiate le montagne. Arma +3 i cui colpi infliggono danni da forza che ignorano ogni resistenza e immunità; impugnandolo puoi rimodellare pietra e metallo a tuo piacimento.",
-      source: "Forgia"
+      id: "sword-of-kas", name: "Sword of Kas", type: "weapon", rarity: "artifact",
+      attunement: true, bonus: { weaponBonus: 3, extra: "Spadone forgiato per uccidere Vecna; critici ampliati, danni necrotici e poteri oscuri" },
+      tags: ["arma", "spada", "artefatto", "leggenda"],
+      descrizione: "L'arma del temibile luogotenente del lich Vecna. Spada +3 dalla volontà spietata: amplia la portata dei colpi critici, infligge danni necrotici aggiuntivi e concede poteri sovrannaturali a chi la brandisce, spingendolo però alla violenza e alla conquista.",
+      source: "Manuale del DM"
     },
     {
-      id: "firstdawn-greatsword", name: "Blade of the First Dawn", type: "weapon", rarity: "artifact",
-      attunement: true, bonus: { weaponBonus: 3, saveBonus: 2, extra: "Luce solare accecante; i non morti colpiti possono essere disintegrati; sei immune alla paura" },
-      tags: ["arma", "spadone", "radioso", "artefatto"],
-      descrizione: "Uno spadone +3 che racchiude la prima alba del mondo. Sprigiona luce solare accecante e i non morti che colpisce devono superare un tiro salvezza o essere disintegrati. Mentre lo impugni sei immune alla condizione spaventato e concedi +2 ai tiri salvezza.",
-      source: "Forgia"
+      id: "axe-of-the-dwarvish-lords", name: "Axe of the Dwarvish Lords", type: "weapon", rarity: "artifact",
+      attunement: true, bonus: { weaponBonus: 3, extra: "Ascia bipenne sacra ai nani; scurovisione, resistenze e maestria da leggendario forgiatore" },
+      tags: ["arma", "ascia", "artefatto", "nani"],
+      descrizione: "L'artefatto sacro dei re nani. Ascia bipenne +3 che dona a chi la brandisce scurovisione, comprensione delle lingue naniche, resistenza a fuoco e veleno e l'abilità di un leggendario forgiatore. Può evocare elementali e incenerire i nemici.",
+      source: "Manuale del DM"
     },
     {
-      id: "the-devourer-scythe", name: "The Devourer", type: "weapon", rarity: "artifact",
-      attunement: true, bonus: { weaponBonus: 3, extra: "Le creature uccise non possono essere resuscitate facilmente; recuperi PF e talvolta uno slot incantesimo" },
-      tags: ["arma", "falce", "anime", "artefatto"],
-      descrizione: "Una falce +3 che divora le anime. Le creature uccise con essa non possono essere riportate in vita con magie inferiori al 9° livello; ogni anima mietuta ti ristora punti ferita e, di tanto in tanto, uno slot incantesimo speso.",
-      source: "Forgia"
+      id: "wand-of-orcus", name: "Wand of Orcus", type: "weapon", rarity: "artifact",
+      attunement: true, bonus: { weaponBonus: 3, extra: "Si impugna come una mazza +3; necromanzia, evoca non morti e corrompe il portatore" },
+      tags: ["arma", "mazza", "artefatto", "non morti", "necromanzia"],
+      descrizione: "Il bastone-mazza del Principe dei Non Morti, sormontato da un teschio. Funziona come una mazza magica +3 che infligge danni necrotici aggiuntivi. Permette di lanciare potenti incantesimi di morte ed evocare orde di non morti, ma corrompe l'anima di chi osa brandirlo.",
+      source: "Manuale del DM"
     },
     {
-      id: "crownward-blade", name: "Crownward, the Oathblade", type: "weapon", rarity: "artifact",
-      attunement: true, bonus: { weaponBonus: 3, saveBonus: 2, extra: "Aura protettiva per gli alleati; una volta al giorno riporti in vita un compagno caduto" },
-      tags: ["arma", "spada", "giuramento", "artefatto"],
-      descrizione: "La lama del giuramento dei re leggendari. Spada +3 che irradia un'aura entro 9 metri: gli alleati ottengono +2 ai tiri salvezza. Una volta al giorno puoi toccare un compagno caduto e riportarlo in vita con metà dei suoi punti ferita.",
-      source: "Forgia"
-    },
-    {
-      id: "stormheart-greataxe", name: "Stormheart", type: "weapon", rarity: "artifact",
-      attunement: true, bonus: { weaponBonus: 3, extra: "Fulmini e tuoni a ogni colpo (+1d8 fulmine, +1d8 tuono) e resistenza al fulmine; una volta al giorno scateni un uragano" },
-      tags: ["arma", "ascia", "tempesta", "artefatto"],
-      descrizione: "Un'ascia bipenne +3 che racchiude il cuore di una tempesta. Ogni colpo libera fulmini e tuoni (1d8 da fulmine e 1d8 da tuono aggiuntivi) e ti dona resistenza al fulmine. Una volta al giorno puoi scatenare un uragano che flagella il campo di battaglia.",
-      source: "Forgia"
+      id: "sword-of-zariel", name: "Sword of Zariel", type: "weapon", rarity: "artifact",
+      attunement: true, bonus: { weaponBonus: 3, extra: "Lama celestiale dell'arcidiavolo caduta; a chi ne è degno dona immunità al fuoco, volo e poteri radiosi" },
+      tags: ["arma", "spada", "artefatto", "celestiale", "radioso"],
+      descrizione: "La spada un tempo appartenuta all'angelo Zariel, prima della sua caduta. Spada lunga +3 che, in mano a chi ne è degno, concede immunità al fuoco, ali per volare, resistenza ai danni e la capacità di colpire e curare con luce radiosa: un faro di speranza nell'Avernus.",
+      source: "Discesa nell'Avernus"
     }
   ];
 });
@@ -2556,6 +2542,279 @@
       castingTime: "action", range: "Personale", components: { v: true, s: true, m: false },
       duration: "1 minuto", concentration: false, ritual: false,
       descrizione: "Alla fine di ogni tuo turno tira 1d20: con 11 o più svanisci nel Piano Etereo fino all'inizio del tuo turno successivo, diventando irraggiungibile dal piano materiale.",
+      source: "SRD" },
+
+    // ============== AGGIUNTE UFFICIALI (update 1.5.0) ==============
+    // 5 incantesimi ufficiali (SRD 5.1) per ogni livello, da 0 a 9.
+
+    // --- Trucchetti (livello 0) ---
+    { id: "shillelagh", name: "Shillelagh", level: 0, school: "transmutation", classes: ["druid"],
+      castingTime: "bonus", range: "Contatto", components: { v: true, s: true, m: true, material: "vischio, un trifoglio e un randello o bastone ferrato" },
+      duration: "1 minuto", concentration: false, ritual: false,
+      descrizione: "Imbevi di potere naturale un randello o un bastone ferrato: per 1 minuto usi Saggezza per i tiri per colpire e i danni con esso, che infligge 1d8 danni contundenti magici.",
+      source: "SRD" },
+    { id: "thorn-whip", name: "Thorn Whip", level: 0, school: "transmutation", classes: ["druid"],
+      castingTime: "action", range: "9 metri", components: { v: true, s: true, m: true, material: "lo stelo di una pianta spinosa" },
+      duration: "Istantanea", concentration: false, ritual: false,
+      descrizione: "Una frusta di rovi colpisce una creatura (tiro per colpire): 1d6 danni perforanti e, se Grande o più piccola, la trascini fino a 3 metri verso di te.",
+      higherLevels: "I danni aumentano di 1d6 al 5°, 11° e 17° livello.", source: "SRD" },
+    { id: "message", name: "Message", level: 0, school: "transmutation", classes: ["bard", "sorcerer", "wizard"],
+      castingTime: "action", range: "36 metri", components: { v: true, s: true, m: true, material: "un pezzo di filo di rame" },
+      duration: "1 round", concentration: false, ritual: false,
+      descrizione: "Sussurri un messaggio a una creatura entro gittata: solo lei lo ode e può risponderti in un bisbiglio. La magia supera gli ostacoli ma è bloccata da metallo o barriere magiche.",
+      source: "SRD" },
+    { id: "true-strike", name: "True Strike", level: 0, school: "divination", classes: ["bard", "sorcerer", "warlock", "wizard"],
+      castingTime: "action", range: "9 metri", components: { v: false, s: true, m: false },
+      duration: "Concentrazione, fino a 1 round", concentration: true, ritual: false,
+      descrizione: "Indichi un bersaglio e intuisci le sue difese: al tuo prossimo turno ottieni vantaggio al primo tiro per colpire contro di esso, se ancora entro gittata.",
+      source: "SRD" },
+    { id: "blade-ward", name: "Blade Ward", level: 0, school: "abjuration", classes: ["bard", "sorcerer", "warlock", "wizard"],
+      castingTime: "action", range: "Personale", components: { v: true, s: true, m: false },
+      duration: "1 round", concentration: false, ritual: false,
+      descrizione: "Tracci segni di protezione nell'aria: fino alla fine del tuo prossimo turno hai resistenza ai danni contundenti, perforanti e da taglio delle armi.",
+      source: "SRD" },
+
+    // --- Livello 1 ---
+    { id: "ray-of-sickness", name: "Ray of Sickness", level: 1, school: "necromancy", classes: ["sorcerer", "wizard"],
+      castingTime: "action", range: "18 metri", components: { v: true, s: true, m: false },
+      duration: "Istantanea", concentration: false, ritual: false,
+      descrizione: "Un raggio di energia malsana colpisce una creatura (tiro per colpire): 2d8 danni da veleno e, se fallisce un TS su Costituzione, è avvelenata fino alla fine del tuo prossimo turno.",
+      higherLevels: "I danni aumentano di 1d8 per ogni slot oltre il 1° livello.", source: "SRD" },
+    { id: "witch-bolt", name: "Witch Bolt", level: 1, school: "evocation", classes: ["sorcerer", "warlock", "wizard"],
+      castingTime: "action", range: "9 metri", components: { v: true, s: true, m: true, material: "un ramoscello colpito da un fulmine" },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Un arco di energia colpisce una creatura (tiro per colpire): 1d12 danni da fulmine. Nei turni successivi puoi usare l'azione per infliggere automaticamente altri 1d12, finché resta in gittata.",
+      higherLevels: "Il danno iniziale aumenta di 1d12 per ogni slot oltre il 1°.", source: "SRD" },
+    { id: "sanctuary", name: "Sanctuary", level: 1, school: "abjuration", classes: ["cleric"],
+      castingTime: "bonus", range: "9 metri", components: { v: true, s: true, m: true, material: "un piccolo specchio d'argento" },
+      duration: "1 minuto", concentration: false, ritual: false,
+      descrizione: "Proteggi una creatura: chi vuole attaccarla o colpirla con un incantesimo deve prima superare un TS su Saggezza, altrimenti deve scegliere un altro bersaglio o sprecare l'azione. L'effetto termina se la creatura protetta attacca o lancia magie offensive.",
+      source: "SRD" },
+    { id: "protection-from-evil-and-good", name: "Protection from Evil and Good", level: 1, school: "abjuration", classes: ["cleric", "paladin", "warlock", "wizard"],
+      castingTime: "action", range: "Contatto", components: { v: true, s: true, m: true, material: "acqua santa o polvere d'argento" },
+      duration: "Concentrazione, fino a 10 minuti", concentration: true, ritual: false,
+      descrizione: "Una creatura toccata è protetta da immondi, non morti, folletti, melme e aberrazioni: queste hanno svantaggio ad attaccarla e non possono ammaliarla, spaventarla o possederla.",
+      source: "SRD" },
+    { id: "find-familiar", name: "Find Familiar", level: 1, school: "conjuration", classes: ["wizard"],
+      castingTime: "1hr", range: "3 metri", components: { v: true, s: true, m: true, material: "carbone, incenso ed erbe per 10 mo, bruciati in un braciere d'argento" },
+      duration: "Istantanea", concentration: false, ritual: true,
+      descrizione: "Evochi uno spirito famiglio in forma di piccola bestia, legato a te: comunichi con esso telepaticamente, puoi vedere attraverso i suoi sensi e lanciare incantesimi a contatto tramite lui.",
+      source: "SRD" },
+
+    // --- Livello 2 ---
+    { id: "shatter", name: "Shatter", level: 2, school: "evocation", classes: ["bard", "sorcerer", "warlock", "wizard"],
+      castingTime: "action", range: "18 metri", components: { v: true, s: true, m: true, material: "una scheggia di mica" },
+      duration: "Istantanea", concentration: false, ritual: false,
+      descrizione: "Un fragore dirompente esplode in una sfera di 3 metri di raggio: le creature subiscono 3d8 danni da tuono (TS Costituzione dimezza), con svantaggio per chi è fatto di materia inorganica come cristallo o metallo.",
+      higherLevels: "I danni aumentano di 1d8 per ogni slot oltre il 2°.", source: "SRD" },
+    { id: "blur", name: "Blur", level: 2, school: "illusion", classes: ["sorcerer", "wizard"],
+      castingTime: "action", range: "Personale", components: { v: true, s: false, m: false },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "I tuoi contorni si fanno indistinti e tremolanti: le creature hanno svantaggio ai tiri per colpire contro di te, salvo che non si affidino a sensi diversi dalla vista.",
+      source: "SRD" },
+    { id: "levitate", name: "Levitate", level: 2, school: "transmutation", classes: ["sorcerer", "wizard"],
+      castingTime: "action", range: "18 metri", components: { v: true, s: true, m: true, material: "un cappio di cuoio o un filo d'oro piegato" },
+      duration: "Concentrazione, fino a 10 minuti", concentration: true, ritual: false,
+      descrizione: "Una creatura o un oggetto consenziente (fino a circa 250 kg) si solleva verticalmente fino a 6 metri e resta sospeso, muovendosi solo verso l'alto o il basso.",
+      source: "SRD" },
+    { id: "detect-thoughts", name: "Detect Thoughts", level: 2, school: "divination", classes: ["bard", "sorcerer", "wizard"],
+      castingTime: "action", range: "Personale", components: { v: true, s: true, m: true, material: "una moneta di rame" },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Leggi i pensieri superficiali delle creature entro 9 metri; concentrandoti puoi sondare più a fondo la mente di una di esse (TS su Saggezza per resistere e accorgersi dell'intrusione).",
+      source: "SRD" },
+    { id: "zone-of-truth", name: "Zone of Truth", level: 2, school: "enchantment", classes: ["bard", "cleric", "paladin"],
+      castingTime: "action", range: "18 metri", components: { v: true, s: true, m: false },
+      duration: "10 minuti", concentration: false, ritual: false,
+      descrizione: "In una sfera di 4,5 metri di raggio le creature che falliscono un TS su Carisma non possono mentire deliberatamente, pur potendo eludere e tacere. Una creatura sa se si trova nell'area.",
+      source: "SRD" },
+
+    // --- Livello 3 ---
+    { id: "fear", name: "Fear", level: 3, school: "illusion", classes: ["bard", "sorcerer", "warlock", "wizard"],
+      castingTime: "action", range: "Personale (cono di 9 metri)", components: { v: true, s: true, m: true, material: "una penna bianca o il cuore di una gallina" },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Proietti un'immagine terrificante in un cono di 9 metri: ogni creatura nell'area fa un TS su Saggezza o lascia cadere ciò che impugna ed è spaventata, fuggendo da te finché può vederti.",
+      source: "SRD" },
+    { id: "stinking-cloud", name: "Stinking Cloud", level: 3, school: "conjuration", classes: ["bard", "sorcerer", "wizard"],
+      castingTime: "action", range: "27 metri", components: { v: true, s: true, m: true, material: "un uovo marcio o alcune foglie di cavolo guasto" },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Una nube di gas nauseante riempie una sfera di 6 metri di raggio: le creature che falliscono un TS su Costituzione perdono l'azione, sopraffatte dai conati.",
+      source: "SRD" },
+    { id: "sleet-storm", name: "Sleet Storm", level: 3, school: "conjuration", classes: ["druid", "sorcerer", "wizard"],
+      castingTime: "action", range: "45 metri", components: { v: true, s: true, m: true, material: "una manciata di polvere e qualche goccia d'acqua" },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Ghiaccio e nevischio coprono un'ampia area: il terreno diventa difficile e scivoloso (chi vi entra rischia di cadere prono), la visibilità è pesantemente oscurata e gli incantatori nell'area faticano a concentrarsi.",
+      source: "SRD" },
+    { id: "bestow-curse", name: "Bestow Curse", level: 3, school: "necromancy", classes: ["bard", "cleric", "wizard"],
+      castingTime: "action", range: "Contatto", components: { v: true, s: true, m: false },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Tocchi una creatura che, se fallisce un TS su Saggezza, riceve una maledizione a tua scelta: svantaggio a una caratteristica, agli attacchi contro di te, perdita dell'azione con un 1d4, oppure +1d8 danni necrotici dai tuoi colpi.",
+      higherLevels: "Con slot più alti la durata aumenta (fino a permanente con uno slot di 9°).", source: "SRD" },
+    { id: "sending", name: "Sending", level: 3, school: "evocation", classes: ["bard", "cleric", "wizard"],
+      castingTime: "action", range: "Illimitata", components: { v: true, s: true, m: true, material: "un pezzo di filo di rame sottile" },
+      duration: "Istantanea", concentration: false, ritual: false,
+      descrizione: "Invii un messaggio di 25 parole a una creatura che conosci, ovunque si trovi sullo stesso piano: può rispondere all'istante. Tra piani diversi il messaggio rischia di non arrivare.",
+      source: "SRD" },
+
+    // --- Livello 4 ---
+    { id: "fire-shield", name: "Fire Shield", level: 4, school: "evocation", classes: ["wizard"],
+      castingTime: "action", range: "Personale", components: { v: true, s: true, m: true, material: "un po' di fosforo o una lucciola" },
+      duration: "10 minuti", concentration: false, ritual: false,
+      descrizione: "Fiamme avvolgono il tuo corpo, calde o gelide a tua scelta: hai resistenza ai danni da fuoco oppure da freddo e, quando una creatura ti colpisce in mischia, subisce 2d8 danni da fuoco o da freddo.",
+      source: "SRD" },
+    { id: "phantasmal-killer", name: "Phantasmal Killer", level: 4, school: "illusion", classes: ["wizard"],
+      castingTime: "action", range: "36 metri", components: { v: true, s: true, m: false },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Dai forma alla paura più profonda del bersaglio: TS su Saggezza o diventa spaventato e subisce 4d10 danni psichici; a ogni suo turno ripete il TS subendo altri danni finché non riesce.",
+      higherLevels: "I danni aumentano di 1d10 per ogni slot oltre il 4°.", source: "SRD" },
+    { id: "black-tentacles", name: "Evard's Black Tentacles", level: 4, school: "conjuration", classes: ["wizard"],
+      castingTime: "action", range: "27 metri", components: { v: true, s: true, m: true, material: "un tentacolo di piovra o di calamaro" },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Tentacoli neri ricoprono un quadrato di 6 metri di lato (terreno difficile): le creature nell'area subiscono 3d6 danni contundenti e vengono afferrate e trattenute se falliscono un TS su Destrezza.",
+      source: "SRD" },
+    { id: "dominate-beast", name: "Dominate Beast", level: 4, school: "enchantment", classes: ["druid", "sorcerer"],
+      castingTime: "action", range: "18 metri", components: { v: true, s: true, m: false },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Soggioghi una bestia (TS su Saggezza): finché ti concentri puoi impartirle ordini telepatici e, spendendo l'azione, controllarla del tutto. Ogni volta che subisce danni può ripetere il TS.",
+      higherLevels: "Slot 5° → 10 minuti, 6° → 1 ora, 7° o più → 8 ore.", source: "SRD" },
+    { id: "divination", name: "Divination", level: 4, school: "divination", classes: ["cleric"],
+      castingTime: "action", range: "Personale", components: { v: true, s: true, m: true, material: "incenso e un'offerta sacrificale per almeno 25 mo" },
+      duration: "Istantanea", concentration: false, ritual: true,
+      descrizione: "Attraverso un rito sacro poni una domanda su un evento entro 7 giorni e ricevi dalla tua divinità un presagio veritiero, per quanto breve e spesso criptico.",
+      source: "SRD" },
+
+    // --- Livello 5 ---
+    { id: "cloudkill", name: "Cloudkill", level: 5, school: "conjuration", classes: ["sorcerer", "wizard"],
+      castingTime: "action", range: "36 metri", components: { v: true, s: true, m: false },
+      duration: "Concentrazione, fino a 10 minuti", concentration: true, ritual: false,
+      descrizione: "Una nebbia di veleno verde riempie una sfera di 6 metri di raggio e ogni round avanza di 3 metri lontano da te: chi vi si trova subisce 5d8 danni da veleno (TS Costituzione dimezza).",
+      higherLevels: "I danni aumentano di 1d8 per ogni slot oltre il 5°.", source: "SRD" },
+    { id: "wall-of-stone", name: "Wall of Stone", level: 5, school: "evocation", classes: ["druid", "sorcerer", "wizard"],
+      castingTime: "action", range: "36 metri", components: { v: true, s: true, m: true, material: "un pezzetto di granito" },
+      duration: "Concentrazione, fino a 10 minuti", concentration: true, ritual: false,
+      descrizione: "Eriggi un muro di pietra solida (pannelli per circa 30 metri di superficie) che può sbarrare passaggi, intrappolare creature o creare ponti. Se resta in piedi per 10 minuti diventa permanente.",
+      source: "SRD" },
+    { id: "animate-objects", name: "Animate Objects", level: 5, school: "transmutation", classes: ["bard", "sorcerer", "wizard"],
+      castingTime: "action", range: "36 metri", components: { v: true, s: true, m: false },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Fino a 10 oggetti non magici prendono vita e combattono ai tuoi ordini: gli oggetti più piccoli colpiscono più spesso, quelli più grandi infliggono più danni.",
+      higherLevels: "Animi 2 oggetti in più per ogni slot oltre il 5°.", source: "SRD" },
+    { id: "geas", name: "Geas", level: 5, school: "enchantment", classes: ["bard", "cleric", "druid", "paladin", "wizard"],
+      castingTime: "1min", range: "18 metri", components: { v: true, s: false, m: false },
+      duration: "30 giorni", concentration: false, ritual: false,
+      descrizione: "Imponi un ordine magico a una creatura (TS su Saggezza): finché dura, ogni volta che disobbedisce subisce 5d10 danni psichici, una volta al giorno.",
+      higherLevels: "Slot 7-8° → 1 anno; slot 9° → permanente.", source: "SRD" },
+    { id: "passwall", name: "Passwall", level: 5, school: "transmutation", classes: ["wizard"],
+      castingTime: "action", range: "9 metri", components: { v: true, s: true, m: true, material: "un pizzico di semi di sesamo" },
+      duration: "1 ora", concentration: false, ritual: false,
+      descrizione: "Apri un passaggio attraverso legno, gesso o pietra, lungo fino a 6 metri: resta aperto per la durata, poi le creature ancora all'interno vengono espulse all'estremità più vicina.",
+      source: "SRD" },
+
+    // --- Livello 6 ---
+    { id: "globe-of-invulnerability", name: "Globe of Invulnerability", level: 6, school: "abjuration", classes: ["sorcerer", "wizard"],
+      castingTime: "action", range: "Personale (raggio di 3 metri)", components: { v: true, s: true, m: true, material: "una sfera di vetro o cristallo" },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Una barriera scintillante ti circonda in una sfera di 3 metri di raggio: gli incantesimi di 5° livello o inferiore non possono colpire le creature al suo interno.",
+      higherLevels: "Blocca un livello di incantesimo in più per ogni slot oltre il 6°.", source: "SRD" },
+    { id: "blade-barrier", name: "Blade Barrier", level: 6, school: "evocation", classes: ["cleric"],
+      castingTime: "action", range: "27 metri", components: { v: true, s: true, m: false },
+      duration: "Concentrazione, fino a 10 minuti", concentration: true, ritual: false,
+      descrizione: "Eriggi un muro verticale di lame vorticanti che fornisce copertura e infligge 6d10 danni da taglio (TS Destrezza dimezza) a chi lo attraversa o vi inizia il turno.",
+      source: "SRD" },
+    { id: "harm", name: "Harm", level: 6, school: "necromancy", classes: ["cleric"],
+      castingTime: "action", range: "18 metri", components: { v: true, s: true, m: false },
+      duration: "Istantanea", concentration: false, ritual: false,
+      descrizione: "Infliggi una malattia devastante: il bersaglio subisce 14d6 danni necrotici (TS Costituzione dimezza) e, se fallisce, i suoi punti ferita massimi calano della stessa quantità per 1 ora.",
+      source: "SRD" },
+    { id: "flesh-to-stone", name: "Flesh to Stone", level: 6, school: "transmutation", classes: ["warlock", "wizard"],
+      castingTime: "action", range: "18 metri", components: { v: true, s: true, m: true, material: "un pizzico di calce, acqua e terra" },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Tenti di pietrificare una creatura: con i TS su Costituzione falliti passa da trattenuta a completamente pietrificata. Se ne fallisce tre, resta una statua finché non viene liberata.",
+      source: "SRD" },
+    { id: "mass-suggestion", name: "Mass Suggestion", level: 6, school: "enchantment", classes: ["bard", "sorcerer", "warlock", "wizard"],
+      castingTime: "action", range: "18 metri", components: { v: true, s: false, m: true, material: "una lingua di serpente e un favo di miele o una goccia d'olio dolce" },
+      duration: "24 ore", concentration: false, ritual: false,
+      descrizione: "Suggerisci una linea di condotta a un massimo di 12 creature (TS su Saggezza): chi fallisce la segue per la durata, finché il comando resta ragionevole.",
+      higherLevels: "Slot 7° → 10 giorni, 8° → 30 giorni, 9° → un anno e un giorno.", source: "SRD" },
+
+    // --- Livello 7 ---
+    { id: "delayed-blast-fireball", name: "Delayed Blast Fireball", level: 7, school: "evocation", classes: ["sorcerer", "wizard"],
+      castingTime: "action", range: "45 metri", components: { v: true, s: true, m: true, material: "un po' di guano di pipistrello e zolfo" },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Una sfera ardente resta sospesa e accumula potenza ogni round (+1d6, partendo da 12d6): quando termini la concentrazione o una creatura la tocca, esplode (TS Destrezza dimezza i danni da fuoco).",
+      higherLevels: "Il danno base aumenta di 1d6 per ogni slot oltre il 7°.", source: "SRD" },
+    { id: "forcecage", name: "Forcecage", level: 7, school: "evocation", classes: ["bard", "warlock", "wizard"],
+      castingTime: "action", range: "30 metri", components: { v: true, s: true, m: true, material: "polvere di rubino per 1.500 mo" },
+      duration: "1 ora", concentration: false, ritual: false,
+      descrizione: "Crei una prigione immateriale di pura forza (una gabbia o una scatola piena): nulla di materiale la attraversa e fuggire è quasi impossibile senza un teletrasporto potente.",
+      source: "SRD" },
+    { id: "simulacrum", name: "Simulacrum", level: 7, school: "illusion", classes: ["wizard"],
+      castingTime: "12hr", range: "Contatto", components: { v: true, s: true, m: true, material: "neve o ghiaccio, polvere di rubino per 1.500 mo e una parte del corpo della creatura copiata" },
+      duration: "Istantanea", concentration: false, ritual: false,
+      descrizione: "Plasmi un duplicato di neve e ghiaccio di una bestia o di un umanoide: il simulacro ti obbedisce, ha metà dei punti ferita massimi dell'originale ma non può recuperarli né potenziarsi.",
+      source: "SRD" },
+    { id: "etherealness", name: "Etherealness", level: 7, school: "transmutation", classes: ["bard", "cleric", "sorcerer", "warlock", "wizard"],
+      castingTime: "action", range: "Personale", components: { v: true, s: true, m: false },
+      duration: "Fino a 8 ore", concentration: false, ritual: false,
+      descrizione: "Entri nel Piano Etereo confinante: ti muovi in ogni direzione e attraversi gli oggetti del piano materiale, percependolo in toni grigi fino a 18 metri ma senza potervi interagire.",
+      source: "SRD" },
+    { id: "conjure-celestial", name: "Conjure Celestial", level: 7, school: "conjuration", classes: ["cleric"],
+      castingTime: "action", range: "27 metri", components: { v: true, s: true, m: false },
+      duration: "Concentrazione, fino a 1 ora", concentration: true, ritual: false,
+      descrizione: "Evochi un celestiale di grado di sfida pari o inferiore a 4: appare in uno spazio libero e combatte al tuo fianco seguendo i tuoi ordini, finché mantieni la concentrazione.",
+      higherLevels: "Slot 9° → celestiale di grado di sfida fino a 5.", source: "SRD" },
+
+    // --- Livello 8 ---
+    { id: "maze", name: "Maze", level: 8, school: "conjuration", classes: ["wizard"],
+      castingTime: "action", range: "18 metri", components: { v: true, s: true, m: false },
+      duration: "Concentrazione, fino a 10 minuti", concentration: true, ritual: false,
+      descrizione: "Bandisci una creatura in un labirinto extradimensionale: scompare e usa le azioni per tentare una prova di Intelligenza (CD 20) per evadere, riapparendo dove era svanita.",
+      source: "SRD" },
+    { id: "mind-blank", name: "Mind Blank", level: 8, school: "abjuration", classes: ["bard", "wizard"],
+      castingTime: "action", range: "Contatto", components: { v: true, s: true, m: false },
+      duration: "24 ore", concentration: false, ritual: false,
+      descrizione: "Una creatura toccata diventa immune ai danni psichici, alla lettura del pensiero, alla divinazione e all'ammaliamento per 24 ore: nulla può scrutarne la mente o la posizione, nemmeno l'incantesimo Desiderio.",
+      source: "SRD" },
+    { id: "incendiary-cloud", name: "Incendiary Cloud", level: 8, school: "conjuration", classes: ["sorcerer", "wizard"],
+      castingTime: "action", range: "45 metri", components: { v: true, s: true, m: false },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Una nube di fumo e scintille roventi riempie una sfera di 6 metri e si sposta di 3 metri ogni round: chi vi si trova subisce 10d8 danni da fuoco (TS Destrezza dimezza).",
+      source: "SRD" },
+    { id: "clone", name: "Clone", level: 8, school: "necromancy", classes: ["wizard"],
+      castingTime: "1hr", range: "Contatto", components: { v: true, s: true, m: true, material: "un diamante per 1.000 mo, un recipiente e un po' di carne della creatura" },
+      duration: "Istantanea", concentration: false, ritual: false,
+      descrizione: "Coltivi in un recipiente un duplicato inerte di una creatura: quando l'originale muore, la sua anima si trasferisce nel clone ormai maturo, riportandola in vita con tutti i suoi ricordi.",
+      source: "SRD" },
+    { id: "control-weather", name: "Control Weather", level: 8, school: "transmutation", classes: ["cleric", "druid", "wizard"],
+      castingTime: "10min", range: "Personale", components: { v: true, s: true, m: true, material: "incenso e schegge di legno bruciato" },
+      duration: "Concentrazione, fino a 8 ore", concentration: true, ritual: false,
+      descrizione: "All'aperto modifichi il clima per chilometri attorno a te: cambi gradualmente precipitazioni, temperatura e vento di un grado per volta, finché mantieni la concentrazione.",
+      source: "SRD" },
+
+    // --- Livello 9 ---
+    { id: "true-polymorph", name: "True Polymorph", level: 9, school: "transmutation", classes: ["bard", "sorcerer", "warlock", "wizard"],
+      castingTime: "action", range: "9 metri", components: { v: true, s: true, m: true, material: "una goccia di mercurio, una goccia di gomma arabica e un filo di fumo" },
+      duration: "Concentrazione, fino a 1 ora", concentration: true, ritual: false,
+      descrizione: "Trasformi una creatura in un'altra creatura, una creatura in un oggetto o viceversa: se mantieni la concentrazione per l'intera ora, la trasformazione diventa permanente.",
+      source: "SRD" },
+    { id: "imprisonment", name: "Imprisonment", level: 9, school: "abjuration", classes: ["warlock", "wizard"],
+      castingTime: "1min", range: "9 metri", components: { v: true, s: true, m: true, material: "una raffigurazione del bersaglio e un componente speciale per ogni tipo di prigionia (almeno 500 mo)" },
+      duration: "Finché non viene annullato", concentration: false, ritual: false,
+      descrizione: "Vincoli una creatura (TS su Saggezza) con un confino a tua scelta: seppellita nelle profondità, racchiusa in una gemma, immersa nel sonno eterno, rinchiusa in uno spazio minuscolo o persa in un labirinto.",
+      source: "SRD" },
+    { id: "astral-projection", name: "Astral Projection", level: 9, school: "necromancy", classes: ["cleric", "warlock", "wizard"],
+      castingTime: "1hr", range: "3 metri", components: { v: true, s: true, m: true, material: "un giacinto per 1.000 mo e una barretta d'argento per 100 mo per ogni viaggiatore" },
+      duration: "Speciale", concentration: false, ritual: false,
+      descrizione: "Proietti il tuo corpo astrale nel Piano Astrale insieme ai compagni, lasciando il corpo fisico in trance: il sé astrale è legato da un cordone argenteo e può poi raggiungere altri piani.",
+      source: "SRD" },
+    { id: "prismatic-wall", name: "Prismatic Wall", level: 9, school: "abjuration", classes: ["wizard"],
+      castingTime: "action", range: "18 metri", components: { v: true, s: true, m: false },
+      duration: "10 minuti", concentration: false, ritual: false,
+      descrizione: "Eriggi un muro di sette strati di luce colorata: ogni strato produce un effetto diverso (fuoco, acido, fulmine, veleno, pietrificazione, accecamento e altro) e va annullato in sequenza per attraversarlo.",
+      source: "SRD" },
+    { id: "shapechange", name: "Shapechange", level: 9, school: "transmutation", classes: ["druid", "wizard"],
+      castingTime: "action", range: "Personale", components: { v: true, s: true, m: true, material: "un diadema di giada per almeno 1.500 mo, indossato durante l'incantesimo" },
+      duration: "Concentrazione, fino a 1 ora", concentration: true, ritual: false,
+      descrizione: "Assumi la forma di un'altra creatura di grado di sfida pari o inferiore al tuo livello, mantenendo allineamento, Intelligenza, Saggezza e Carisma: puoi cambiare forma a volontà finché ti concentri.",
       source: "SRD" }
   ];
 });
@@ -2909,6 +3168,23 @@
 
   // Voci in ordine cronologico inverso (la più recente per prima).
   return [
+    {
+      version: '1.5.0',
+      date: '2026-06-06',
+      title: 'Lancio dei dadi e contenuti ufficiali',
+      added: [
+        'Nuova sezione « Dadi »: scegli un dado (d4, d6, d8, d10, d12, d20, d100), quanti lanciarne e un eventuale modificatore (per esempio 2d6+3), poi premi « Lancia » e guarda i dadi rotolare a schermo fino al risultato.',
+        'Cronologia dei tiri recenti: gli ultimi lanci restano a portata di mano, con il dettaglio dei singoli dadi e del totale.',
+        'Cinquanta nuovi incantesimi ufficiali, cinque per ogni livello dallo 0 al 9 — tra cui Vera trasformazione, Simulacro, Labirinto, Nube mortale e Gabbia di forza.',
+        'Quattro armi-artefatto leggendarie: la Spada di Kas, l’Ascia dei Signori dei Nani, la Bacchetta di Orcus e la Spada di Zariel.'
+      ],
+      improved: [
+        'Tutti i contenuti del sito sono ora ufficiali di D&D 5e: oggetti e incantesimi presi dai manuali (SRD, Manuale del DM, Guida di Xanathar), senza nulla di inventato.'
+      ],
+      fixed: [
+        'Le armi non ufficiali introdotte di recente sono state sostituite con armi magiche ufficiali, tra cui Lama solare, Lingua di fuoco, Spada vorpal e il Sacro vendicatore.'
+      ]
+    },
     {
       version: '1.4.0',
       date: '2026-06-06',
@@ -3905,6 +4181,114 @@
 
   </script>
   <script>
+  /* ===== src/core/dice.js ===== */
+/*
+ * dice.js — Logica pura del lancio dei dadi di D&D (testabile, RNG iniettabile).
+ * Nessuna dipendenza dal DOM: l'animazione e l'interfaccia vivono in app.js.
+ * Esposto come DND.dice nel browser e come module.exports in Node.
+ *
+ * API:
+ *   DICE            -> elenco dei dadi classici [{ sides, label }]
+ *   MAX_COUNT       -> numero massimo di dadi per tiro
+ *   rollDie(sides, rng?)        -> intero 1..sides
+ *   roll(spec, rng?)            -> { count, sides, modifier, rolls[], sum, total }
+ *   notation(spec)              -> stringa "NdS+M" (es. "2d6+3")
+ *   parse(str)                  -> spec { count, sides, modifier } oppure null
+ *   clampInt(n, min, max, def)  -> intero entro i limiti
+ *
+ * `rng` è una funzione che restituisce un float in [0,1) (default Math.random):
+ * iniettandola, i test diventano deterministici.
+ */
+(function (root, factory) {
+  'use strict';
+  var mod = factory();
+  if (typeof module !== 'undefined' && module.exports) { module.exports = mod; }
+  if (root) { root.DND = root.DND || {}; root.DND.dice = mod; }
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  // I dadi classici di Dungeons & Dragons.
+  var DICE = [
+    { sides: 4, label: 'd4' },
+    { sides: 6, label: 'd6' },
+    { sides: 8, label: 'd8' },
+    { sides: 10, label: 'd10' },
+    { sides: 12, label: 'd12' },
+    { sides: 20, label: 'd20' },
+    { sides: 100, label: 'd100' }
+  ];
+
+  var MAX_COUNT = 20; // dadi massimi per singolo tiro
+
+  // Forza un valore a intero entro [min, max]; se non è un numero usa `fallback`.
+  function clampInt(n, min, max, fallback) {
+    n = Math.floor(Number(n));
+    if (isNaN(n)) { return fallback; }
+    if (n < min) { return min; }
+    if (n > max) { return max; }
+    return n;
+  }
+
+  // Tira un singolo dado a `sides` facce. rng() deve restituire un float in [0,1).
+  function rollDie(sides, rng) {
+    var r = (typeof rng === 'function') ? rng : Math.random;
+    var s = clampInt(sides, 2, 1000, 20);
+    return Math.floor(r() * s) + 1;
+  }
+
+  // Esegue un tiro completo a partire da uno spec { count, sides, modifier }.
+  function roll(spec, rng) {
+    spec = spec || {};
+    var sides = clampInt(spec.sides, 2, 1000, 20);
+    var count = clampInt(spec.count, 1, MAX_COUNT, 1);
+    var modifier = clampInt(spec.modifier, -1000, 1000, 0);
+    var rolls = [];
+    var sum = 0;
+    for (var i = 0; i < count; i++) {
+      var v = rollDie(sides, rng);
+      rolls.push(v);
+      sum += v;
+    }
+    return { count: count, sides: sides, modifier: modifier, rolls: rolls, sum: sum, total: sum + modifier };
+  }
+
+  // Converte uno spec nella notazione testuale, es. "2d6+3", "1d20-1", "3d8".
+  function notation(spec) {
+    spec = spec || {};
+    var count = clampInt(spec.count, 1, MAX_COUNT, 1);
+    var sides = clampInt(spec.sides, 2, 1000, 20);
+    var modifier = clampInt(spec.modifier, -1000, 1000, 0);
+    var s = count + 'd' + sides;
+    if (modifier > 0) { s += '+' + modifier; }
+    else if (modifier < 0) { s += String(modifier); } // il segno '-' è già incluso
+    return s;
+  }
+
+  // Analizza una notazione "NdS+M" (spazi opzionali). Ritorna lo spec o null.
+  function parse(str) {
+    if (typeof str !== 'string') { return null; }
+    var m = str.replace(/\s+/g, '').match(/^(\d*)d(\d+)([+-]\d+)?$/i);
+    if (!m) { return null; }
+    return {
+      count: m[1] ? parseInt(m[1], 10) : 1,
+      sides: parseInt(m[2], 10),
+      modifier: m[3] ? parseInt(m[3], 10) : 0
+    };
+  }
+
+  return {
+    DICE: DICE,
+    MAX_COUNT: MAX_COUNT,
+    clampInt: clampInt,
+    rollDie: rollDie,
+    roll: roll,
+    notation: notation,
+    parse: parse
+  };
+});
+
+  </script>
+  <script>
   /* ===== src/ui/app.js ===== */
 /*
  * app.js — Controller dell'interfaccia (vanilla JS).
@@ -3923,6 +4307,7 @@
   var ITEM_BY_ID = index(ITEMS);
   var SPELL_BY_ID = index(SPELLS);
   var CHANGELOG = D.changelog || []; // cronologia versioni (Patch Notes)
+  var DICE = D.dice; // logica pura del lancio dei dadi (RNG iniettabile)
 
   // Build personalizzate dell'utente: logica pura in builds.js, stato persistito
   // in localStorage. `builds` è l'elenco salvato, `activeBuildId` quella in modifica.
@@ -4035,6 +4420,7 @@
       { id: 'assistant', label: t.nav.assistant },
       { id: 'build', label: t.nav.build },
       { id: 'dm', label: t.nav.dm },
+      { id: 'dice', label: t.nav.dice },
       { id: 'patch', label: t.nav.patch }
     ];
     $('tabs').innerHTML = tabs.map(function (tab, i) {
@@ -4116,6 +4502,19 @@
     $('patch-intro').textContent = t.patch.intro;
     $('patch-empty').textContent = t.patch.empty;
 
+    // Lancio dei dadi
+    $('dice-title').textContent = t.dice.title;
+    $('dice-intro').textContent = t.dice.intro;
+    $('lbl-dice-die').textContent = t.dice.die;
+    $('lbl-dice-qty').textContent = t.dice.quantity;
+    $('lbl-dice-mod').textContent = t.dice.modifier;
+    $('dice-roll').textContent = t.dice.roll;
+    $('dice-result-title').textContent = t.dice.resultTitle;
+    $('dice-empty').textContent = t.dice.empty;
+    $('dice-history-title').textContent = t.dice.historyTitle;
+    $('dice-history-clear').textContent = t.dice.historyClear;
+    $('dice-history-empty').textContent = t.dice.historyEmpty;
+
     $('drawer-close').setAttribute('aria-label', t.common.close);
   }
 
@@ -4125,7 +4524,7 @@
       var btn = e.target.closest('[data-tab]');
       if (!btn) { return; }
       var id = btn.getAttribute('data-tab');
-      ['items', 'spells', 'assistant', 'build', 'dm', 'patch'].forEach(function (p) {
+      ['items', 'spells', 'assistant', 'build', 'dm', 'dice', 'patch'].forEach(function (p) {
         $('panel-' + p).classList.toggle('hidden', p !== id);
       });
       Array.prototype.forEach.call($('tabs').children, function (c) {
@@ -4970,6 +5369,117 @@
     list.innerHTML = CHANGELOG.map(patchCard).join('');
   }
 
+  // ---- Lancio dei dadi -----------------------------------------------------
+  var diceState = { sides: 20, count: 1, modifier: 0 };
+  var diceHistory = [];
+  var diceRolling = false;
+  var diceAnimTimer = null;
+
+  function diceReadInputs() {
+    diceState.count = DICE.clampInt($('dice-qty').value, 1, DICE.MAX_COUNT, 1);
+    diceState.modifier = DICE.clampInt($('dice-mod').value, -99, 99, 0);
+  }
+  function diceUpdateNotation() { $('dice-notation').textContent = DICE.notation(diceState); }
+
+  function diceRenderTypes() {
+    $('dice-types').innerHTML = DICE.DICE.map(function (d) {
+      return '<button type="button" class="' + chipClass(d.sides === diceState.sides) + '" data-sides="' + d.sides + '">' + esc(d.label) + '</button>';
+    }).join('');
+  }
+  function diceRestyleTypes() {
+    Array.prototype.forEach.call($('dice-types').children, function (c) {
+      c.className = chipClass(Number(c.getAttribute('data-sides')) === diceState.sides);
+    });
+  }
+
+  function dieFaceHtml(value, cls) {
+    return '<span class="die-face ' + cls + '">' + esc(String(value)) + '</span>';
+  }
+  function diceModText(mod) {
+    if (mod > 0) { return ' + ' + mod; }
+    if (mod < 0) { return ' - ' + Math.abs(mod); }
+    return '';
+  }
+
+  function diceRenderHistory() {
+    var box = $('dice-history');
+    var empty = $('dice-history-empty');
+    if (!diceHistory.length) { box.innerHTML = ''; empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+    box.innerHTML = diceHistory.map(function (h) {
+      return '<div class="flex items-center justify-between gap-3 text-sm border-b border-edge/40 pb-2 last:border-0 last:pb-0">' +
+        '<span class="text-muted shrink-0">' + esc(h.notation) + '</span>' +
+        '<span class="text-parchment/80 truncate">' + esc(h.rolls.join(' + ') + diceModText(h.modifier)) + '</span>' +
+        '<span class="font-display text-gold text-lg shrink-0">' + h.total + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
+  // Mostra il risultato finale: facce ferme, totale e scomposizione.
+  function diceShowResult(result) {
+    $('dice-empty').classList.add('hidden');
+    $('dice-faces').innerHTML = result.rolls.map(function (v) { return dieFaceHtml(v, 'settled'); }).join('');
+    $('dice-total-wrap').classList.remove('hidden');
+    $('dice-total-label').textContent = t.dice.total;
+    var totalEl = $('dice-total');
+    totalEl.textContent = result.total;
+    totalEl.classList.remove('die-total'); void totalEl.offsetWidth; totalEl.classList.add('die-total'); // riavvia il "pop"
+    var bd = t.dice.sumLabel + ' ' + result.sum;
+    if (result.modifier) { bd += '  ·  ' + t.dice.modLabel + ' ' + (result.modifier > 0 ? '+' + result.modifier : result.modifier); }
+    $('dice-breakdown').textContent = bd;
+  }
+
+  function diceDoRoll() {
+    if (diceRolling) { return; }
+    diceReadInputs();
+    var result = DICE.roll(diceState); // RNG di default (Math.random)
+    diceRolling = true;
+    var btn = $('dice-roll');
+    btn.disabled = true;
+    btn.textContent = t.dice.rolling;
+    $('dice-total-wrap').classList.add('hidden');
+    $('dice-empty').classList.add('hidden');
+
+    // Animazione: le facce "rotolano" mostrando numeri casuali, poi si fermano.
+    var faces = $('dice-faces');
+    faces.innerHTML = result.rolls.map(function () { return dieFaceHtml('?', 'is-rolling'); }).join('');
+    var spins = 0;
+    diceAnimTimer = window.setInterval(function () {
+      spins++;
+      Array.prototype.forEach.call(faces.children, function (el) { el.textContent = DICE.rollDie(result.sides); });
+      if (spins >= 11) {
+        window.clearInterval(diceAnimTimer);
+        diceAnimTimer = null;
+        diceShowResult(result);
+        diceHistory.unshift({ notation: DICE.notation(diceState), rolls: result.rolls, modifier: result.modifier, total: result.total });
+        if (diceHistory.length > 8) { diceHistory.pop(); }
+        diceRenderHistory();
+        diceRolling = false;
+        btn.disabled = false;
+        btn.textContent = t.dice.roll;
+      }
+    }, 55);
+  }
+
+  function initDice() {
+    if (!DICE || !$('dice-types')) { return; } // modulo o markup assenti: salta senza rompere
+    diceRenderTypes();
+    diceUpdateNotation();
+    diceRenderHistory();
+
+    $('dice-types').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-sides]');
+      if (!btn) { return; }
+      diceState.sides = Number(btn.getAttribute('data-sides'));
+      diceRestyleTypes();
+      diceUpdateNotation();
+    });
+    $('dice-qty').addEventListener('input', function () { diceReadInputs(); diceUpdateNotation(); });
+    $('dice-mod').addEventListener('input', function () { diceReadInputs(); diceUpdateNotation(); });
+    $('dice-roll').addEventListener('click', diceDoRoll);
+    $('dice-history-clear').addEventListener('click', function () { diceHistory = []; diceRenderHistory(); });
+  }
+
   // ---- Build personalizzate ------------------------------------------------
   var BUILD_CTX = { itemById: ITEM_BY_ID, spellById: SPELL_BY_ID, classById: CLASS_BY_ID };
   var BUILD_VERDICT = {
@@ -5356,6 +5866,7 @@
     initDrawer();
     initDM();
     initBuild();
+    initDice();
     initPatch();
   }
 
