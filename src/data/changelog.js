@@ -15,6 +15,20 @@
   // Voci in ordine cronologico inverso (la più recente per prima).
   return [
     {
+      version: '1.6.0',
+      date: '2026-06-08',
+      title: 'Nomi in italiano ed elenco completo nelle build',
+      added: [
+        'Nella sezione « Build » ora puoi sfogliare l’elenco completo di oggetti e incantesimi: lascia vuota la casella di ricerca e scorri la lista, così non devi più ricordare i nomi a memoria.',
+        'La casella di ricerca delle build filtra l’elenco mentre scrivi e funziona sia con il nome italiano sia con quello inglese (per esempio « fireball » trova la Palla di Fuoco).'
+      ],
+      improved: [
+        'Tutti i nomi di oggetti e incantesimi sono ora in italiano (per esempio « Lingua di Fuoco », « Palla di Fuoco », « Dardo Incantato »), per una lettura più immediata.',
+        'La ricerca nel Database resta valida anche con i nomi inglesi: chi li conosce può continuare a usarli.'
+      ],
+      fixed: []
+    },
+    {
       version: '1.5.0',
       date: '2026-06-06',
       title: 'Lancio dei dadi e contenuti ufficiali',

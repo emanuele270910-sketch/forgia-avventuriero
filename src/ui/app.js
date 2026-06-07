@@ -1310,7 +1310,8 @@
         '<p id="build-spells-empty" class="text-xs text-muted py-2"></p>' +
         '<input id="build-spell-search" type="search" autocomplete="off" placeholder="' + esc(t.build.spellSearch) + '" ' +
           'class="mt-2 w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-sm text-parchment placeholder-muted focus:outline-none focus:border-gold/70" />' +
-        '<div id="build-spell-results" class="mt-2 flex flex-col gap-1.5"></div>'
+        '<p class="mt-1.5 text-[11px] text-muted">' + esc(t.build.browseHint) + '</p>' +
+        '<div id="build-spell-results" class="mt-2 flex flex-col gap-1.5 max-h-72 overflow-y-auto pr-1"></div>'
       : '<h4 class="font-display text-base text-parchment mb-2">' + esc(t.build.spellsTitle) + '</h4>' +
         '<p class="text-sm text-muted rounded-lg border border-dashed border-edge px-3 py-3">' + esc(t.build.spellsNonCaster) + '</p>';
 
@@ -1334,7 +1335,8 @@
         '<p id="build-items-empty" class="text-xs text-muted py-2"></p>' +
         '<input id="build-item-search" type="search" autocomplete="off" placeholder="' + esc(t.build.itemSearch) + '" ' +
           'class="mt-2 w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-sm text-parchment placeholder-muted focus:outline-none focus:border-gold/70" />' +
-        '<div id="build-item-results" class="mt-2 flex flex-col gap-1.5"></div>' +
+        '<p class="mt-1.5 text-[11px] text-muted">' + esc(t.build.browseHint) + '</p>' +
+        '<div id="build-item-results" class="mt-2 flex flex-col gap-1.5 max-h-72 overflow-y-auto pr-1"></div>' +
       '</div>' +
       '<div class="rounded-xl bg-panel border border-edge p-4">' + spellsSection + '</div>' +
       '<div id="build-assist"></div>';
@@ -1398,29 +1400,38 @@
       '<span class="flex-1 min-w-0 truncate text-sm text-parchment">' + esc(name) + '</span>' + badge(tag.label, tag.color) + tail +
     '</button>';
   }
+  // Ordina per nome italiano (accent-insensitive, stabile).
+  function byName(a, b) { return (a.name || '').localeCompare(b.name || '', 'it', { sensitivity: 'base' }); }
+
   function renderItemSearch() {
     var box = $('build-item-results');
     if (!box) { return; }
     var b = activeBuild();
+    if (!b) { box.innerHTML = ''; return; }
     var q = (buildItemQuery || '').trim();
-    if (!b || !q) { box.innerHTML = ''; return; }
-    var list = D.filterItems(ITEMS, { text: q }).slice(0, 8);
+    var st = box.scrollTop; // preserva la posizione di scorrimento dell'elenco
+    // Query vuota -> elenco completo da sfogliare; altrimenti filtra.
+    var list = (q ? D.filterItems(ITEMS, { text: q }) : ITEMS.slice()).sort(byName);
     if (!list.length) { box.innerHTML = '<p class="text-xs text-muted px-1 py-1">' + esc(t.build.searchEmpty) + '</p>'; return; }
     box.innerHTML = list.map(function (item) {
       return buildSearchRow('item', item.id, item.name, RARITY_BY_ID[item.rarity] || { label: item.rarity, color: '#888' }, (b.itemIds || []).indexOf(item.id) !== -1);
     }).join('');
+    box.scrollTop = st;
   }
   function renderSpellSearch() {
     var box = $('build-spell-results');
     if (!box) { return; }
     var b = activeBuild();
+    if (!b) { box.innerHTML = ''; return; }
     var q = (buildSpellQuery || '').trim();
-    if (!b || !q) { box.innerHTML = ''; return; }
-    var list = D.filterSpells(SPELLS, { text: q }).slice(0, 8);
+    var st = box.scrollTop; // preserva la posizione di scorrimento dell'elenco
+    // Query vuota -> elenco completo da sfogliare; altrimenti filtra.
+    var list = (q ? D.filterSpells(SPELLS, { text: q }) : SPELLS.slice()).sort(byName);
     if (!list.length) { box.innerHTML = '<p class="text-xs text-muted px-1 py-1">' + esc(t.build.searchEmpty) + '</p>'; return; }
     box.innerHTML = list.map(function (spell) {
       return buildSearchRow('spell', spell.id, spell.name, { label: levelLabel(spell.level), color: SCHOOL_COLORS[spell.school] || '#888' }, (b.spellIds || []).indexOf(spell.id) !== -1);
     }).join('');
+    box.scrollTop = st;
   }
 
   function buildAssistGroup(title, color, entries) {

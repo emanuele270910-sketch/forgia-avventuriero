@@ -16,8 +16,10 @@
   var matchesText = util.matchesText;
 
   // Tutto il testo "cercabile" di un oggetto, in un'unica stringa.
+  // Includiamo anche `id` (slug inglese) così la ricerca funziona sia col nome
+  // italiano sia col nome inglese canonico (es. "fireball", "bag of holding").
   function itemHaystack(item) {
-    var parts = [item.name, item.descrizione, item.type];
+    var parts = [item.name, item.id, item.descrizione, item.type];
     if (item.tags) { parts = parts.concat(item.tags); }
     if (item.bonus && item.bonus.extra) { parts.push(item.bonus.extra); }
     if (item.attunementNote) { parts.push(item.attunementNote); }
@@ -25,7 +27,7 @@
   }
 
   function spellHaystack(spell) {
-    var parts = [spell.name, spell.descrizione, spell.school];
+    var parts = [spell.name, spell.id, spell.descrizione, spell.school];
     if (spell.classes) { parts = parts.concat(spell.classes); }
     if (spell.higherLevels) { parts.push(spell.higherLevels); }
     return parts.join(' ');

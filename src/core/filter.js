@@ -21,15 +21,17 @@
   function asArray(v) { return Array.isArray(v) ? v : []; }
   function nonEmpty(arr) { return arr.length > 0; }
 
+  // Includiamo anche `id` (slug inglese) così i filtri testuali trovano gli
+  // elementi sia col nome italiano sia col nome inglese canonico.
   function itemHaystack(item) {
-    var parts = [item.name, item.descrizione, item.type];
+    var parts = [item.name, item.id, item.descrizione, item.type];
     if (item.tags) { parts = parts.concat(item.tags); }
     if (item.bonus && item.bonus.extra) { parts.push(item.bonus.extra); }
     return parts.join(' ');
   }
 
   function spellHaystack(spell) {
-    var parts = [spell.name, spell.descrizione, spell.school];
+    var parts = [spell.name, spell.id, spell.descrizione, spell.school];
     if (spell.classes) { parts = parts.concat(spell.classes); }
     return parts.join(' ');
   }

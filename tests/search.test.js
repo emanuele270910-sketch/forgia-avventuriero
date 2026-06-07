@@ -18,7 +18,11 @@
       expect(searchItems(items, '').length).toBe(items.length);
     });
 
-    it('trova "Bag of Holding" cercando "bag"', function () {
+    it('trova la Sacca Magica cercando il nome italiano "sacca"', function () {
+      expect(ids(searchItems(items, 'sacca'))).toContain('bag-of-holding');
+    });
+
+    it('trova ancora con il nome inglese "bag" (id canonico)', function () {
       expect(ids(searchItems(items, 'bag'))).toContain('bag-of-holding');
     });
 
@@ -39,7 +43,11 @@
       expect(searchSpells(spells, '').length).toBe(spells.length);
     });
 
-    it('trova "Fireball" cercando "fireball"', function () {
+    it('trova la Palla di Fuoco cercando il nome italiano "palla"', function () {
+      expect(ids(searchSpells(spells, 'palla'))).toContain('fireball');
+    });
+
+    it('trova ancora con il nome inglese "fireball" (id canonico)', function () {
       expect(ids(searchSpells(spells, 'fireball'))).toContain('fireball');
     });
 
