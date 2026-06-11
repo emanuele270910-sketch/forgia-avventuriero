@@ -15,6 +15,16 @@
   // Voci in ordine cronologico inverso (la più recente per prima).
   return [
     {
+      version: '1.8.1',
+      date: '2026-06-12',
+      title: 'Stanze online della Griglia attivate',
+      added: [],
+      improved: [
+        'La Griglia di combattimento è ora collegata al cloud: crea una stanza, condividi il codice e gli altri giocatori entrano da qualsiasi dispositivo per vedere il campo e le distanze in tempo reale.'
+      ],
+      fixed: []
+    },
+    {
       version: '1.8.0',
       date: '2026-06-11',
       title: 'Griglia di combattimento condivisa',
