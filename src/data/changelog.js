@@ -15,6 +15,21 @@
   // Voci in ordine cronologico inverso (la più recente per prima).
   return [
     {
+      version: '1.8.0',
+      date: '2026-06-11',
+      title: 'Griglia di combattimento condivisa',
+      added: [
+        'Nuova sezione « Griglia »: crea una griglia tattica e condividi il codice; gli altri giocatori entrano e la vedono in tempo reale.',
+        'Il conduttore aggiunge e toglie mostri e personaggi (con nome e colore) e li trascina sulle caselle a piacimento.',
+        'Tocca una pedina per misurare al volo la distanza dalle altre, mostrata in metri (1 casella = 1,5 m = 5 ft) con linee sul campo.',
+        'Dimensione della griglia regolabile e codice stanza condivisibile con un tocco.'
+      ],
+      improved: [
+        'La griglia funziona subito su un singolo dispositivo (modalità locale); per far entrare gli amici da altri dispositivi basta attivare le stanze online gratuite (vedi le istruzioni nel file dell’app).'
+      ],
+      fixed: []
+    },
+    {
       version: '1.7.0',
       date: '2026-06-11',
       title: 'Armature, nuovi incantesimi e veste grafica rinnovata',

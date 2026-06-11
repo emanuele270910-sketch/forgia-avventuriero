@@ -128,6 +128,7 @@
       { id: 'assistant', label: t.nav.assistant },
       { id: 'build', label: t.nav.build },
       { id: 'dm', label: t.nav.dm },
+      { id: 'grid', label: t.nav.grid },
       { id: 'dice', label: t.nav.dice },
       { id: 'patch', label: t.nav.patch }
     ];
@@ -222,6 +223,8 @@
     $('dice-history-title').textContent = t.dice.historyTitle;
     $('dice-history-clear').textContent = t.dice.historyClear;
     $('dice-history-empty').textContent = t.dice.historyEmpty;
+    $('grid-title').textContent = t.grid.title;
+    $('grid-intro').textContent = t.grid.intro;
 
     $('drawer-close').setAttribute('aria-label', t.common.close);
   }
@@ -232,7 +235,7 @@
       var btn = e.target.closest('[data-tab]');
       if (!btn) { return; }
       var id = btn.getAttribute('data-tab');
-      ['items', 'spells', 'assistant', 'build', 'dm', 'dice', 'patch'].forEach(function (p) {
+      ['items', 'spells', 'assistant', 'build', 'dm', 'grid', 'dice', 'patch'].forEach(function (p) {
         $('panel-' + p).classList.toggle('hidden', p !== id);
       });
       Array.prototype.forEach.call($('tabs').children, function (c) {
@@ -1571,6 +1574,435 @@
   }
 
   // ---- Boot ----------------------------------------------------------------
+  // ---- Griglia di combattimento --------------------------------------------
+  var GRID = D.grid;
+  var gridCellPx = 36;
+  var gridState = {
+    room: null, role: 'none', status: 'offline',
+    grid: GRID ? GRID.makeGrid() : { cols: 24, rows: 16 },
+    tokens: [], selectedId: null, participants: 1,
+    addKind: 'monster', addColor: GRID ? GRID.TOKEN_COLORS[0] : '#ef4444'
+  };
+  var fb = { db: null, stateRef: null, presAll: null, presMe: null };
+  var gridDrag = null, gridPushTimer = null, gridLastPush = 0;
+
+  function gridT(key) { return (t.grid && t.grid[key] != null) ? t.grid[key] : key; }
+  function gridConfigPresent() {
+    var c = window.FIREBASE_CONFIG;
+    return !!(c && typeof c.apiKey === 'string' && c.apiKey.indexOf('INSERISCI') === -1 &&
+      typeof c.databaseURL === 'string' && c.databaseURL.indexOf('INSERISCI') === -1);
+  }
+  // Carica l'SDK Firebase (compat) solo quando serve.
+  function gridLoadFirebase(cb) {
+    if (window.firebase && window.firebase.database) { cb(true); return; }
+    if (!gridConfigPresent()) { cb(false); return; }
+    var base = 'https://www.gstatic.com/firebasejs/10.12.2/';
+    var files = ['firebase-app-compat.js', 'firebase-database-compat.js'];
+    var i = 0;
+    (function nextScript() {
+      if (i >= files.length) {
+        try { if (!window.firebase.apps || !window.firebase.apps.length) { window.firebase.initializeApp(window.FIREBASE_CONFIG); } }
+        catch (e) {}
+        cb(!!(window.firebase && window.firebase.database));
+        return;
+      }
+      var s = document.createElement('script');
+      s.src = base + files[i++];
+      s.onload = nextScript;
+      s.onerror = function () { cb(false); };
+      document.head.appendChild(s);
+    })();
+  }
+
+  function gridFindToken(id) {
+    for (var i = 0; i < gridState.tokens.length; i++) { if (gridState.tokens[i].id === id) { return gridState.tokens[i]; } }
+    return null;
+  }
+  function gridFlash(msg) { var el = $('grid-connect-msg'); if (el) { el.textContent = msg || ''; } }
+
+  function gridDetach() {
+    try { if (fb.stateRef) { fb.stateRef.off(); } } catch (e) {}
+    try { if (fb.presAll) { fb.presAll.off(); } } catch (e) {}
+    try { if (fb.presMe) { fb.presMe.onDisconnect().cancel(); fb.presMe.remove(); } } catch (e) {}
+    fb.stateRef = null; fb.presAll = null; fb.presMe = null;
+  }
+  function gridResetState() {
+    gridDetach();
+    gridState.room = null; gridState.role = 'none'; gridState.status = 'offline';
+    gridState.grid = GRID.makeGrid(); gridState.tokens = []; gridState.selectedId = null; gridState.participants = 1;
+  }
+
+  function gridAttachPresence() {
+    if (!fb.db || !gridState.room) { return; }
+    var path = 'grids/' + gridState.room + '/presence';
+    fb.presMe = fb.db.ref(path).push();
+    fb.presMe.set(true);
+    fb.presMe.onDisconnect().remove();
+    fb.presAll = fb.db.ref(path);
+    fb.presAll.on('value', function (snap) {
+      gridState.participants = snap.numChildren() || 1;
+      gridRenderConnect();
+    });
+  }
+
+  function gridCreate() {
+    gridResetState();
+    gridState.room = GRID.makeRoomCode();
+    gridState.role = 'host';
+    gridState.status = gridConfigPresent() ? 'connecting' : 'local';
+    gridState.selectedId = null;
+    gridRender();
+    if (!gridConfigPresent()) { return; }
+    gridLoadFirebase(function (ok) {
+      if (!ok) { gridState.status = 'local'; gridRenderConnect(); return; }
+      fb.db = window.firebase.database();
+      fb.stateRef = fb.db.ref('grids/' + gridState.room + '/state');
+      gridAttachPresence();
+      gridState.status = 'online';
+      gridPushState(true);
+      gridRenderConnect();
+    });
+  }
+
+  function gridJoin(rawCode) {
+    var code = GRID.normalizeCode(rawCode);
+    if (!GRID.isValidCode(code)) { gridFlash(gridT('invalidCode')); return; }
+    if (!gridConfigPresent()) { gridFlash(gridT('onlineUnavailableJoin')); return; }
+    gridResetState();
+    gridState.room = code; gridState.role = 'viewer'; gridState.status = 'connecting';
+    gridRender();
+    gridLoadFirebase(function (ok) {
+      if (!ok) { gridState.status = 'error'; gridRenderConnect(); return; }
+      fb.db = window.firebase.database();
+      fb.stateRef = fb.db.ref('grids/' + code + '/state');
+      fb.stateRef.on('value', function (snap) {
+        var val = snap.val();
+        if (!val) { gridState.status = 'notFound'; gridState.tokens = []; }
+        else {
+          var s = GRID.sanitizeState(val);
+          gridState.grid = s.grid; gridState.tokens = s.tokens; gridState.status = 'online';
+          if (gridState.selectedId && !gridFindToken(gridState.selectedId)) { gridState.selectedId = null; }
+        }
+        gridRenderConnect(); gridRenderBoard(); gridRenderSide();
+      });
+      gridAttachPresence();
+    });
+  }
+
+  function gridLeave() { gridResetState(); gridRender(); }
+
+  function gridPushState(immediate) {
+    if (gridState.role !== 'host' || !fb.stateRef) { return; }
+    var doPush = function () {
+      gridLastPush = Date.now();
+      var tokens = {};
+      gridState.tokens.forEach(function (tk) { tokens[tk.id] = tk; });
+      try { fb.stateRef.set({ grid: gridState.grid, tokens: tokens, updatedAt: gridLastPush }); } catch (e) {}
+    };
+    if (immediate) { if (gridPushTimer) { clearTimeout(gridPushTimer); gridPushTimer = null; } doPush(); return; }
+    if (gridPushTimer) { return; }
+    var wait = Math.max(0, 90 - (Date.now() - gridLastPush));
+    gridPushTimer = setTimeout(function () { gridPushTimer = null; doPush(); }, wait);
+  }
+
+  function gridFreeCell() {
+    var taken = {};
+    gridState.tokens.forEach(function (tk) { taken[tk.x + ',' + tk.y] = true; });
+    for (var y = 0; y < gridState.grid.rows; y++) {
+      for (var x = 0; x < gridState.grid.cols; x++) { if (!taken[x + ',' + y]) { return { x: x, y: y }; } }
+    }
+    return { x: 0, y: 0 };
+  }
+  function gridAddToken(opts) {
+    if (gridState.role !== 'host' || gridState.tokens.length >= GRID.MAX_TOKENS) { return; }
+    var pos = gridFreeCell();
+    var tk = GRID.makeToken({ kind: opts.kind, label: opts.label, color: opts.color, x: pos.x, y: pos.y }, gridState.grid);
+    gridState.tokens.push(tk);
+    gridState.selectedId = tk.id;
+    gridPushState(true);
+    gridRenderBoard(); gridRenderSide();
+  }
+  function gridRemoveToken(id) {
+    if (gridState.role !== 'host') { return; }
+    gridState.tokens = gridState.tokens.filter(function (tk) { return tk.id !== id; });
+    if (gridState.selectedId === id) { gridState.selectedId = null; }
+    gridPushState(true);
+    gridRenderBoard(); gridRenderSide();
+  }
+  function gridClearAll() {
+    if (gridState.role !== 'host') { return; }
+    gridState.tokens = []; gridState.selectedId = null;
+    gridPushState(true);
+    gridRenderBoard(); gridRenderSide();
+  }
+  function gridSetSize(cols, rows) {
+    if (gridState.role !== 'host') { return; }
+    gridState.grid = GRID.makeGrid(cols, rows);
+    gridState.tokens.forEach(function (tk) { GRID.clampTokenToGrid(tk, gridState.grid); });
+    gridPushState(true);
+    gridRenderBoard(); gridRenderSide();
+  }
+  function gridSelect(id) {
+    gridState.selectedId = (gridState.selectedId === id) ? null : id;
+    gridRenderBoard(); gridRenderSide();
+  }
+
+  function gridInitials(tk) {
+    if (tk.label) {
+      var parts = tk.label.trim().split(/\s+/);
+      if (parts.length >= 2) { return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase(); }
+      return tk.label.trim().slice(0, 2).toUpperCase();
+    }
+    return tk.kind === 'pc' ? 'PG' : 'M';
+  }
+  function gridFmtM(value) { return value.toFixed(1).replace('.0', '').replace('.', ','); }
+
+  // ---- Rendering della griglia ----
+  function gridStatusInfo() {
+    var map = {
+      online: { label: gridT('statusOnline'), color: '#34d399' },
+      connecting: { label: gridT('statusConnecting'), color: '#d9b65f' },
+      local: { label: gridT('statusLocal'), color: '#9b94ac' },
+      error: { label: gridT('statusError'), color: '#f87171' },
+      notFound: { label: gridT('statusNotFound'), color: '#f87171' },
+      offline: { label: '', color: '#9b94ac' }
+    };
+    return map[gridState.status] || map.offline;
+  }
+  function gridRenderConnect() {
+    var box = $('grid-connect'); if (!box) { return; }
+    if (!gridState.room) {
+      box.innerHTML =
+        '<div class="flex flex-col sm:flex-row sm:items-end gap-4">' +
+          '<button id="grid-create" type="button" class="btn-gold rounded-lg bg-gradient-to-b from-gold to-goldsoft text-ink font-semibold px-5 py-2.5 hover:brightness-105 active:brightness-95 transition self-start">' + esc(gridT('create')) + '</button>' +
+          '<div class="flex-1 min-w-0">' +
+            '<label class="block text-[11px] uppercase tracking-wider text-muted mb-1">' + esc(gridT('joinLabel')) + '</label>' +
+            '<div class="flex gap-2">' +
+              '<input id="grid-join-code" type="text" autocomplete="off" maxlength="5" placeholder="' + esc(gridT('joinPlaceholder')) + '" class="w-44 rounded-lg bg-panel2 border border-edge px-3 py-2 text-parchment uppercase tracking-[0.2em] placeholder-muted placeholder:tracking-normal focus:outline-none focus:border-gold/70" />' +
+              '<button id="grid-join" type="button" class="rounded-lg border border-edge bg-panel2 text-parchment px-4 py-2 hover:border-gold/60 transition">' + esc(gridT('join')) + '</button>' +
+            '</div>' +
+            '<p id="grid-connect-msg" class="text-xs text-crimson mt-1 min-h-[1rem]"></p>' +
+          '</div>' +
+        '</div>' +
+        (gridConfigPresent() ? '' : '<p class="text-xs text-muted mt-3 border-t border-edge/60 pt-2">' + esc(gridT('localNote')) + '</p>');
+      return;
+    }
+    var st = gridStatusInfo();
+    var roleLabel = gridState.role === 'host' ? gridT('roleHost') : gridT('roleViewer');
+    box.innerHTML =
+      '<div class="flex flex-wrap items-center gap-x-5 gap-y-3">' +
+        '<div><div class="text-[11px] uppercase tracking-wider text-muted">' + esc(gridT('room')) + '</div>' +
+          '<div class="flex items-center gap-2"><span class="font-display text-2xl text-gold tracking-[0.25em]">' + esc(gridState.room) + '</span>' +
+          '<button id="grid-copy" type="button" class="text-xs rounded border border-edge px-2 py-1 text-muted hover:text-gold hover:border-gold/60 transition">' + esc(gridT('copy')) + '</button></div></div>' +
+        '<div class="h-8 w-px bg-edge/70"></div>' +
+        '<div><div class="text-[11px] uppercase tracking-wider text-muted">' + esc(roleLabel) + '</div>' +
+          '<div class="flex items-center gap-1.5 text-sm" style="color:' + st.color + '"><span class="w-2 h-2 rounded-full" style="background:' + st.color + '"></span>' + esc(st.label) + '</div></div>' +
+        (fb.db ? '<div><div class="text-[11px] uppercase tracking-wider text-muted">' + esc(gridT('participants')) + '</div><div class="text-sm text-parchment">' + gridState.participants + '</div></div>' : '') +
+        '<button id="grid-leave" type="button" class="ml-auto text-xs rounded-lg border border-edge px-3 py-1.5 text-muted hover:text-crimson hover:border-crimson/60 transition">' + esc(gridT('leave')) + '</button>' +
+      '</div>' +
+      '<p class="text-xs text-muted mt-2">' + esc(gridState.role === 'host' ? gridT('shareHint') : gridT('viewerReadonly')) + '</p>' +
+      (gridState.status === 'local' ? '<p class="text-xs text-muted mt-2 border-t border-edge/60 pt-2">' + esc(gridT('localNote')) + '</p>' : '');
+  }
+
+  function gridBuildOverlay() {
+    var sel = gridState.selectedId ? gridFindToken(gridState.selectedId) : null;
+    if (!sel) { return ''; }
+    var g = gridState.grid, w = g.cols * gridCellPx, h = g.rows * gridCellPx;
+    var half = gridCellPx / 2;
+    var svg = '<svg class="grid-lines" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">';
+    gridState.tokens.forEach(function (tk) {
+      if (tk.id === sel.id) { return; }
+      var x1 = sel.x * gridCellPx + half, y1 = sel.y * gridCellPx + half;
+      var x2 = tk.x * gridCellPx + half, y2 = tk.y * gridCellPx + half;
+      var mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+      var label = gridFmtM(GRID.distanceM(sel, tk)) + ' m';
+      var wgt = label.length * 6 + 10;
+      svg += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#d9b65f" stroke-width="2" stroke-dasharray="5 4" opacity="0.85"/>';
+      svg += '<rect x="' + (mx - wgt / 2) + '" y="' + (my - 9) + '" width="' + wgt + '" height="18" rx="5" fill="#13111c" stroke="#d9b65f" stroke-opacity="0.6"/>';
+      svg += '<text x="' + mx + '" y="' + (my + 4) + '" text-anchor="middle" font-size="11" fill="#ece5d3" font-family="Inter, sans-serif">' + esc(label) + '</text>';
+    });
+    return svg + '</svg>';
+  }
+  function gridRenderOverlay() {
+    var board = $('grid-board'); if (!board) { return; }
+    var existing = board.querySelector('svg.grid-lines');
+    var html = gridBuildOverlay();
+    if (existing) { if (html) { existing.outerHTML = html; } else { existing.parentNode.removeChild(existing); } }
+    else if (html) { board.insertAdjacentHTML('afterbegin', html); }
+  }
+  function gridRenderBoard() {
+    var board = $('grid-board'); if (!board) { return; }
+    var g = gridState.grid;
+    board.classList.add('grid-board');
+    board.style.width = (g.cols * gridCellPx) + 'px';
+    board.style.height = (g.rows * gridCellPx) + 'px';
+    board.style.setProperty('--cell', gridCellPx + 'px');
+    var canEdit = gridState.role === 'host';
+    var tokensHtml = gridState.tokens.map(function (tk) {
+      var isSel = tk.id === gridState.selectedId;
+      return '<button type="button" class="grid-token' + (isSel ? ' is-selected' : '') + (canEdit ? ' is-draggable' : '') + '" data-token="' + esc(tk.id) + '" ' +
+        'style="left:' + (tk.x * gridCellPx) + 'px;top:' + (tk.y * gridCellPx) + 'px;width:' + gridCellPx + 'px;height:' + gridCellPx + 'px;--tc:' + esc(tk.color) + '">' +
+        '<span class="grid-token-dot">' + esc(gridInitials(tk)) + '</span>' +
+        (tk.label ? '<span class="grid-token-label">' + esc(tk.label) + '</span>' : '') + '</button>';
+    }).join('');
+    var emptyMsg = '';
+    if (!gridState.room) { emptyMsg = gridT('boardIdle'); }
+    else if (!gridState.tokens.length) { emptyMsg = gridState.role === 'host' ? gridT('boardEmptyHost') : gridT('boardEmptyViewer'); }
+    var emptyHtml = emptyMsg ? '<div class="grid-empty">' + esc(emptyMsg) + '</div>' : '';
+    board.innerHTML = gridBuildOverlay() + tokensHtml + emptyHtml;
+  }
+
+  function gridKindBtn(kind) {
+    var active = gridState.addKind === kind;
+    var label = kind === 'pc' ? gridT('kindPc') : gridT('kindMonster');
+    return '<button type="button" data-kind="' + kind + '" class="flex-1 rounded-lg border px-3 py-2 text-sm transition ' +
+      (active ? 'border-gold/70 bg-gold/15 text-parchment' : 'border-edge bg-panel2 text-muted hover:text-parchment') + '">' + esc(label) + '</button>';
+  }
+  function gridColorSwatches() {
+    return GRID.TOKEN_COLORS.map(function (c) {
+      var active = gridState.addColor === c;
+      return '<button type="button" data-color="' + esc(c) + '" class="w-7 h-7 rounded-full border-2 transition" style="background:' + esc(c) + ';border-color:' + (active ? '#ece5d3' : 'transparent') + '"></button>';
+    }).join('');
+  }
+  function gridDistancePanel() {
+    var sel = gridState.selectedId ? gridFindToken(gridState.selectedId) : null;
+    var inner;
+    if (!sel) { inner = '<p class="text-xs text-muted">' + esc(gridT('distanceHint')) + '</p>'; }
+    else {
+      var others = gridState.tokens.filter(function (tk) { return tk.id !== sel.id; });
+      if (!others.length) { inner = '<p class="text-xs text-muted">' + esc(gridT('distanceNone')) + '</p>'; }
+      else {
+        others.sort(function (a, b) { return GRID.cellsBetween(sel, a) - GRID.cellsBetween(sel, b); });
+        inner = '<div class="flex items-center gap-2 mb-2"><span class="grid-dot" style="--tc:' + esc(sel.color) + '"></span><span class="text-sm text-parchment font-medium truncate">' + esc(sel.label || gridInitials(sel)) + '</span></div>' +
+          '<ul class="flex flex-col gap-1.5">' + others.map(function (tk) {
+            return '<li class="flex items-center justify-between gap-2 text-sm">' +
+              '<span class="flex items-center gap-2 min-w-0"><span class="grid-dot" style="--tc:' + esc(tk.color) + '"></span><span class="truncate text-parchment/90">' + esc(tk.label || gridInitials(tk)) + '</span></span>' +
+              '<span class="text-gold whitespace-nowrap font-medium">' + esc(gridFmtM(GRID.distanceM(sel, tk))) + ' m</span></li>';
+          }).join('') + '</ul>';
+      }
+    }
+    return '<div class="rounded-xl bg-panel border border-edge p-4"><h4 class="font-display text-base text-parchment mb-3">' + esc(gridT('distanceTitle')) + '</h4>' + inner + '</div>';
+  }
+  function gridTokenListPanel() {
+    var canEdit = gridState.role === 'host';
+    var inner;
+    if (!gridState.tokens.length) { inner = '<p class="text-xs text-muted">' + esc(gridT('tokensEmpty')) + '</p>'; }
+    else {
+      inner = '<ul class="flex flex-col gap-1.5">' + gridState.tokens.map(function (tk) {
+        return '<li class="flex items-center gap-2">' +
+          '<button type="button" data-token-sel="' + esc(tk.id) + '" class="flex-1 min-w-0 flex items-center gap-2 text-left text-sm transition hover:text-gold ' + (tk.id === gridState.selectedId ? 'text-gold' : 'text-parchment/90') + '">' +
+            '<span class="grid-dot" style="--tc:' + esc(tk.color) + '"></span><span class="truncate">' + esc(tk.label || gridInitials(tk)) + '</span></button>' +
+          (canEdit ? '<button type="button" data-token-del="' + esc(tk.id) + '" aria-label="' + esc(gridT('remove')) + '" class="w-6 h-6 rounded border border-edge text-muted hover:text-crimson hover:border-crimson/60 flex items-center justify-center text-sm leading-none shrink-0">&times;</button>' : '') +
+        '</li>';
+      }).join('') + '</ul>' +
+        (canEdit ? '<button id="grid-clear" type="button" class="mt-3 text-xs text-muted hover:text-crimson underline underline-offset-2">' + esc(gridT('clearAll')) + '</button>' : '');
+    }
+    return '<div class="rounded-xl bg-panel border border-edge p-4"><h4 class="font-display text-base text-parchment mb-3">' + esc(gridT('tokensTitle')) + '</h4>' + inner + '</div>';
+  }
+  function gridSizePanel() {
+    return '<div class="rounded-xl bg-panel border border-edge p-4"><h4 class="font-display text-base text-parchment mb-3">' + esc(gridT('sizeTitle')) + '</h4>' +
+      '<div class="flex gap-3">' +
+        '<div><label class="block text-[11px] uppercase tracking-wider text-muted mb-1">' + esc(gridT('cols')) + '</label><input id="grid-cols" type="number" min="' + GRID.MIN_DIM + '" max="' + GRID.MAX_DIM + '" value="' + gridState.grid.cols + '" class="w-20 rounded-lg bg-panel2 border border-edge px-2 py-1.5 text-parchment focus:outline-none focus:border-gold/70" /></div>' +
+        '<div><label class="block text-[11px] uppercase tracking-wider text-muted mb-1">' + esc(gridT('rows')) + '</label><input id="grid-rows" type="number" min="' + GRID.MIN_DIM + '" max="' + GRID.MAX_DIM + '" value="' + gridState.grid.rows + '" class="w-20 rounded-lg bg-panel2 border border-edge px-2 py-1.5 text-parchment focus:outline-none focus:border-gold/70" /></div>' +
+      '</div></div>';
+  }
+  function gridRenderSide() {
+    var side = $('grid-side'); if (!side) { return; }
+    if (!gridState.room) { side.innerHTML = ''; return; }
+    var html = '';
+    if (gridState.role === 'host') {
+      html += '<div class="rounded-xl bg-panel border border-edge p-4">' +
+        '<h4 class="font-display text-base text-parchment mb-3">' + esc(gridT('addTitle')) + '</h4>' +
+        '<div class="flex gap-2 mb-3">' + gridKindBtn('monster') + gridKindBtn('pc') + '</div>' +
+        '<input id="grid-add-name" type="text" autocomplete="off" maxlength="24" placeholder="' + esc(gridT('namePlaceholder')) + '" class="w-full rounded-lg bg-panel2 border border-edge px-3 py-2 text-sm text-parchment placeholder-muted focus:outline-none focus:border-gold/70 mb-3" />' +
+        '<div class="mb-3"><div class="text-[11px] uppercase tracking-wider text-muted mb-1.5">' + esc(gridT('colorLabel')) + '</div><div class="flex flex-wrap gap-2">' + gridColorSwatches() + '</div></div>' +
+        '<button id="grid-add" type="button" class="btn-gold w-full rounded-lg bg-gradient-to-b from-gold to-goldsoft text-ink font-semibold py-2 hover:brightness-105 transition">' + esc(gridT('add')) + '</button>' +
+      '</div>';
+    }
+    html += gridDistancePanel();
+    html += gridTokenListPanel();
+    if (gridState.role === 'host') { html += gridSizePanel(); }
+    side.innerHTML = html;
+  }
+  function gridSetHint() {
+    var hint = $('grid-hint'); if (!hint) { return; }
+    hint.textContent = !gridState.room ? '' : (gridState.role === 'host' ? gridT('hintHost') : gridT('hintViewer'));
+  }
+  function gridRender() { gridRenderConnect(); gridRenderBoard(); gridRenderSide(); gridSetHint(); }
+
+  function gridCopyCode(btn) {
+    if (!gridState.room) { return; }
+    var done = function () { if (btn) { btn.textContent = gridT('copied'); setTimeout(function () { if (btn) { btn.textContent = gridT('copy'); } }, 1500); } };
+    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(gridState.room).then(done, done); }
+    else { done(); }
+  }
+  function gridAddFromForm() {
+    var inp = $('grid-add-name');
+    gridAddToken({ kind: gridState.addKind, label: (inp || {}).value || '', color: gridState.addColor });
+    if (inp) { inp.value = ''; }
+  }
+  function gridBindBoard() {
+    var board = $('grid-board'); if (!board) { return; }
+    board.addEventListener('pointerdown', function (e) {
+      var el = e.target.closest('[data-token]'); if (!el) { return; }
+      var id = el.getAttribute('data-token');
+      if (gridState.role !== 'host') { gridSelect(id); return; }
+      if (!gridFindToken(id)) { return; }
+      e.preventDefault();
+      gridDrag = { id: id, el: el, moved: false, startX: e.clientX, startY: e.clientY, rect: board.getBoundingClientRect(), pointerId: e.pointerId };
+      try { el.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    board.addEventListener('pointermove', function (e) {
+      if (!gridDrag) { return; }
+      var tk = gridFindToken(gridDrag.id); if (!tk) { return; }
+      var cx = e.clientX - gridDrag.rect.left, cy = e.clientY - gridDrag.rect.top;
+      var nx = GRID.clampInt(Math.floor(cx / gridCellPx), 0, gridState.grid.cols - 1, tk.x);
+      var ny = GRID.clampInt(Math.floor(cy / gridCellPx), 0, gridState.grid.rows - 1, tk.y);
+      if (Math.abs(e.clientX - gridDrag.startX) > 3 || Math.abs(e.clientY - gridDrag.startY) > 3) { gridDrag.moved = true; }
+      if (tk.x !== nx || tk.y !== ny) {
+        tk.x = nx; tk.y = ny; gridDrag.moved = true;
+        gridDrag.el.style.left = (nx * gridCellPx) + 'px';
+        gridDrag.el.style.top = (ny * gridCellPx) + 'px';
+        gridRenderOverlay();
+        gridPushState(false);
+      }
+    });
+    var endDrag = function () {
+      if (!gridDrag) { return; }
+      var d = gridDrag; gridDrag = null;
+      try { d.el.releasePointerCapture(d.pointerId); } catch (err) {}
+      if (!d.moved) { gridSelect(d.id); }
+      else { gridPushState(true); gridRenderSide(); }
+    };
+    board.addEventListener('pointerup', endDrag);
+    board.addEventListener('pointercancel', endDrag);
+  }
+  function initGrid() {
+    if (!GRID || !$('grid-connect')) { return; }
+    gridRender();
+    gridBindBoard();
+    var panel = $('panel-grid');
+    panel.addEventListener('click', function (e) {
+      var el;
+      if (e.target.closest('#grid-create')) { gridCreate(); return; }
+      if (e.target.closest('#grid-join')) { gridJoin((($('grid-join-code') || {}).value) || ''); return; }
+      if (e.target.closest('#grid-leave')) { gridLeave(); return; }
+      if ((el = e.target.closest('#grid-copy'))) { gridCopyCode(el); return; }
+      if (e.target.closest('#grid-add')) { gridAddFromForm(); return; }
+      if (e.target.closest('#grid-clear')) { gridClearAll(); return; }
+      if ((el = e.target.closest('[data-kind]'))) { gridState.addKind = el.getAttribute('data-kind'); gridRenderSide(); return; }
+      if ((el = e.target.closest('[data-color]'))) { gridState.addColor = el.getAttribute('data-color'); gridRenderSide(); return; }
+      if ((el = e.target.closest('[data-token-del]'))) { gridRemoveToken(el.getAttribute('data-token-del')); return; }
+      if ((el = e.target.closest('[data-token-sel]'))) { gridSelect(el.getAttribute('data-token-sel')); return; }
+    });
+    panel.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && e.target.id === 'grid-join-code') { e.preventDefault(); gridJoin(e.target.value); }
+    });
+    panel.addEventListener('change', function (e) {
+      if (e.target.id === 'grid-cols' || e.target.id === 'grid-rows') { gridSetSize(($('grid-cols') || {}).value, ($('grid-rows') || {}).value); }
+    });
+  }
+
   function boot() {
     if (!t || !D.filterItems) {
       document.body.insertAdjacentHTML('afterbegin',
@@ -1586,6 +2018,7 @@
     initDM();
     initBuild();
     initDice();
+    initGrid();
     initPatch();
   }
 
