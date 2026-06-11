@@ -966,6 +966,108 @@
       tags: ["arma", "spada", "artefatto", "celestiale", "radioso"],
       descrizione: "La spada un tempo appartenuta all'angelo Zariel, prima della sua caduta. Spada lunga +3 che, in mano a chi ne è degno, concede immunità al fuoco, ali per volare, resistenza ai danni e la capacità di colpire e curare con luce radiosa: un faro di speranza nell'Avernus.",
       source: "Discesa nell'Avernus"
+    },
+
+    // ---------------- AGGIUNTE (update 1.7.0) — ARMATURE ----------------
+    {
+      id: "mariners-armor", name: "Armatura del Marinaio", type: "armor", rarity: "uncommon",
+      attunement: false, bonus: { extra: "Velocità di nuoto pari al tuo movimento; non affondi sott'acqua mentre la indossi" },
+      tags: ["armatura", "nuoto", "acqua"],
+      descrizione: "Quest'armatura è ricoperta di motivi a forma di pesce e conchiglia. Mentre la indossi hai una velocità di nuoto pari al tuo movimento e, se inizi il turno sott'acqua privo di sensi, risali verso la superficie.",
+      source: "SRD"
+    },
+    {
+      id: "armor-of-resistance", name: "Armatura della Resistenza", type: "armor", rarity: "rare",
+      attunement: true, bonus: { resist: ["fire"], extra: "Resistenza a un tipo di danno scelto alla creazione: acido, freddo, fuoco, forza, fulmine, necrotico, psichico, radiante, tuono o veleno" },
+      tags: ["armatura", "resistenza", "difesa"],
+      descrizione: "Mentre indossi quest'armatura hai resistenza a un tipo di danno, stabilito quando l'oggetto viene creato (qui mostrato il fuoco come esempio).",
+      source: "SRD"
+    },
+    {
+      id: "glamoured-studded-leather", name: "Corazza di Cuoio Borchiata Cangiante", type: "armor", rarity: "rare",
+      attunement: false, bonus: { acBonus: 1, extra: "Azione bonus (parola di comando): cambi l'aspetto dell'armatura, mantenendone le protezioni" },
+      tags: ["armatura", "difesa", "travestimento"],
+      descrizione: "Mentre indossi quest'armatura ottieni +1 alla Classe Armatura. Con un'azione bonus puoi farle assumere l'aspetto di un altro capo di abbigliamento o di una normale armatura: la forma è illusoria ma le protezioni restano reali.",
+      source: "SRD"
+    },
+    {
+      id: "dragon-scale-mail", name: "Cotta di Scaglie di Drago", type: "armor", rarity: "very-rare",
+      attunement: true, bonus: { acBonus: 1, resist: ["fire"], extra: "Resistenza al tipo di danno del drago; vantaggio ai TS contro presenza e soffi dei draghi; azione per fiutare i draghi vicini" },
+      tags: ["armatura", "draghi", "resistenza", "difesa"],
+      descrizione: "Forgiata con le scaglie di un drago, dona +1 alla Classe Armatura e resistenza al tipo di danno legato a quel drago. Hai vantaggio ai tiri salvezza contro la Presenza Spaventosa e i soffi dei draghi e, con un'azione, percepisci la presenza di draghi entro 9 km.",
+      source: "SRD"
+    },
+    {
+      id: "dwarven-plate", name: "Corazza Nanica di Piastre", type: "armor", rarity: "very-rare",
+      attunement: false, bonus: { acBonus: 2, extra: "Se un effetto ti spinge o trascina, reazione per ridurre lo spostamento di 3 metri" },
+      tags: ["armatura", "nani", "difesa"],
+      descrizione: "Capolavoro dei fabbri nanici: dona +2 alla Classe Armatura. Quando un effetto ti farebbe spostare contro la tua volontà, puoi usare una reazione per ridurre di 3 metri lo spostamento, restando saldo come la roccia.",
+      source: "SRD"
+    },
+    {
+      id: "demon-armor", name: "Armatura Demoniaca", type: "armor", rarity: "very-rare",
+      attunement: true, bonus: { acBonus: 1, extra: "Attacchi senz'armi con artigli magici (1d8) e +1 a colpire/danni con essi; ma l'armatura è maledetta" },
+      tags: ["armatura", "maledetto", "demoni", "difesa"],
+      descrizione: "Armatura infernale ornata di corna e volti urlanti. Concede +1 alla Classe Armatura e trasforma i tuoi attacchi senz'armi in colpi di artiglio magici (1d8 danni taglienti, +1 ai tiri). È però maledetta: una volta indossata, te ne separi solo con una rimozione di maledizione.",
+      source: "SRD"
+    },
+    {
+      id: "plate-armor-of-etherealness", name: "Corazza di Piastre dell'Eterealità", type: "armor", rarity: "legendary",
+      attunement: true, bonus: { extra: "Azione (parola di comando): diventi etereo per 10 minuti o finché usi un'azione per tornare materiale" },
+      tags: ["armatura", "etereo", "difesa"],
+      descrizione: "Pronunciando la parola di comando entri nel Piano Etereo per 10 minuti o finché non usi un'azione per ritornare. Mentre sei etereo attraversi gli oggetti e ti muovi in ogni direzione, restando protetto dalla pesante corazza di piastre.",
+      source: "SRD"
+    },
+    {
+      id: "armor-of-invulnerability", name: "Armatura dell'Invulnerabilità", type: "armor", rarity: "legendary",
+      attunement: true, bonus: { resist: ["bludgeoning", "piercing", "slashing"], extra: "Resistenza ai danni non magici; azione: immunità ai danni non magici per 10 minuti (1/giorno)" },
+      tags: ["armatura", "difesa", "invulnerabilità"],
+      descrizione: "Mentre indossi quest'armatura hai resistenza ai danni non magici. Una volta al giorno puoi usare un'azione per diventare immune ai danni non magici per 10 minuti o finché non la togli.",
+      source: "SRD"
+    },
+
+    // ---------------- AGGIUNTE (update 1.7.0) — SCUDI ----------------
+    {
+      id: "sentinel-shield", name: "Scudo della Sentinella", type: "shield", rarity: "uncommon",
+      attunement: false, bonus: { extra: "Vantaggio all'iniziativa e alle prove di Saggezza (Percezione) mentre lo impugni" },
+      tags: ["scudo", "percezione", "iniziativa"],
+      descrizione: "Su questo scudo è inciso un occhio sempre vigile. Mentre lo impugni hai vantaggio ai tiri di iniziativa e alle prove di Saggezza (Percezione): nulla ti coglie di sorpresa.",
+      source: "SRD"
+    },
+    {
+      id: "shield-plus-2", name: "Scudo +2", type: "shield", rarity: "rare",
+      attunement: false, bonus: { acBonus: 2 },
+      tags: ["scudo", "difesa", "bonus"],
+      descrizione: "Mentre impugni questo scudo ottieni un bonus di +2 alla Classe Armatura, oltre al normale bonus dello scudo.",
+      source: "SRD"
+    },
+    {
+      id: "arrow-catching-shield", name: "Scudo Acchiappafrecce", type: "shield", rarity: "rare",
+      attunement: true, bonus: { extra: "+2 alla CA contro gli attacchi a distanza (oltre al bonus dello scudo); reazione per attirare su di te un tiro a distanza diretto a chi ti è vicino" },
+      tags: ["scudo", "difesa", "protezione"],
+      descrizione: "Ottieni un bonus di +2 alla Classe Armatura contro gli attacchi a distanza, oltre al normale bonus dello scudo. Quando una creatura entro 1,5 metri da te è bersaglio di un attacco a distanza, puoi usare una reazione per diventare tu il bersaglio.",
+      source: "SRD"
+    },
+    {
+      id: "spellguard-shield", name: "Scudo Anti-Incantesimi", type: "shield", rarity: "very-rare",
+      attunement: true, bonus: { extra: "Vantaggio ai TS contro incantesimi e altri effetti magici; gli attacchi con incantesimi hanno svantaggio contro di te" },
+      tags: ["scudo", "difesa", "antimagia"],
+      descrizione: "Mentre impugni questo scudo hai vantaggio ai tiri salvezza contro gli incantesimi e gli altri effetti magici, e gli attacchi effettuati con incantesimi hanno svantaggio contro di te.",
+      source: "SRD"
+    },
+    {
+      id: "shield-plus-3", name: "Scudo +3", type: "shield", rarity: "very-rare",
+      attunement: false, bonus: { acBonus: 3 },
+      tags: ["scudo", "difesa", "bonus"],
+      descrizione: "Mentre impugni questo scudo ottieni un bonus di +3 alla Classe Armatura, oltre al normale bonus dello scudo.",
+      source: "SRD"
+    },
+    {
+      id: "animated-shield", name: "Scudo Animato", type: "shield", rarity: "very-rare",
+      attunement: true, bonus: { extra: "Azione bonus: lo animi per 1 minuto; fluttua e ti protegge (bonus dello scudo) lasciandoti le mani libere" },
+      tags: ["scudo", "difesa", "animato"],
+      descrizione: "Con un'azione bonus puoi pronunciare la parola di comando e far fluttuare lo scudo intorno a te per 1 minuto: ti protegge come se lo impugnassi, ma lascia libere entrambe le mani. Si disattiva se lo usi di nuovo, se sei incapacitato o se muori.",
+      source: "SRD"
     }
   ];
 });

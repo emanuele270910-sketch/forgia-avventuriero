@@ -42,30 +42,39 @@
     body {
       background-color: #0b0a10;
       background-image:
-        radial-gradient(1200px 600px at 80% -10%, rgba(155, 34, 38, 0.16), transparent 60%),
-        radial-gradient(900px 500px at 0% 0%, rgba(217, 182, 95, 0.10), transparent 55%),
-        linear-gradient(180deg, #0b0a10 0%, #0e0c15 100%);
+        radial-gradient(1100px 600px at 82% -12%, rgba(155, 34, 38, 0.20), transparent 60%),
+        radial-gradient(900px 520px at -5% 0%, rgba(217, 182, 95, 0.12), transparent 55%),
+        radial-gradient(820px 620px at 112% 116%, rgba(99, 76, 168, 0.14), transparent 62%),
+        linear-gradient(180deg, #0b0a10 0%, #0d0b14 55%, #0e0c15 100%);
       background-attachment: fixed;
     }
-    .font-display { font-family: 'Cinzel', Georgia, serif; }
+    .font-display { font-family: 'Cinzel', Georgia, serif; letter-spacing: .012em; }
+    /* alone dorato sui titoli di sezione */
+    .font-display.text-gold { text-shadow: 0 0 22px rgba(217, 182, 95, 0.22); }
+
     ::-webkit-scrollbar { width: 10px; height: 10px; }
     ::-webkit-scrollbar-track { background: #13111c; }
-    ::-webkit-scrollbar-thumb { background: #352c4a; border-radius: 6px; }
-    ::-webkit-scrollbar-thumb:hover { background: #4a3e63; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #4a3e63, #352c4a); border-radius: 8px; border: 2px solid #13111c; }
+    ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #6b5a8c, #4a3e63); }
 
-    .card-rise { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
-    .card-rise:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+    .card-rise { position: relative; transition: transform .18s cubic-bezier(.22,.61,.36,1), box-shadow .2s ease, border-color .2s ease, background-color .2s ease; }
+    /* riflesso lucido appena percettibile in cima alla card */
+    .card-rise::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(180deg, rgba(255,255,255,.05), transparent 38%); }
+    .card-rise:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(217,182,95,.20); border-color: rgba(217,182,95,.45); background-color: #211c30; }
 
-    .tab-active { color: #0b0a10; background: linear-gradient(180deg, #e6c96f, #c9a64a); box-shadow: 0 6px 18px rgba(217,182,95,.25); }
+    #tabs button { transition: color .15s ease, background-color .15s ease, box-shadow .15s ease; }
+    #tabs button:not(.tab-active):hover { color: #ece5d3; background: rgba(217,182,95,.10); }
+    .tab-active, #tabs button.tab-active { color: #0b0a10; background: linear-gradient(180deg, #e6c96f, #c9a64a); box-shadow: 0 6px 18px rgba(217,182,95,.30), inset 0 1px 0 rgba(255,255,255,.45); }
 
     .drawer { transition: transform .28s cubic-bezier(.22,.61,.36,1); }
     .drawer-closed { transform: translateX(105%); }
     .overlay { transition: opacity .25s ease; }
 
-    .fade-in { animation: fadeIn .25s ease both; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .fade-in { animation: fadeIn .3s cubic-bezier(.22,.61,.36,1) both; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px) scale(.99); } to { opacity: 1; transform: none; } }
 
-    .chip { transition: background-color .12s ease, color .12s ease, border-color .12s ease; }
+    .chip { transition: background-color .12s ease, color .12s ease, border-color .12s ease, box-shadow .12s ease, transform .12s ease; }
+    .chip:hover { box-shadow: 0 2px 10px rgba(0,0,0,.3); }
 
     /* Lancio dei dadi */
     .die-face {
@@ -96,16 +105,42 @@
     .accent-left { border-left-width: 4px; }
     details > summary { list-style: none; cursor: pointer; }
     details > summary::-webkit-details-marker { display: none; }
-  </style>
+
+    /* ===================== Rifiniture grafiche (update 1.7.0) ===================== */
+    /* profondità leggera su tutti i pannelli scuri */
+    .bg-panel { box-shadow: inset 0 1px 0 rgba(255,255,255,.035); }
+    /* intestazione del sito: gradiente + filo dorato luminoso in basso */
+    .site-header { background-image: linear-gradient(180deg, rgba(13,11,20,.92), rgba(11,10,16,.74)); }
+    .site-header::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: linear-gradient(90deg, transparent, rgba(217,182,95,.55), transparent); }
+    /* logo con riflesso che scorre al passaggio del mouse */
+    .app-logo { position: relative; overflow: hidden; }
+    .app-logo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,.55) 50%, transparent 65%); transform: translateX(-130%); }
+    .app-logo:hover::after { animation: shimmer 1.1s ease; }
+    @keyframes shimmer { from { transform: translateX(-130%); } to { transform: translateX(130%); } }
+    /* campi di input/selezione più reattivi al focus */
+    input, select, textarea { transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease; }
+    input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px rgba(217,182,95,.16); }
+    /* alone dorato sui pulsanti dorati (sia statici sia generati) */
+    .from-gold.to-goldsoft { transition: filter .15s ease, box-shadow .15s ease, transform .1s ease; }
+    button.from-gold.to-goldsoft { box-shadow: 0 4px 14px rgba(217,182,95,.20); }
+    button.from-gold.to-goldsoft:hover { box-shadow: 0 8px 24px rgba(217,182,95,.40); }
+    button.from-gold.to-goldsoft:active { transform: translateY(1px); }
+    /* rispetta chi preferisce meno animazioni */
+    @media (prefers-reduced-motion: reduce) {
+      .app-logo::after, .die-face.is-rolling { animation: none; }
+      .card-rise:hover { transform: none; }
+      .fade-in { animation: none; }
+    }
+</style>
 </head>
 
 <body class="font-body text-parchment min-h-screen antialiased">
 
   <!-- HEADER -->
-  <header class="sticky top-0 z-30 backdrop-blur-md bg-ink/80 border-b border-edge/70">
+  <header class="site-header sticky top-0 z-30 backdrop-blur-md bg-ink/80 border-b border-edge/70">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4 flex-wrap">
       <div class="flex items-center gap-3 mr-auto">
-        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-gold to-goldsoft flex items-center justify-center text-ink font-display font-bold text-xl shadow-lg select-none">&amp;</div>
+        <div class="app-logo w-10 h-10 rounded-lg bg-gradient-to-br from-gold to-goldsoft flex items-center justify-center text-ink font-display font-bold text-xl shadow-lg select-none">&amp;</div>
         <div>
           <h1 id="app-title" class="font-display text-xl sm:text-2xl font-bold tracking-wide leading-none text-parchment"></h1>
           <p id="app-subtitle" class="text-xs text-muted mt-0.5"></p>
@@ -1821,6 +1856,108 @@
       tags: ["arma", "spada", "artefatto", "celestiale", "radioso"],
       descrizione: "La spada un tempo appartenuta all'angelo Zariel, prima della sua caduta. Spada lunga +3 che, in mano a chi ne è degno, concede immunità al fuoco, ali per volare, resistenza ai danni e la capacità di colpire e curare con luce radiosa: un faro di speranza nell'Avernus.",
       source: "Discesa nell'Avernus"
+    },
+
+    // ---------------- AGGIUNTE (update 1.7.0) — ARMATURE ----------------
+    {
+      id: "mariners-armor", name: "Armatura del Marinaio", type: "armor", rarity: "uncommon",
+      attunement: false, bonus: { extra: "Velocità di nuoto pari al tuo movimento; non affondi sott'acqua mentre la indossi" },
+      tags: ["armatura", "nuoto", "acqua"],
+      descrizione: "Quest'armatura è ricoperta di motivi a forma di pesce e conchiglia. Mentre la indossi hai una velocità di nuoto pari al tuo movimento e, se inizi il turno sott'acqua privo di sensi, risali verso la superficie.",
+      source: "SRD"
+    },
+    {
+      id: "armor-of-resistance", name: "Armatura della Resistenza", type: "armor", rarity: "rare",
+      attunement: true, bonus: { resist: ["fire"], extra: "Resistenza a un tipo di danno scelto alla creazione: acido, freddo, fuoco, forza, fulmine, necrotico, psichico, radiante, tuono o veleno" },
+      tags: ["armatura", "resistenza", "difesa"],
+      descrizione: "Mentre indossi quest'armatura hai resistenza a un tipo di danno, stabilito quando l'oggetto viene creato (qui mostrato il fuoco come esempio).",
+      source: "SRD"
+    },
+    {
+      id: "glamoured-studded-leather", name: "Corazza di Cuoio Borchiata Cangiante", type: "armor", rarity: "rare",
+      attunement: false, bonus: { acBonus: 1, extra: "Azione bonus (parola di comando): cambi l'aspetto dell'armatura, mantenendone le protezioni" },
+      tags: ["armatura", "difesa", "travestimento"],
+      descrizione: "Mentre indossi quest'armatura ottieni +1 alla Classe Armatura. Con un'azione bonus puoi farle assumere l'aspetto di un altro capo di abbigliamento o di una normale armatura: la forma è illusoria ma le protezioni restano reali.",
+      source: "SRD"
+    },
+    {
+      id: "dragon-scale-mail", name: "Cotta di Scaglie di Drago", type: "armor", rarity: "very-rare",
+      attunement: true, bonus: { acBonus: 1, resist: ["fire"], extra: "Resistenza al tipo di danno del drago; vantaggio ai TS contro presenza e soffi dei draghi; azione per fiutare i draghi vicini" },
+      tags: ["armatura", "draghi", "resistenza", "difesa"],
+      descrizione: "Forgiata con le scaglie di un drago, dona +1 alla Classe Armatura e resistenza al tipo di danno legato a quel drago. Hai vantaggio ai tiri salvezza contro la Presenza Spaventosa e i soffi dei draghi e, con un'azione, percepisci la presenza di draghi entro 9 km.",
+      source: "SRD"
+    },
+    {
+      id: "dwarven-plate", name: "Corazza Nanica di Piastre", type: "armor", rarity: "very-rare",
+      attunement: false, bonus: { acBonus: 2, extra: "Se un effetto ti spinge o trascina, reazione per ridurre lo spostamento di 3 metri" },
+      tags: ["armatura", "nani", "difesa"],
+      descrizione: "Capolavoro dei fabbri nanici: dona +2 alla Classe Armatura. Quando un effetto ti farebbe spostare contro la tua volontà, puoi usare una reazione per ridurre di 3 metri lo spostamento, restando saldo come la roccia.",
+      source: "SRD"
+    },
+    {
+      id: "demon-armor", name: "Armatura Demoniaca", type: "armor", rarity: "very-rare",
+      attunement: true, bonus: { acBonus: 1, extra: "Attacchi senz'armi con artigli magici (1d8) e +1 a colpire/danni con essi; ma l'armatura è maledetta" },
+      tags: ["armatura", "maledetto", "demoni", "difesa"],
+      descrizione: "Armatura infernale ornata di corna e volti urlanti. Concede +1 alla Classe Armatura e trasforma i tuoi attacchi senz'armi in colpi di artiglio magici (1d8 danni taglienti, +1 ai tiri). È però maledetta: una volta indossata, te ne separi solo con una rimozione di maledizione.",
+      source: "SRD"
+    },
+    {
+      id: "plate-armor-of-etherealness", name: "Corazza di Piastre dell'Eterealità", type: "armor", rarity: "legendary",
+      attunement: true, bonus: { extra: "Azione (parola di comando): diventi etereo per 10 minuti o finché usi un'azione per tornare materiale" },
+      tags: ["armatura", "etereo", "difesa"],
+      descrizione: "Pronunciando la parola di comando entri nel Piano Etereo per 10 minuti o finché non usi un'azione per ritornare. Mentre sei etereo attraversi gli oggetti e ti muovi in ogni direzione, restando protetto dalla pesante corazza di piastre.",
+      source: "SRD"
+    },
+    {
+      id: "armor-of-invulnerability", name: "Armatura dell'Invulnerabilità", type: "armor", rarity: "legendary",
+      attunement: true, bonus: { resist: ["bludgeoning", "piercing", "slashing"], extra: "Resistenza ai danni non magici; azione: immunità ai danni non magici per 10 minuti (1/giorno)" },
+      tags: ["armatura", "difesa", "invulnerabilità"],
+      descrizione: "Mentre indossi quest'armatura hai resistenza ai danni non magici. Una volta al giorno puoi usare un'azione per diventare immune ai danni non magici per 10 minuti o finché non la togli.",
+      source: "SRD"
+    },
+
+    // ---------------- AGGIUNTE (update 1.7.0) — SCUDI ----------------
+    {
+      id: "sentinel-shield", name: "Scudo della Sentinella", type: "shield", rarity: "uncommon",
+      attunement: false, bonus: { extra: "Vantaggio all'iniziativa e alle prove di Saggezza (Percezione) mentre lo impugni" },
+      tags: ["scudo", "percezione", "iniziativa"],
+      descrizione: "Su questo scudo è inciso un occhio sempre vigile. Mentre lo impugni hai vantaggio ai tiri di iniziativa e alle prove di Saggezza (Percezione): nulla ti coglie di sorpresa.",
+      source: "SRD"
+    },
+    {
+      id: "shield-plus-2", name: "Scudo +2", type: "shield", rarity: "rare",
+      attunement: false, bonus: { acBonus: 2 },
+      tags: ["scudo", "difesa", "bonus"],
+      descrizione: "Mentre impugni questo scudo ottieni un bonus di +2 alla Classe Armatura, oltre al normale bonus dello scudo.",
+      source: "SRD"
+    },
+    {
+      id: "arrow-catching-shield", name: "Scudo Acchiappafrecce", type: "shield", rarity: "rare",
+      attunement: true, bonus: { extra: "+2 alla CA contro gli attacchi a distanza (oltre al bonus dello scudo); reazione per attirare su di te un tiro a distanza diretto a chi ti è vicino" },
+      tags: ["scudo", "difesa", "protezione"],
+      descrizione: "Ottieni un bonus di +2 alla Classe Armatura contro gli attacchi a distanza, oltre al normale bonus dello scudo. Quando una creatura entro 1,5 metri da te è bersaglio di un attacco a distanza, puoi usare una reazione per diventare tu il bersaglio.",
+      source: "SRD"
+    },
+    {
+      id: "spellguard-shield", name: "Scudo Anti-Incantesimi", type: "shield", rarity: "very-rare",
+      attunement: true, bonus: { extra: "Vantaggio ai TS contro incantesimi e altri effetti magici; gli attacchi con incantesimi hanno svantaggio contro di te" },
+      tags: ["scudo", "difesa", "antimagia"],
+      descrizione: "Mentre impugni questo scudo hai vantaggio ai tiri salvezza contro gli incantesimi e gli altri effetti magici, e gli attacchi effettuati con incantesimi hanno svantaggio contro di te.",
+      source: "SRD"
+    },
+    {
+      id: "shield-plus-3", name: "Scudo +3", type: "shield", rarity: "very-rare",
+      attunement: false, bonus: { acBonus: 3 },
+      tags: ["scudo", "difesa", "bonus"],
+      descrizione: "Mentre impugni questo scudo ottieni un bonus di +3 alla Classe Armatura, oltre al normale bonus dello scudo.",
+      source: "SRD"
+    },
+    {
+      id: "animated-shield", name: "Scudo Animato", type: "shield", rarity: "very-rare",
+      attunement: true, bonus: { extra: "Azione bonus: lo animi per 1 minuto; fluttua e ti protegge (bonus dello scudo) lasciandoti le mani libere" },
+      tags: ["scudo", "difesa", "animato"],
+      descrizione: "Con un'azione bonus puoi pronunciare la parola di comando e far fluttuare lo scudo intorno a te per 1 minuto: ti protegge come se lo impugnassi, ma lascia libere entrambe le mani. Si disattiva se lo usi di nuovo, se sei incapacitato o se muori.",
+      source: "SRD"
     }
   ];
 });
@@ -2816,6 +2953,108 @@
       castingTime: "action", range: "Personale", components: { v: true, s: true, m: true, material: "un diadema di giada per almeno 1.500 mo, indossato durante l'incantesimo" },
       duration: "Concentrazione, fino a 1 ora", concentration: true, ritual: false,
       descrizione: "Assumi la forma di un'altra creatura di grado di sfida pari o inferiore al tuo livello, mantenendo allineamento, Intelligenza, Saggezza e Carisma: puoi cambiare forma a volontà finché ti concentri.",
+      source: "SRD" },
+
+    // ===================== AGGIUNTE (update 1.7.0) — INCANTESIMI SRD =====================
+    { id: "grease", name: "Grasso", level: 1, school: "conjuration", classes: ["wizard"],
+      castingTime: "action", range: "18 metri", components: { v: true, s: true, m: true, material: "un po' di cotenna di maiale o di burro" },
+      duration: "1 minuto", concentration: false, ritual: false,
+      descrizione: "Un grasso scivoloso ricopre un quadrato di 3 metri di lato, che diventa terreno difficile. Ogni creatura nell'area quando appare effettua un TS su Destrezza o cade prona; chi vi entra o vi inizia il turno deve superarlo per non cadere.",
+      source: "SRD" },
+    { id: "longstrider", name: "Falcata Veloce", level: 1, school: "transmutation", classes: ["bard", "druid", "ranger", "wizard"],
+      castingTime: "action", range: "Contatto", components: { v: true, s: true, m: true, material: "un pizzico di terra" },
+      duration: "1 ora", concentration: false, ritual: false,
+      descrizione: "Una creatura toccata aumenta la propria velocità di 3 metri per la durata.",
+      higherLevels: "Bersagli una creatura aggiuntiva per ogni livello di slot oltre il 1°.", source: "SRD" },
+    { id: "comprehend-languages", name: "Comprensione dei Linguaggi", level: 1, school: "divination", classes: ["bard", "sorcerer", "warlock", "wizard"],
+      castingTime: "action", range: "Personale", components: { v: true, s: true, m: true, material: "un pizzico di fuliggine e sale" },
+      duration: "1 ora", concentration: false, ritual: true,
+      descrizione: "Per la durata comprendi il significato letterale di qualsiasi lingua parlata che senti e di qualsiasi lingua scritta che tocchi, al ritmo di circa una pagina al minuto.",
+      source: "SRD" },
+    { id: "unseen-servant", name: "Servitore Invisibile", level: 1, school: "conjuration", classes: ["bard", "warlock", "wizard"],
+      castingTime: "action", range: "18 metri", components: { v: true, s: true, m: true, material: "un pezzo di spago e un frammento di legno" },
+      duration: "1 ora", concentration: false, ritual: true,
+      descrizione: "Crei una forza invisibile, informe e mansueta che svolge compiti semplici al tuo comando: pulire, accendere un fuoco, servire del cibo o reggere oggetti, finché resta entro 18 metri da te.",
+      source: "SRD" },
+    { id: "knock", name: "Apertura", level: 2, school: "transmutation", classes: ["bard", "sorcerer", "wizard"],
+      castingTime: "action", range: "18 metri", components: { v: true, s: false, m: false },
+      duration: "Istantanea", concentration: false, ritual: false,
+      descrizione: "Scegli un oggetto chiuso, sbarrato o sigillato magicamente: viene aperto, sbloccato o liberato da un chiavistello. L'incantesimo produce un forte rumore udibile a 90 metri.",
+      source: "SRD" },
+    { id: "alter-self", name: "Mutare Sé Stessi", level: 2, school: "transmutation", classes: ["sorcerer", "wizard"],
+      castingTime: "action", range: "Personale", components: { v: true, s: true, m: false },
+      duration: "Concentrazione, fino a 1 ora", concentration: true, ritual: false,
+      descrizione: "Assumi una forma diversa: puoi adattarti all'acqua (respiro e velocità di nuoto), modificare il tuo aspetto o far crescere armi naturali che contano come magiche.",
+      source: "SRD" },
+    { id: "enlarge-reduce", name: "Ingrandire/Ridurre", level: 2, school: "transmutation", classes: ["sorcerer", "wizard"],
+      castingTime: "action", range: "9 metri", components: { v: true, s: true, m: true, material: "un pizzico di limatura di ferro" },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Ingrandisci o rimpicciolisci di una categoria di taglia una creatura o un oggetto. Ingrandito: vantaggio a Forza, +1d4 ai danni in mischia. Rimpicciolito: svantaggio a Forza, −1d4 ai danni.",
+      source: "SRD" },
+    { id: "blindness-deafness", name: "Cecità/Sordità", level: 2, school: "necromancy", classes: ["bard", "cleric", "sorcerer", "wizard"],
+      castingTime: "action", range: "9 metri", components: { v: true, s: false, m: false },
+      duration: "1 minuto", concentration: false, ritual: false,
+      descrizione: "Una creatura effettua un tiro salvezza su Costituzione o diventa cieca oppure sorda (a tua scelta) per la durata, ripetendo il tiro alla fine di ogni suo turno.",
+      higherLevels: "Bersagli una creatura aggiuntiva per ogni livello di slot oltre il 2°.", source: "SRD" },
+    { id: "tongues", name: "Linguaggi", level: 3, school: "divination", classes: ["bard", "cleric", "sorcerer", "warlock", "wizard"],
+      castingTime: "action", range: "Contatto", components: { v: true, s: false, m: true, material: "una piccola torre di argilla o porcellana" },
+      duration: "1 ora", concentration: false, ritual: false,
+      descrizione: "La creatura toccata comprende qualsiasi lingua parlata che sente e qualunque creatura che conosca almeno una lingua la capisce quando parla.",
+      source: "SRD" },
+    { id: "gaseous-form", name: "Forma Gassosa", level: 3, school: "transmutation", classes: ["sorcerer", "warlock", "wizard"],
+      castingTime: "action", range: "Contatto", components: { v: true, s: true, m: true, material: "un po' di garza e un filo di fumo" },
+      duration: "Concentrazione, fino a 1 ora", concentration: true, ritual: false,
+      descrizione: "Una creatura consenziente e il suo equipaggiamento diventano una nube nebbiosa: ha resistenza ai danni non magici, può attraversare piccole fessure e ha velocità di volo di 3 metri, ma non può attaccare né lanciare incantesimi.",
+      source: "SRD" },
+    { id: "major-image", name: "Immagine Superiore", level: 3, school: "illusion", classes: ["bard", "sorcerer", "warlock", "wizard"],
+      castingTime: "action", range: "36 metri", components: { v: true, s: true, m: true, material: "un po' di lana di pecora" },
+      duration: "Concentrazione, fino a 10 minuti", concentration: true, ritual: false,
+      descrizione: "Crei l'immagine di un oggetto, di una creatura o di un fenomeno grande fino a un cubo di 6 metri, con suoni, odori e temperatura. Con un'azione puoi spostarla e farle compiere azioni credibili.",
+      higherLevels: "Con uno slot di 6° livello o superiore l'illusione dura finché ti concentri, senza bisogno di mantenere la concentrazione.", source: "SRD" },
+    { id: "remove-curse", name: "Rimuovere Maledizione", level: 3, school: "abjuration", classes: ["cleric", "paladin", "warlock", "wizard"],
+      castingTime: "action", range: "Contatto", components: { v: true, s: true, m: false },
+      duration: "Istantanea", concentration: false, ritual: false,
+      descrizione: "Al tuo tocco terminano tutte le maledizioni che affliggono una creatura o un oggetto. Spezzi anche il legame con un oggetto magico maledetto, permettendo di disfartene.",
+      source: "SRD" },
+    { id: "arcane-eye", name: "Occhio Arcano", level: 4, school: "divination", classes: ["wizard"],
+      castingTime: "action", range: "9 metri", components: { v: true, s: true, m: true, material: "un po' di pelo di pipistrello" },
+      duration: "Concentrazione, fino a 1 ora", concentration: true, ritual: false,
+      descrizione: "Crei un occhio magico invisibile che fluttua nell'aria. Vedi attraverso di esso (con scurovisione) e con un'azione lo muovi di 9 metri in qualsiasi direzione, anche attraverso piccoli pertugi.",
+      source: "SRD" },
+    { id: "locate-creature", name: "Individuazione di Creature", level: 4, school: "divination", classes: ["bard", "cleric", "druid", "paladin", "ranger", "wizard"],
+      castingTime: "action", range: "Personale", components: { v: true, s: true, m: true, material: "un po' di pelo di un segugio" },
+      duration: "Concentrazione, fino a 1 ora", concentration: true, ritual: false,
+      descrizione: "Percepisci la direzione di una creatura specifica a te nota, o del tipo più vicino di una creatura familiare, se si trova entro 300 metri. Acqua corrente di almeno 3 metri blocca l'incantesimo.",
+      source: "SRD" },
+    { id: "arcane-hand", name: "Mano di Bigby", level: 5, school: "evocation", classes: ["wizard"],
+      castingTime: "action", range: "36 metri", components: { v: true, s: true, m: true, material: "un guscio d'uovo e un guanto di pelle di serpente" },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Evochi una grande mano di forza traslucida che puoi muovere e usare per colpire (forza), spingere, afferrare o fare da barriera. La mano ha PF pari ai tuoi massimi e un'ottima Forza.",
+      higherLevels: "I danni da pugno aumentano di 2d8 e quelli da stretta di 2d6 per ogni livello di slot oltre il 5°.", source: "SRD" },
+    { id: "planar-binding", name: "Legame Planare", level: 5, school: "abjuration", classes: ["bard", "cleric", "druid", "wizard"],
+      castingTime: "1hr", range: "18 metri", components: { v: true, s: true, m: true, material: "una gemma del valore di almeno 1.000 mo, consumata" },
+      duration: "24 ore", concentration: false, ritual: false,
+      descrizione: "Costringi un celestiale, un elementale, un folletto o un immondo (TS Carisma) a servirti: vincolato, esegue i compiti che gli affidi per la durata.",
+      higherLevels: "La durata aumenta: 10 giorni (6°), 30 giorni (7°), 180 giorni (8°), un anno e un giorno (9°).", source: "SRD" },
+    { id: "eyebite", name: "Malocchio", level: 6, school: "necromancy", classes: ["bard", "sorcerer", "warlock", "wizard"],
+      castingTime: "action", range: "Personale", components: { v: true, s: true, m: false },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "I tuoi occhi si fanno cavernosi e malevoli. Ogni turno puoi colpire con lo sguardo una creatura entro 18 metri (TS Saggezza): la fai addormentare, la terrorizzi in fuga o la rendi malata con svantaggio a colpire.",
+      source: "SRD" },
+    { id: "heroes-feast", name: "Banchetto degli Eroi", level: 6, school: "conjuration", classes: ["cleric", "druid"],
+      castingTime: "10min", range: "9 metri", components: { v: true, s: true, m: true, material: "una ciotola gemmata del valore di almeno 1.000 mo, che svanisce" },
+      duration: "Istantanea", concentration: false, ritual: false,
+      descrizione: "Imbandisci un banchetto magico per un'ora che nutre fino a dodici creature. Per le 24 ore successive ciascuna è guarita, immune a veleno e paura, ha vantaggio ai TS su Saggezza e 2d10 punti ferita massimi in più.",
+      source: "SRD" },
+    { id: "arcane-sword", name: "Spada di Mordenkainen", level: 7, school: "evocation", classes: ["bard", "wizard"],
+      castingTime: "action", range: "18 metri", components: { v: true, s: true, m: true, material: "una miniatura di spada di platino del valore di 250 mo" },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Evochi una spada di forza spettrale che fluttua accanto a te. Con un'azione bonus la muovi e la fai attaccare un bersaglio, infliggendo 3d10 danni da forza a ogni colpo.",
+      source: "SRD" },
+    { id: "weird", name: "Terrore Fantasmatico", level: 9, school: "illusion", classes: ["wizard"],
+      castingTime: "action", range: "36 metri", components: { v: true, s: true, m: false },
+      duration: "Concentrazione, fino a 1 minuto", concentration: true, ritual: false,
+      descrizione: "Dai vita agli incubi più profondi delle creature in una sfera di 9 metri (TS Saggezza). Chi fallisce è spaventato e, alla fine di ogni suo turno, subisce 4d10 danni psichici finché supera il tiro salvezza.",
       source: "SRD" }
   ];
 });
@@ -3169,6 +3408,21 @@
 
   // Voci in ordine cronologico inverso (la più recente per prima).
   return [
+    {
+      version: '1.7.0',
+      date: '2026-06-11',
+      title: 'Armature, nuovi incantesimi e veste grafica rinnovata',
+      added: [
+        'Otto nuove armature magiche ufficiali: Armatura del Marinaio, Armatura della Resistenza, Cuoio Borchiato Cangiante, Cotta di Scaglie di Drago, Corazza Nanica di Piastre, Armatura Demoniaca, Corazza dell’Eterealità e Armatura dell’Invulnerabilità.',
+        'Sei nuovi scudi magici ufficiali: Scudo della Sentinella, Scudo +2, Scudo +3, Scudo Acchiappafrecce, Scudo Anti-Incantesimi e Scudo Animato.',
+        'Venti nuovi incantesimi ufficiali sparsi dal 1° al 9° livello — tra cui Grasso, Apertura, Linguaggi, Forma Gassosa, Occhio Arcano, Mano di Bigby, Legame Planare, Malocchio, Banchetto degli Eroi e Spada di Mordenkainen.'
+      ],
+      improved: [
+        'Veste grafica rinnovata da cima a fondo: sfondo più profondo, schede che si illuminano e si sollevano al passaggio del mouse, intestazione con rifinitura dorata, titoli con un delicato alone e schede di navigazione più curate — senza cambiare il funzionamento di nulla.',
+        'Il Database Oggetti conta ora 178 oggetti e il Grimorio 204 incantesimi.'
+      ],
+      fixed: []
+    },
     {
       version: '1.6.0',
       date: '2026-06-08',

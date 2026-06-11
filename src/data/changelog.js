@@ -15,6 +15,21 @@
   // Voci in ordine cronologico inverso (la più recente per prima).
   return [
     {
+      version: '1.7.0',
+      date: '2026-06-11',
+      title: 'Armature, nuovi incantesimi e veste grafica rinnovata',
+      added: [
+        'Otto nuove armature magiche ufficiali: Armatura del Marinaio, Armatura della Resistenza, Cuoio Borchiato Cangiante, Cotta di Scaglie di Drago, Corazza Nanica di Piastre, Armatura Demoniaca, Corazza dell’Eterealità e Armatura dell’Invulnerabilità.',
+        'Sei nuovi scudi magici ufficiali: Scudo della Sentinella, Scudo +2, Scudo +3, Scudo Acchiappafrecce, Scudo Anti-Incantesimi e Scudo Animato.',
+        'Venti nuovi incantesimi ufficiali sparsi dal 1° al 9° livello — tra cui Grasso, Apertura, Linguaggi, Forma Gassosa, Occhio Arcano, Mano di Bigby, Legame Planare, Malocchio, Banchetto degli Eroi e Spada di Mordenkainen.'
+      ],
+      improved: [
+        'Veste grafica rinnovata da cima a fondo: sfondo più profondo, schede che si illuminano e si sollevano al passaggio del mouse, intestazione con rifinitura dorata, titoli con un delicato alone e schede di navigazione più curate — senza cambiare il funzionamento di nulla.',
+        'Il Database Oggetti conta ora 178 oggetti e il Grimorio 204 incantesimi.'
+      ],
+      fixed: []
+    },
+    {
       version: '1.6.0',
       date: '2026-06-08',
       title: 'Nomi in italiano ed elenco completo nelle build',
