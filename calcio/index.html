@@ -41,6 +41,9 @@
   h1.title{margin:0;font-size:clamp(2rem,7vw,3.4rem);line-height:.92;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.35),0 0 26px rgba(245,197,24,.25)}
   h1.title .gold{color:var(--gold)}
   .tagline{margin:.35rem 0 0;color:var(--muted);font-weight:600;font-size:.92rem;letter-spacing:.04em;text-transform:uppercase}
+  .conn{margin-left:auto;align-self:center;font-size:.72rem;font-weight:700;padding:5px 11px;border-radius:999px;white-space:nowrap}
+  .conn.on{color:#bff6c9;background:rgba(52,211,153,.14);border:1px solid rgba(52,211,153,.45)}
+  .conn.off{color:var(--muted);background:rgba(255,255,255,.06);border:1px solid var(--edge)}
 
   /* ===== TABS ===== */
   nav.tabs{position:sticky;top:0;z-index:20;background:rgba(6,18,10,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--edge)}
@@ -152,6 +155,7 @@
       <h1 class="title font-display">LA <span class="gold">CLASSIFICA</span></h1>
       <p class="tagline">Final &middot; Tedesca &middot; solo gloria (e una Coca Cola)</p>
     </div>
+    <span id="conn" class="conn off">● collegamento…</span>
   </div>
 </header>
 
@@ -199,6 +203,20 @@
 <footer>Fatto con ⚽ e poco senso · La Classifica</footer>
 
 <script>
+  // Stesso progetto Firebase dell'app D&D → la classifica è CONDIVISA online
+  // (l'admin scrive, tutti la vedono in tempo reale). Config pubblica-safe.
+  window.FIREBASE_CONFIG = {
+    apiKey: "AIzaSyDtDacj2QtkaFJFv0BedfZ6F2Cg53bcOyQ",
+    authDomain: "dangeons-and-dragons.firebaseapp.com",
+    databaseURL: "https://dangeons-and-dragons-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "dangeons-and-dragons",
+    storageBucket: "dangeons-and-dragons.firebasestorage.app",
+    messagingSenderId: "393759849575",
+    appId: "1:393759849575:web:27097eafa152975109a8c2"
+  };
+</script>
+
+<script>
 (function(){
   "use strict";
   var KEY = "classifica-calcio:v1";
@@ -234,6 +252,56 @@
   }
   function save(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
   var data = load();
+
+  // ===== Sincronizzazione online (stesso Firebase dell'app D&D) =====
+  // Un'unica classifica condivisa: l'admin scrive, tutti leggono in tempo reale.
+  // Riusa il ramo grids/ (già aperto nelle regole) con una chiave fissa.
+  var FB_PATH = "grids/classifica-calcio-lega/state";
+  var fb = { db:null, ref:null };
+  var online = false;
+
+  function fbConfigPresent(){
+    var c = window.FIREBASE_CONFIG;
+    return !!(c && typeof c.apiKey==="string" && c.apiKey.indexOf("INSERISCI")===-1 &&
+      typeof c.databaseURL==="string" && c.databaseURL.indexOf("INSERISCI")===-1);
+  }
+  function loadFirebase(cb){
+    if(window.firebase && window.firebase.database){ cb(true); return; }
+    if(!fbConfigPresent()){ cb(false); return; }
+    var base="https://www.gstatic.com/firebasejs/10.12.2/", files=["firebase-app-compat.js","firebase-database-compat.js"], i=0;
+    (function next(){
+      if(i>=files.length){ try{ if(!window.firebase.apps.length) window.firebase.initializeApp(window.FIREBASE_CONFIG); }catch(e){} cb(!!(window.firebase&&window.firebase.database)); return; }
+      var s=document.createElement("script"); s.src=base+files[i++]; s.onload=next; s.onerror=function(){cb(false);}; document.head.appendChild(s);
+    })();
+  }
+  function sanitizePlayers(arr){
+    if(!Array.isArray(arr)) return [];
+    var out=[];
+    for(var i=0;i<arr.length && out.length<200;i++){
+      var p=arr[i]; if(!p||typeof p!=="object") continue;
+      out.push({ id: typeof p.id==="string"?p.id.slice(0,40):uid(), name:String(p.name==null?"":p.name).slice(0,28), points:Math.max(0,Math.round(Number(p.points))||0) });
+    }
+    return out;
+  }
+  function startSync(){
+    loadFirebase(function(ok){
+      if(!ok){ online=false; updateConn(); return; }
+      fb.db=window.firebase.database(); fb.ref=fb.db.ref(FB_PATH); online=true; updateConn();
+      fb.ref.on("value", function(snap){
+        var val=snap.val(), players=[];
+        if(val && val.players){ players = Array.isArray(val.players)?val.players:Object.keys(val.players).map(function(k){return val.players[k];}); }
+        data.players = sanitizePlayers(players);
+        save(data); renderAll();
+      }, function(){ online=false; updateConn(); });
+    });
+  }
+  function pushRemote(){ if(online && fb.ref){ try{ fb.ref.set({ players:data.players, updatedAt:Date.now() }); }catch(e){} } }
+  function persist(){ save(data); pushRemote(); }
+  function updateConn(){
+    var el=document.getElementById("conn"); if(!el) return;
+    el.textContent = online ? "● Condivisa online" : "● Solo questo dispositivo";
+    el.className = "conn " + (online ? "on" : "off");
+  }
 
   function uid(){ return "p" + Date.now().toString(36) + Math.floor(Math.random()*1e4).toString(36); }
   function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
@@ -373,22 +441,22 @@
     if(a==="add"){
       var ni=document.getElementById("new-player"); var nm=(ni&&ni.value||"").trim();
       if(!nm){ toast("✏️ Scrivi un nome"); return; }
-      data.players.push({ id:uid(), name:nm.slice(0,28), points:0 }); save(data);
+      data.players.push({ id:uid(), name:nm.slice(0,28), points:0 }); persist();
       if(ni) ni.value=""; renderAll(); toast("✅ Aggiunto: "+esc(nm)); return;
     }
     if(a==="del"){
       var p=findPlayer(el.getAttribute("data-id")); if(!p) return;
-      data.players=data.players.filter(function(x){return x.id!==p.id;}); save(data); renderAll(); toast("🗑️ Rimosso: "+esc(p.name)); return;
+      data.players=data.players.filter(function(x){return x.id!==p.id;}); persist(); renderAll(); toast("🗑️ Rimosso: "+esc(p.name)); return;
     }
     if(a==="adj"){
       var pa=findPlayer(el.getAttribute("data-id")); if(!pa) return;
-      pa.points=Math.max(0, pa.points + (el.getAttribute("data-d")==="1"?1:-1)); save(data); renderAll(); return;
+      pa.points=Math.max(0, pa.points + (el.getAttribute("data-d")==="1"?1:-1)); persist(); renderAll(); return;
     }
     if(a==="give"){
       var id=selectedBonusPlayer(); var pg=id?findPlayer(id):null;
       if(!pg){ toast("👤 Scegli prima un giocatore"); return; }
       var pts=parseInt(el.getAttribute("data-pts"),10)||0;
-      pg.points=Math.max(0,pg.points+pts); save(data); renderAll();
+      pg.points=Math.max(0,pg.points+pts); persist(); renderAll();
       toast("⚽ +"+pts+" a <b>"+esc(pg.name)+"</b> · "+esc(el.getAttribute("data-label")));
       return;
     }
@@ -403,6 +471,8 @@
   // ---- init ----
   renderRegole();
   renderAll();
+  updateConn();
+  startSync();
 })();
 </script>
 </body>
